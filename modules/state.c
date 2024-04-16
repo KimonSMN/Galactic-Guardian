@@ -119,8 +119,17 @@ StateInfo state_info(State state) {
 
 List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
-
-	return NULL;
+	List list = list_create(free); // Creates the List to store the data and eventually return them
+    
+	for (int i = 0; i < vector_size(state->objects); i++) {
+        Object object = vector_get_at(state->objects, i);
+        if (object->position.x >= top_left.x && object->position.y >= top_left.y &&
+            object->position.x <= bottom_right.x && object->position.y <= bottom_right.y) {
+            list_insert_next(list, LIST_BOF, object);
+        }
+    }
+	
+    return list;
 }
 
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.

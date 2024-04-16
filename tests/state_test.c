@@ -37,6 +37,25 @@ void test_state_create() {
 	TEST_ASSERT(info->score == 0);
 
 	// Προσθέστε επιπλέον ελέγχους
+
+	TEST_ASSERT(info->spaceship != NULL); // check if spaceship has been created
+	TEST_ASSERT(info->spaceship->type == SPACESHIP); // check if spaceship type is SPACESHIP
+	
+    Vector2 top_left = {100, 100};
+    Vector2 bottom_right = {400, 400};
+
+	List list = state_objects(state, top_left, bottom_right);
+	TEST_ASSERT(list_size(list) != 0);
+
+	ListNode first_node = list_first(list);
+
+	Object object = list_node_value(list, first_node);
+	
+    TEST_ASSERT(object->position.x >= top_left.x && 
+				object->position.y >= top_left.y && 
+				object->position.x <= bottom_right.x && 
+				object->position.y <= bottom_right.y);
+
 }
 
 void test_state_update() {
