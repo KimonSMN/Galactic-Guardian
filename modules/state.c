@@ -109,8 +109,8 @@ State state_create() {
 // Επιστρέφει τις βασικές πληροφορίες του παιχνιδιού στην κατάσταση state
 
 StateInfo state_info(State state) {
-	// Προς υλοποίηση
-	return NULL;
+	// Προς υλοποίηση checked
+	return &(state->info);
 }
 
 // Επιστρέφει μια λίστα με όλα τα αντικείμενα του παιχνιδιού στην κατάσταση state,
@@ -118,7 +118,8 @@ StateInfo state_info(State state) {
 // γωνία top_left και κάτω δεξιά bottom_right.
 
 List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
-	// Προς υλοποίηση
+
+
 	return NULL;
 }
 
