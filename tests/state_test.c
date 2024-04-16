@@ -43,7 +43,7 @@ void test_state_create() {
 
 	// Tests για state_objects 
 	// Πρωτη Κληση της state_object:
-	// Testing Object has Position (182.717728, 314.321869)
+	// First Testing, Object has Position (182.717728, 314.321869)
 
 	// Set Cordinates for top_left
     Vector2 top_left; 
@@ -55,39 +55,38 @@ void test_state_create() {
 	bottom_right.x = 400;
 	bottom_right.y = 400;
 
-	List list_one = state_objects(state, top_left, bottom_right); 
-	TEST_ASSERT(list_size(list_one) != 0); // Check if list isn't empty
+	List list = state_objects(state, top_left, bottom_right); 
+	TEST_ASSERT(list_size(list) != 0); // Check if list isn't empty
 
-	ListNode node = list_first(list_one); // Set node to first element of list
+	ListNode node = list_first(list); // Set node to first element of list
 
-	Object object = list_node_value(list_one, node); // Save the value of the node to the object
-
+	Object object = list_node_value(list, node); // Save the value of the node to the object
+	
     TEST_ASSERT(object->position.x >= top_left.x && 
 				object->position.y >= top_left.y && 
 				object->position.x <= bottom_right.x && 
 				object->position.y <= bottom_right.y);
 
 	// Δευτερη Κληση της state_object:
-	// Testing Object still has Position (182.717728, 314.321869)
-
+	// Second Testing, Object has Position (286.382477, 182.218079)
+	
+	// Set Cordinates
 	top_left.x = 50;
 	top_left.y = 50;
 	bottom_right.x = 350;
 	bottom_right.y = 350;
 
-	List list_two = state_objects(state, top_left, bottom_right); 
+	list = state_objects(state, top_left, bottom_right); 
+	TEST_ASSERT(list_size(list) != 0); // Check if list isn't empty
+
+	node = list_next(list, node); // Set node to second element of list
 	
-	TEST_ASSERT(list_size(list_two) != 0);
+	object = list_node_value(list, node);
 
-	node = list_first(list_two);
-
-	Object new_object = list_node_value(list_two, node);
-
-    TEST_ASSERT(new_object->position.x >= top_left.x && 
-				new_object->position.y >= top_left.y && 
-				new_object->position.x <= bottom_right.x && 
-				new_object->position.y <= bottom_right.y);
-
+    TEST_ASSERT(object->position.x >= top_left.x && 
+				object->position.y >= top_left.y && 
+				object->position.x <= bottom_right.x && 
+				object->position.y <= bottom_right.y);
 }
 
 void test_state_update() {
