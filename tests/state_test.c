@@ -38,23 +38,55 @@ void test_state_create() {
 
 	// Προσθέστε επιπλέον ελέγχους
 
-	TEST_ASSERT(info->spaceship != NULL); // check if spaceship has been created
-	TEST_ASSERT(info->spaceship->type == SPACESHIP); // check if spaceship type is SPACESHIP
-	
-    Vector2 top_left = {100, 100};
-    Vector2 bottom_right = {400, 400};
+	TEST_ASSERT(info->spaceship != NULL); 
+	TEST_ASSERT(info->spaceship->type == SPACESHIP); 
 
-	List list = state_objects(state, top_left, bottom_right);
-	TEST_ASSERT(list_size(list) != 0);
+	// Tests για state_objects 
+	// Πρωτη Κληση της state_object:
+	// Testing Object has Position (182.717728, 314.321869)
 
-	ListNode first_node = list_first(list);
+	// Set Cordinates for top_left
+    Vector2 top_left; 
+	top_left.x = 100;
+	top_left.y = 100;
 
-	Object object = list_node_value(list, first_node);
-	
+	// Set Cordinates for bottom_right
+    Vector2 bottom_right;
+	bottom_right.x = 400;
+	bottom_right.y = 400;
+
+	List list_one = state_objects(state, top_left, bottom_right); 
+	TEST_ASSERT(list_size(list_one) != 0); // Check if list isn't empty
+
+	ListNode node = list_first(list_one); // Set node to first element of list
+
+	Object object = list_node_value(list_one, node); // Save the value of the node to the object
+
     TEST_ASSERT(object->position.x >= top_left.x && 
 				object->position.y >= top_left.y && 
 				object->position.x <= bottom_right.x && 
 				object->position.y <= bottom_right.y);
+
+	// Δευτερη Κληση της state_object:
+	// Testing Object still has Position (182.717728, 314.321869)
+
+	top_left.x = 50;
+	top_left.y = 50;
+	bottom_right.x = 350;
+	bottom_right.y = 350;
+
+	List list_two = state_objects(state, top_left, bottom_right); 
+	
+	TEST_ASSERT(list_size(list_two) != 0);
+
+	node = list_first(list_two);
+
+	Object new_object = list_node_value(list_two, node);
+
+    TEST_ASSERT(new_object->position.x >= top_left.x && 
+				new_object->position.y >= top_left.y && 
+				new_object->position.x <= bottom_right.x && 
+				new_object->position.y <= bottom_right.y);
 
 }
 

@@ -28,4 +28,8 @@
 		"arg7": "#",
 		"arg8": "#",
 	},
+	"files.associations": {
+		"stdio.h": "c",
+		"state.h": "c"
+	},
 }

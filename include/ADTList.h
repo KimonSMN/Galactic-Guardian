@@ -25,8 +25,6 @@
 typedef struct list* List;
 typedef struct list_node* ListNode;
 
-
-
 // Δημιουργεί και επιστρέφει μια νέα λίστα.
 // Αν destroy_value != NULL, τότε καλείται destroy_value(value) κάθε φορά που αφαιρείται ένα στοιχείο.
 
