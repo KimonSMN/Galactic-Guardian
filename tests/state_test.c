@@ -47,13 +47,13 @@ void test_state_create() {
 
 	// Set Cordinates for top_left
     Vector2 top_left; 
-	top_left.x = 100;
-	top_left.y = 100;
+	top_left.x = 0;
+	top_left.y = 10000;
 
 	// Set Cordinates for bottom_right
     Vector2 bottom_right;
-	bottom_right.x = 400;
-	bottom_right.y = 400;
+	bottom_right.x = 10000;
+	bottom_right.y = 0;
 
 	List list = state_objects(state, top_left, bottom_right); 
 	TEST_ASSERT(list_size(list) != 0); // Check if list isn't empty
@@ -63,18 +63,18 @@ void test_state_create() {
 	Object object = list_node_value(list, node); // Save the value of the node to the object
 	
     TEST_ASSERT(object->position.x >= top_left.x && 
-				object->position.y >= top_left.y && 
+				object->position.y <= top_left.y && 
 				object->position.x <= bottom_right.x && 
-				object->position.y <= bottom_right.y);
+				object->position.y >= bottom_right.y);
 
 	// Δευτερη Κληση της state_object:
 	// Second Testing, Object has Position (286.382477, 182.218079)
 	
 	// Set Cordinates
-	top_left.x = 50;
-	top_left.y = 50;
+	top_left.x = 0;
+	top_left.y = 500;
 	bottom_right.x = 350;
-	bottom_right.y = 350;
+	bottom_right.y = 0;
 
 	list = state_objects(state, top_left, bottom_right); 
 	TEST_ASSERT(list_size(list) != 0); // Check if list isn't empty
@@ -84,9 +84,9 @@ void test_state_create() {
 	object = list_node_value(list, node);
 
     TEST_ASSERT(object->position.x >= top_left.x && 
-				object->position.y >= top_left.y && 
+				object->position.y <= top_left.y && 
 				object->position.x <= bottom_right.x && 
-				object->position.y <= bottom_right.y);
+				object->position.y >= bottom_right.y);
 }
 
 void test_state_update() {
@@ -127,7 +127,7 @@ void test_state_update() {
 
 	keys.left = true;
 	state_update(state, &keys);
-	
+
 	TEST_ASSERT( !vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,0}) );
 	keys.left = false;
 

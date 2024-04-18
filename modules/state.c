@@ -124,8 +124,8 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
     
 	for (int i = 0; i < vector_size(state->objects); i++) {
         Object object = vector_get_at(state->objects, i);
-		if (object->position.x >= top_left.x && object->position.y >= top_left.y && 
-			object->position.x <= bottom_right.x && object->position.y <= bottom_right.y) {
+		if (object->position.x >= top_left.x && object->position.y <= top_left.y && 
+			object->position.x <= bottom_right.x && object->position.y >= bottom_right.y) {
 			list_insert_next(list, LIST_BOF, object);
 
 		}
@@ -147,16 +147,7 @@ void state_update(State state, KeyState keys) {
     }
 
     Object spaceship = state->info.spaceship;
-    // Object bullet = state->info.spaceship;
-	// bullet->type = BULLET;
 
-	// if(keys->space){
-	// 	bullet->size = BULLET_SIZE;
-	// 	bullet->speed.x = BULLET_SPEED;
-	// 	bullet->speed.y = BULLET_SPEED;
-	// 	bullet->position.x += bullet->speed.x;
-	// 	bullet->position.y += bullet->speed.y;
-	// }
 	int direction = 0;
 
 	if (keys->right){
@@ -185,6 +176,14 @@ void state_update(State state, KeyState keys) {
 		spaceship->speed.x *= SPACESHIP_SLOWDOWN;
     	spaceship->speed.y *= SPACESHIP_SLOWDOWN;
 	}
+
+	if(keys->space){
+		// for(int i = 0; i <= 15; i++){
+		// 	state_update(state, keys);
+		// }
+		
+	}
+
 	if (keys->p){
 		state->info.paused = true;
 		return;
