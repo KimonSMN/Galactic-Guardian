@@ -138,6 +138,59 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
 void state_update(State state, KeyState keys) {
 	// Προς υλοποίηση
+    if (state->info.paused && !keys->n) {
+        return;
+    }
+
+    if (state->info.paused && keys->n) {
+		state->info.paused = false;
+    }
+
+    Object spaceship = state->info.spaceship;
+    // Object bullet = state->info.spaceship;
+	// bullet->type = BULLET;
+
+	// if(keys->space){
+	// 	bullet->size = BULLET_SIZE;
+	// 	bullet->speed.x = BULLET_SPEED;
+	// 	bullet->speed.y = BULLET_SPEED;
+	// 	bullet->position.x += bullet->speed.x;
+	// 	bullet->position.y += bullet->speed.y;
+	// }
+	int direction = 0;
+
+	if (keys->right){
+		direction = 1;
+	}
+	if (keys->left){
+		direction = -1;
+	}
+	if(spaceship->orientation.y >= 0) {
+		spaceship->orientation.x += SPACESHIP_ROTATION * direction;
+	}
+	if(spaceship->orientation.y < 0) {
+		spaceship->orientation.x -= SPACESHIP_ROTATION * direction;
+	}
+	if(spaceship->orientation.x > 0) {
+		spaceship->orientation.y -= SPACESHIP_ROTATION * direction;
+	}
+	if(spaceship->orientation.x <= 0) {
+		spaceship->orientation.y += SPACESHIP_ROTATION * direction;
+	} 
+
+	if (keys->up){
+		spaceship->speed.x += SPACESHIP_ACCELERATION * spaceship->orientation.x;
+		spaceship->speed.y += SPACESHIP_ACCELERATION * spaceship->orientation.y;
+	}else{
+		spaceship->speed.x *= SPACESHIP_SLOWDOWN;
+    	spaceship->speed.y *= SPACESHIP_SLOWDOWN;
+	}
+	if (keys->p){
+		state->info.paused = true;
+		return;
+	}else{
+		state->info.paused = false;
+	}
 }
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.

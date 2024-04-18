@@ -110,6 +110,27 @@ void test_state_update() {
 	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed,    (Vector2){0,SPACESHIP_ACCELERATION}) );
 
 	// Προσθέστε επιπλέον ελέγχους
+	keys.up = false;
+
+	// Με πατημενο το p, το παιχνιδι σταματαει
+	keys.p = true;	
+	state_update(state, &keys);
+	
+	TEST_ASSERT(state_info(state)->paused == true);
+	keys.p = false;	
+
+	keys.right = true;
+	state_update(state, &keys);
+
+	TEST_ASSERT( !vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,0}) );
+	keys.right = false;
+
+	keys.left = true;
+	state_update(state, &keys);
+	
+	TEST_ASSERT( !vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,0}) );
+	keys.left = false;
+
 }
 
 
