@@ -119,12 +119,14 @@ void test_state_update() {
 	TEST_ASSERT(state_info(state)->paused == true);
 	keys.p = false;	
 
+	// Με πατημενο το right_arrow, το orientation του spaceship αλλαζει 
 	keys.right = true;
 	state_update(state, &keys);
 
 	TEST_ASSERT( !vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,0}) );
 	keys.right = false;
 
+	// Με πατημενο το left_arrow, το orientation του spaceship αλλαζει 
 	keys.left = true;
 	state_update(state, &keys);
 

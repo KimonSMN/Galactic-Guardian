@@ -238,7 +238,11 @@ void state_update(State state, KeyState keys) {
 			continue;
 		
 		if(obj->type == ASTEROID &&
-			obj->position.x == bullet->position.x){
+		CheckCollisionCircles(obj->position,
+		obj->size,
+		bullet->position,
+		bullet->size
+		)){
 			
 			vector_set_at(state->objects, i , NULL);
 
@@ -291,8 +295,14 @@ void state_update(State state, KeyState keys) {
 		Object obj = vector_get_at(state->objects, i);
 		if(obj == NULL)
 			continue;
-		if(obj->type == ASTEROID && spaceship->position.x == obj->position.x){ // Check for collision διαστημόπλοιο με αστεροειδή
-			state->info.score = state->info.score / 2;
+		if(obj->type == ASTEROID && 
+			CheckCollisionCircles( // Check for collision διαστημόπλοιο με αστεροειδή
+			obj->position,
+			obj->size,
+			spaceship->position,
+			spaceship->size
+			)){ 
+			state->info.score = state->info.score / 2; // Αν το διαστημόπλοιο συγκρουστεί με αστεροειδή χάνεται το μισό σκορ
 		}
 	}
 
