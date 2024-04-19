@@ -138,6 +138,8 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
 void state_update(State state, KeyState keys) {
 	// Προς υλοποίηση
+	// if(keys->enter )
+
     if (state->info.paused && !keys->n) {
         return;
     }
@@ -148,6 +150,7 @@ void state_update(State state, KeyState keys) {
 
     Object spaceship = state->info.spaceship;
 
+	// Orientation
 	int direction = 0;
 
 	if (keys->right){
@@ -169,6 +172,7 @@ void state_update(State state, KeyState keys) {
 		spaceship->orientation.y += SPACESHIP_ROTATION * direction;
 	} 
 
+	// Speed
 	if (keys->up){
 		spaceship->speed.x += SPACESHIP_ACCELERATION * spaceship->orientation.x;
 		spaceship->speed.y += SPACESHIP_ACCELERATION * spaceship->orientation.y;
@@ -177,6 +181,27 @@ void state_update(State state, KeyState keys) {
     	spaceship->speed.y *= SPACESHIP_SLOWDOWN;
 	}
 
+	Vector2 top_left = {spaceship->position.x,ASTEROID_MAX_DIST};
+	Vector2 bottom_left = {ASTEROID_MAX_DIST,spaceship->position.y};
+
+	List objects = state_objects(state, top_left, bottom_left);
+	int asteroids = 0;
+	for(ListNode node = list_first(objects); 
+		node != LIST_EOF; 
+		node = list_next(objects, node)){
+
+		Object obj = list_node_value(objects, node);
+		if(obj->type == ASTEROID){
+			asteroids++;
+		}
+	}
+	if (asteroids != ASTEROID_NUM){
+		int remaining = ASTEROID_NUM - asteroids;
+		if (remaining > 0) {
+        	add_asteroids(state, remaining);
+    	}
+	}
+	// Bullets
 	if(keys->space){
 		// for(int i = 0; i <= 15; i++){
 		// 	state_update(state, keys);
@@ -184,6 +209,7 @@ void state_update(State state, KeyState keys) {
 		
 	}
 
+	// Pause
 	if (keys->p){
 		state->info.paused = true;
 		return;
