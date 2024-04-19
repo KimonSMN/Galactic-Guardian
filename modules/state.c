@@ -297,7 +297,7 @@ void state_update(State state, KeyState keys) {
 		Object obj = vector_get_at(state->objects, i);
 		if(obj == NULL)
 			continue;
-		if(obj->type == ASTEROID && 
+		if (obj->type == ASTEROID && 
 			CheckCollisionCircles( // Check for collision διαστημόπλοιο με αστεροειδή
 			obj->position,
 			obj->size,
@@ -308,7 +308,7 @@ void state_update(State state, KeyState keys) {
 		}
 	}
 
-	if(state->info.score % 100 == 0){
+	if (state->info.score % 100 == 0){
 		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
 	}
 

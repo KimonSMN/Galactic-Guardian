@@ -31,6 +31,10 @@
 	"files.associations": {
 		"stdio.h": "c",
 		"state.h": "c",
-		"common_types.h": "c"
+		"common_types.h": "c",
+		"type_traits": "c",
+		"utility": "c",
+		"set_utils.h": "c",
+		"acutest.h": "c"
 	},
 }
