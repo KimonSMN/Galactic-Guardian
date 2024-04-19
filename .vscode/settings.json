@@ -30,6 +30,7 @@
 	},
 	"files.associations": {
 		"stdio.h": "c",
-		"state.h": "c"
+		"state.h": "c",
+		"common_types.h": "c"
 	},
 }
