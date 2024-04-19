@@ -278,16 +278,18 @@ void state_update(State state, KeyState keys) {
 
 		// Loop to remove NULL values from vector
 
-		for (int i = vector_size(state->objects); i >= 0 ; i--) {
-			Object obj = vector_get_at(state->objects, i);
-			if(obj == NULL){
-				for (int j = i; j < vector_size(state->objects) - 1; j++) {
-					Pointer next_value = vector_get_at(state->objects, j + 1);
-					vector_set_at(state->objects, j, next_value);
-				}
-			}
-			vector_remove_last(state->objects);
-		}
+		// This is wrong ( just add checks for null later)
+
+		// for (int i = vector_size(state->objects); i >= 0 ; i--) {
+		// 	Object obj = vector_get_at(state->objects, i);
+		// 	if(obj == NULL){
+		// 		for (int j = i; j < vector_size(state->objects) - 1; j++) {
+		// 			Pointer next_value = vector_get_at(state->objects, j + 1);
+		// 			vector_set_at(state->objects, j, next_value);
+		// 		}
+		// 	}
+		// 	vector_remove_last(state->objects);
+		// }
 	}
 
 
