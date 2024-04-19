@@ -203,10 +203,23 @@ void state_update(State state, KeyState keys) {
 	}
 	// Bullets
 	if(keys->space){
-		// for(int i = 0; i <= 15; i++){
-		// 	state_update(state, keys);
-		// }
+		Object bullet = malloc(sizeof(struct object));
 		
+		bullet->type = BULLET;
+		bullet->size = BULLET_SIZE;
+		bullet->position.x = state->info.spaceship->position.x;
+		bullet->position.y = state->info.spaceship->position.y;
+		bullet->speed.x = state->info.spaceship->speed.x + BULLET_SPEED * state->info.spaceship->orientation.x;
+		bullet->speed.y = state->info.spaceship->speed.y + BULLET_SPEED * state->info.spaceship->orientation.y;
+
+		vector_insert_last(state->objects, bullet);
+
+		state->next_bullet = BULLET_DELAY;
+	}
+
+
+	if (state->next_bullet > 0 ) {
+    	state->next_bullet--;
 	}
 
 	// Pause
