@@ -136,7 +136,6 @@ void test_state_update() {
 	// Have to add Ασκηση 4 Tests !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
-
 // Λίστα με όλα τα tests προς εκτέλεση
 TEST_LIST = {
 	{ "test_state_create", test_state_create },

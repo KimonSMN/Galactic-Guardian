@@ -11,10 +11,10 @@ CFLAGS = -Wall -Werror -g -I$(INCLUDE)
 LDFLAGS = -lm
 
 # Αρχεία .o
-OBJS = set_utils.o $(LIB)/k08.a 
+OBJS = set_utils_test.o $(LIB)/k08.a $(MODULES)/set_utils.o
 
 # Το εκτελέσιμο πρόγραμμα
-EXEC = set_utils
+EXEC = set_utils_test
 
 # Παράμετροι για δοκιμαστική εκτέλεση
 ARGS =

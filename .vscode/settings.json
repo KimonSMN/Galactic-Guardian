@@ -35,6 +35,7 @@
 		"type_traits": "c",
 		"utility": "c",
 		"set_utils.h": "c",
-		"acutest.h": "c"
+		"acutest.h": "c",
+		"vec2.h": "c"
 	},
 }

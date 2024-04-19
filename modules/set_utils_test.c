@@ -5,9 +5,8 @@
 //////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
-#include "acutest.h"			// Απλή βιβλιοθήκη για unit testing
+#include "acutest.h"
 
-#include "ADTSet.h"
 #include "set_utils.h"
 
 int* create_int(int value){
@@ -46,7 +45,7 @@ void test_set_find_eq_or_smaller(){
     set_insert(set, create_int(11)); 
 
     Pointer value = create_int(10); 
-    int* result = set_find_eq_or_greater(set, value); 
+    int* result = set_find_eq_or_smaller(set, value); 
 
 
     TEST_ASSERT(result != NULL && *result == 7);

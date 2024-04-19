@@ -37,39 +37,3 @@ Pointer set_find_eq_or_smaller(Set set, Pointer value){
     set_remove(set, value);                     // Τέλος το αφαιρείτε
     return result;
 }
-
-int* create_int(int value){
-    int* p = malloc(sizeof(int));
-    *p = value;
-    return p;
-}
-
-int compare_ints(Pointer a, Pointer b) {
-    return *(int*)a - *(int*)b;
-}
-
-int main(){
-    Set set = set_create(compare_ints, NULL);  
-    set_insert(set, create_int(7));   // Dynamically allocate integers for insertion
-    set_insert(set, create_int(15));
-    set_insert(set, create_int(12));
-    set_insert(set, create_int(4)); 
-    set_insert(set, create_int(11)); 
-
-    Pointer value = create_int(10);  
-    int* result = set_find_eq_or_greater(set, value); 
-
-    if (result != NULL) {
-        printf("Test Value: %d, Result: %d\n", *(int*)value, *result); 
-    } else {
-        printf("Test Value: %d, Result: None\n", *(int*)value);
-    }
-
-    result = set_find_eq_or_smaller(set, value); 
-
-    if (result != NULL) {
-        printf("Test Value: %d, Result: %d\n", *(int*)value, *result); 
-    } else {
-        printf("Test Value: %d, Result: None\n", *(int*)value);
-    }
-}
