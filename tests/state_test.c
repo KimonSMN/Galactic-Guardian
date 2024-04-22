@@ -133,7 +133,7 @@ void test_state_update() {
 	TEST_ASSERT( !vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,0}) );
 	keys.left = false;
 
-	// Have to add Ασκηση 4 Tests !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// Have to add Ασκηση 3 Tests !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 // Λίστα με όλα τα tests προς εκτέλεση
