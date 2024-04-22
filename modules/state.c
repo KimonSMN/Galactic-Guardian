@@ -162,17 +162,18 @@ void state_update(State state, KeyState keys) {
 	if(keys->left){
 		spaceship->orientation = vec2_rotate(spaceship->orientation, -SPACESHIP_ROTATION);
 	}
+
 	// Speed of Spaceship //
 
+	// Maybe have to add .position too somewhere
 	if (keys->up){
-		spaceship->speed.x += SPACESHIP_ACCELERATION * spaceship->orientation.x * state->speed_factor;
-		spaceship->speed.y += SPACESHIP_ACCELERATION * spaceship->orientation.y * state->speed_factor;
+		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, SPACESHIP_ACCELERATION)); // Handle Acceleration
 	}else{
-		spaceship->speed.x *= SPACESHIP_SLOWDOWN * state->speed_factor;
-    	spaceship->speed.y *= SPACESHIP_SLOWDOWN * state->speed_factor;
+    	spaceship->speed = vec2_scale(spaceship->speed, SPACESHIP_SLOWDOWN); // Handle Slowdown
 	}
 
 	// Δημιουργία αστεροειδών //
+
 	Vector2 top_left = {spaceship->position.x,ASTEROID_MAX_DIST}; 		// Set top_left
 	Vector2 bottom_left = {ASTEROID_MAX_DIST,spaceship->position.y};	// Set bottom_right
 
@@ -261,20 +262,6 @@ void state_update(State state, KeyState keys) {
 			state->info.score -= 10;	//Για κάθε αστεροειδή που συγκρούεται με σφαίρα το σκορ μειώνεται κατά 10
 		}
 
-		// Loop to remove NULL values from vector
-
-		// This is wrong ( just add checks for null later)
-
-		// for (int i = vector_size(state->objects); i >= 0 ; i--) {
-		// 	Object obj = vector_get_at(state->objects, i);
-		// 	if(obj == NULL){
-		// 		for (int j = i; j < vector_size(state->objects) - 1; j++) {
-		// 			Pointer next_value = vector_get_at(state->objects, j + 1);
-		// 			vector_set_at(state->objects, j, next_value);
-		// 		}
-		// 	}
-		// 	vector_remove_last(state->objects);
-		// }
 	}
 
 
