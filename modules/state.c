@@ -157,10 +157,10 @@ void state_update(State state, KeyState keys) {
 	// Orientation of Spaceship //
 
 	if(keys->right){
-		spaceship->orientation = vec2_rotate(spaceship->orientation, SPACESHIP_ROTATION);
+		spaceship->orientation = vec2_rotate(spaceship->orientation, -SPACESHIP_ROTATION);
 	}
 	if(keys->left){
-		spaceship->orientation = vec2_rotate(spaceship->orientation, -SPACESHIP_ROTATION);
+		spaceship->orientation = vec2_rotate(spaceship->orientation, SPACESHIP_ROTATION);
 	}
 
 	// Speed of Spaceship //

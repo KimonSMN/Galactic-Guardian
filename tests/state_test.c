@@ -6,8 +6,10 @@
 
 #include <stdlib.h>
 #include "acutest.h"			// Απλή βιβλιοθήκη για unit testing
+#include <math.h>
 
 #include "state.h"
+#include "vec2.h"
 
 
 ///// Βοηθητικές συναρτήσεις ////////////////////////////////////////
@@ -15,9 +17,8 @@
 // Ελέγχει την (προσεγγιστική) ισότητα δύο double
 // (λόγω λαθών το a == b δεν είναι ακριβές όταν συγκρίνουμε double).
 static bool double_equal(double a, double b) {
-	return abs(a-b) < 1e-6;
+	return fabs(a-b) < 1e-6;
 }
-
 // Ελέγχει την ισότητα δύο διανυσμάτων
 static bool vec2_equal(Vector2 a, Vector2 b) {
 	return double_equal(a.x, b.x) && double_equal(a.y, b.y);
@@ -112,26 +113,48 @@ void test_state_update() {
 	// Προσθέστε επιπλέον ελέγχους
 	keys.up = false;
 
-	// Με πατημενο το p, το παιχνιδι σταματαει
+	// Με πατημενο το P, το παιχνιδι σταματαει
 	keys.p = true;	
 	state_update(state, &keys);
 	
 	TEST_ASSERT(state_info(state)->paused == true);
 	keys.p = false;	
 
-	// Με πατημενο το right_arrow, το orientation του spaceship αλλαζει 
+	// Με πατημενο το N, το παιχνιδι συνεχιζετε για ενα frame 
+	keys.n = true;
+	state_update(state, &keys);
+
+	TEST_ASSERT(state_info(state)->paused == false);
+	keys.n = false;
+
+	// Με πατημενο το RIGHT, το orientation του spaceship αλλαζει 
+
+	state_info(state)->spaceship->orientation.x = 0; 
+	state_info(state)->spaceship->orientation.y = 1; // Initial Orientation 
+
+	Vector2 expected_right= vec2_rotate(state_info(state)->spaceship->orientation, -SPACESHIP_ROTATION); // Rotates spaceship clockwise
+
 	keys.right = true;
 	state_update(state, &keys);
 
-	TEST_ASSERT( !vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,0}) );
+	TEST_ASSERT(vec2_equal(state_info(state)->spaceship->orientation, expected_right));
+
 	keys.right = false;
 
-	// Με πατημενο το left_arrow, το orientation του spaceship αλλαζει 
-	keys.left = true;
-	state_update(state, &keys);
+	// Με πατημενο το LEFT, το orientation του spaceship αλλαζει 
 
-	TEST_ASSERT( !vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,0}) );
+	state_info(state)->spaceship->orientation.x = 0;
+	state_info(state)->spaceship->orientation.y = 1; // Initial Orientation 
+
+	Vector2 expected_left = vec2_rotate(state_info(state)->spaceship->orientation, SPACESHIP_ROTATION); // Rotates spaceship counter-clockwise
+
+	keys.left = true;
+	state_update(state, &keys); 
+
+	TEST_ASSERT(vec2_equal(state_info(state)->spaceship->orientation, expected_left));
+
 	keys.left = false;
+
 
 	// Have to add Ασκηση 3 Tests !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }

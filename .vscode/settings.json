@@ -36,6 +36,8 @@
 		"utility": "c",
 		"set_utils.h": "c",
 		"acutest.h": "c",
-		"vec2.h": "c"
+		"vec2.h": "c",
+		"stdlib.h": "c",
+		"math.h": "c"
 	},
 }
