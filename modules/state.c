@@ -165,12 +165,17 @@ void state_update(State state, KeyState keys) {
 
 	// Speed of Spaceship //
 
-	// Maybe have to add .position too somewhere
 	if (keys->up){
 		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, SPACESHIP_ACCELERATION)); // Handle Acceleration
 	}else{
+		// Check if speed is greater than 0 (speed >= 0)
     	spaceship->speed = vec2_scale(spaceship->speed, SPACESHIP_SLOWDOWN); // Handle Slowdown
 	}
+
+	// Position of Spaceship //
+
+	spaceship->position = vec2_add(spaceship->position, spaceship->speed);
+
 
 	// Δημιουργία αστεροειδών //
 
@@ -198,15 +203,17 @@ void state_update(State state, KeyState keys) {
 
 	// Bullets
 
-	if(keys->space){
-		Object bullet = malloc(sizeof(struct object));
+	if(keys->space && state->next_bullet <= 0){
+		Object bullet = malloc(sizeof(Object));
+		if (bullet == NULL) {
+        	return;
+    }
+  		bullet->type = BULLET;			// Set the type to BULLET
+    	bullet->size = BULLET_SIZE;		// Set the size of the bullet to BULLET_SIZE
+
+    	bullet->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED));
 		
-		bullet->type = BULLET;
-		bullet->size = BULLET_SIZE;
-		bullet->position.x = state->info.spaceship->position.x;
-		bullet->position.y = state->info.spaceship->position.y;
-		bullet->speed.x = state->info.spaceship->speed.x + BULLET_SPEED * state->info.spaceship->orientation.x * state->speed_factor;
-		bullet->speed.y = state->info.spaceship->speed.y + BULLET_SPEED * state->info.spaceship->orientation.y * state->speed_factor;
+		bullet->position = spaceship->position;
 
 		vector_insert_last(state->objects, bullet);
 
