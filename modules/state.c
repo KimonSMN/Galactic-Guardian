@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "ADTVector.h"
 #include "ADTList.h"
@@ -152,7 +153,6 @@ void state_update(State state, KeyState keys) {
     }
 
     Object spaceship = state->info.spaceship;
-	Object bullet = malloc(sizeof(struct object));
 
 	// Orientation of Spaceship //
 
@@ -204,16 +204,18 @@ void state_update(State state, KeyState keys) {
 	// Bullets
 
 	if(keys->space && state->next_bullet <= 0){
-		Object bullet = malloc(sizeof(Object));
+
+		Object bullet = create_object( // Create new bullet 
+			BULLET,
+			spaceship->position,
+			vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
+			spaceship->orientation,
+			BULLET_SIZE
+			);
+
 		if (bullet == NULL) {
         	return;
-    }
-  		bullet->type = BULLET;			// Set the type to BULLET
-    	bullet->size = BULLET_SIZE;		// Set the size of the bullet to BULLET_SIZE
-
-    	bullet->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED));
-		
-		bullet->position = spaceship->position;
+    	}
 
 		vector_insert_last(state->objects, bullet);
 
@@ -226,66 +228,56 @@ void state_update(State state, KeyState keys) {
 	// Συγκρουσεις
 
 	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object obj = vector_get_at(state->objects, i);
-		if(obj == NULL)
+		Object asteroid = vector_get_at(state->objects, i);
+		if (asteroid == NULL || asteroid->type != ASTEROID)
 			continue;
-		
-		if(obj->type == ASTEROID &&
-		CheckCollisionCircles(obj->position,
-		obj->size,
-		bullet->position,
-		bullet->size
-		)){
-			
-			vector_set_at(state->objects, i , NULL);
 
-			if (obj->size/2 >= ASTEROID_MIN_SIZE ){			// Πρέπει να είναι τουλάχιστον ASTEROID_MIN_SIZE σε μέγεθος
-				for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < vector_size(state->objects); j++) {
+			Object bullet = vector_get_at(state->objects, j);
+			if(bullet == NULL || bullet->type != BULLET) 
+				continue;
+				
+			if (CheckCollisionCircles( 			// Check for collision bullet με αστεροειδή
+			bullet->position,
+			bullet->size,
+			asteroid->position,
+			asteroid->size
+			)){
 
-					Vector2 position = vec2_add(
-						state->info.spaceship->position,
-						vec2_from_polar(
-							randf(ASTEROID_MIN_DIST, ASTEROID_MAX_DIST),	// απόσταση
-							randf(0, 2*PI)									// κατεύθυνση
-						)
-					);
+				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) { // Πρέπει να είναι τουλάχιστον ASTEROID_MIN_SIZE σε μέγεθος
+					for (int k = 0; k < 2; k++) {
+						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
+						Vector2 asteroid_speed = vec2_from_polar(
+							length *state->speed_factor,
+							randf(0, 2*PI)
+						);
 
-					Vector2 speed = vec2_from_polar(
-						obj->speed.x * 1.5 * state->speed_factor, 	// Μήκος 1,5 φορά μεγαλύτερο της ταχύτητας του αρχικού
-						randf(0, 2*PI)
-					);
+						Object new_asteroid = create_object(
+							ASTEROID,
+							asteroid->position,
+							asteroid_speed,
+							(Vector2){0, 0},
+							asteroid->size / 2
+							);
 
-					Object asteroid = create_object(
-						ASTEROID,
-						position,
-						speed,
-						(Vector2){0, 0},		
-						obj->size/2		// Το μισό μέγεθος από τον αρχικό
-					);
-					vector_insert_last(state->objects, asteroid);
+						vector_insert_last(state->objects, &new_asteroid);
+						
+						state->info.score += 2; // Το σκορ αυξάνεται κατά 1 για καθε νεο αστεροειδη
+					}
+
 				}
+
+
+				free(asteroid);
+				free(bullet);
+				state->info.score -= 10; // Το σκορ μειώνεται κατά 10
+				break;	
 			}
-			
-			state->info.score -= 10;	//Για κάθε αστεροειδή που συγκρούεται με σφαίρα το σκορ μειώνεται κατά 10
-		}
-
-	}
-
-
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object obj = vector_get_at(state->objects, i);
-		if(obj == NULL)
-			continue;
-		if (obj->type == ASTEROID && 
-			CheckCollisionCircles( // Check for collision διαστημόπλοιο με αστεροειδή
-			obj->position,
-			obj->size,
-			spaceship->position,
-			spaceship->size
-			)){ 
-			state->info.score = state->info.score / 2; // Αν το διαστημόπλοιο συγκρουστεί με αστεροειδή χάνεται το μισό σκορ
 		}
 	}
+
+	
+		
 
 	if (state->info.score % 100 == 0){
 		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
