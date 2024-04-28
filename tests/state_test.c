@@ -181,11 +181,11 @@ void test_state_update() {
 			counter++;
 		}
 	}
-	
+
 	int remaining = ASTEROID_NUM - counter;
 
 	while (remaining > 0) {
-		Object new_asteroid = malloc(sizeof(Object));
+		Object new_asteroid = malloc(sizeof(*new_asteroid));
 		new_asteroid->type = ASTEROID;
 		list_insert_next(asteroids, node, new_asteroid);
 		remaining--;
@@ -193,7 +193,29 @@ void test_state_update() {
 	state_update(state, &keys); 
 	TEST_ASSERT(list_size(asteroids) == ASTEROID_NUM);
 
+	// Check for Asteroid & Bullet collision
+
+	Object asteroid = malloc(sizeof(*asteroid));
+	asteroid->type = ASTEROID;
+	asteroid->position = (Vector2){100, 100}; // Same postion for asteroid & bullet
+	asteroid->speed = (Vector2){0, 0};
+	asteroid->orientation = (Vector2){0, 0};
+	asteroid->size = 80;
+
+	Object bullet = malloc(sizeof(*bullet));
+	bullet->type = ASTEROID;
+	bullet->position = (Vector2){100, 100}; // Same postion for asteroid & bullet
+	bullet->speed = (Vector2){0, 0};
+	bullet->orientation = (Vector2){0, 0};
+	bullet->size = BULLET_SIZE;
+	state_update(state, &keys); 
+
+	TEST_ASSERT(CheckCollisionCircles(bullet->position, bullet->size, asteroid->position, asteroid->size));
+
+	// Check for Asteroid & Spaceship collision
+	
 }
+ 
 
 // Λίστα με όλα τα tests προς εκτέλεση
 TEST_LIST = {
