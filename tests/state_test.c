@@ -88,6 +88,7 @@ void test_state_create() {
 				object->position.y <= top_left.y && 
 				object->position.x <= bottom_right.x && 
 				object->position.y >= bottom_right.y);
+
 }
 
 void test_state_update() {
@@ -200,10 +201,10 @@ void test_state_update() {
 	asteroid->position = (Vector2){100, 100}; // Same postion for asteroid & bullet
 	asteroid->speed = (Vector2){0, 0};
 	asteroid->orientation = (Vector2){0, 0};
-	asteroid->size = 80;
+	asteroid->size = ASTEROID_MAX_SIZE;
 
 	Object bullet = malloc(sizeof(*bullet));
-	bullet->type = ASTEROID;
+	bullet->type = BULLET;
 	bullet->position = (Vector2){100, 100}; // Same postion for asteroid & bullet
 	bullet->speed = (Vector2){0, 0};
 	bullet->orientation = (Vector2){0, 0};
@@ -221,14 +222,13 @@ void test_state_update() {
 	spaceship->orientation = (Vector2){0, 1};
 	spaceship->size = SPACESHIP_SIZE;
 	state_update(state, &keys); 
-
+	
 	TEST_ASSERT(CheckCollisionCircles(spaceship->position, spaceship->size, asteroid->position, asteroid->size));
 
-	// free(spaceship);
-	// free(asteroid);
-	// free(bullet);
-	// free(asteroids);
-	// free(list);
+
+	// Have to add Bullet movement test
+	// Have to add Asterpod halfing in size test
+	// Have to add Score checks
 }
  
 

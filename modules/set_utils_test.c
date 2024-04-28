@@ -33,7 +33,7 @@ void test_set_find_eq_or_greater(){
 
     TEST_ASSERT(result != NULL && *result == 11);
 
-    free(set);
+    set_destroy(set);
 }
 
 void test_set_find_eq_or_smaller(){
@@ -50,7 +50,7 @@ void test_set_find_eq_or_smaller(){
 
     TEST_ASSERT(result != NULL && *result == 7);
 
-    free(set);
+    set_destroy(set);
 }
 
 

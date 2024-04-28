@@ -34,6 +34,9 @@ clean:
 run: $(EXEC)
 	./$(EXEC) $(ARGS)
 
+valgrind: $(EXEC)
+	valgrind --error-exitcode=1 --leak-check=full --show-leak-kinds=all ./$(EXEC) $(ARGS)
+
 # Για να φτιάξουμε τα k08.a/libraylib.a τρέχουμε το make στο lib directory.
 $(LIB)/%.a:
 	$(MAKE) -C $(LIB) $*.a
