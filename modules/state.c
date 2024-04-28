@@ -225,7 +225,7 @@ void state_update(State state, KeyState keys) {
     	state->next_bullet--;
 	}
 
-	// Συγκρουσεις
+	// Συγκρουσεις Αστεροιδη και Σφαιρας
 
 	for (int i = 0; i < vector_size(state->objects); i++) {
 		Object asteroid = vector_get_at(state->objects, i);
@@ -267,7 +267,6 @@ void state_update(State state, KeyState keys) {
 
 				}
 
-
 				free(asteroid);
 				free(bullet);
 				state->info.score -= 10; // Το σκορ μειώνεται κατά 10
@@ -276,8 +275,29 @@ void state_update(State state, KeyState keys) {
 		}
 	}
 
-	
+	// Συγκρουσεις Αστεροιδη και Διαστημοπλοιου
+
+	for (int i = 0; i < vector_size(state->objects); i++) {
+		Object asteroid = vector_get_at(state->objects, i);
+		if (asteroid == NULL || asteroid->type != ASTEROID)
+			continue;
+
+			if(spaceship == NULL || spaceship->type != SPACESHIP) 
+				continue;
+				
+			if (CheckCollisionCircles( 			// Check for collision bullet με Διαστημοπλοιο
+			spaceship->position,
+			spaceship->size,
+			asteroid->position,
+			asteroid->size
+			)){
+
+				free(asteroid);
+				state->info.score = state->info.score / 2;
+				break;
+			}
 		
+	}
 
 	if (state->info.score % 100 == 0){
 		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
