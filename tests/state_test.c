@@ -156,7 +156,43 @@ void test_state_update() {
 	keys.left = false;
 
 
-	// Have to add Ασκηση 3 Tests !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// Ασκηση 3 Tests 
+
+	// Check for asteroid generation
+
+	// Set Cordinates
+	Vector2 top_left;
+	Vector2 bottom_right;
+
+	top_left.x = 0;
+	top_left.y = 300;
+	bottom_right.x = 300;
+	bottom_right.y = 0;
+
+	List asteroids = state_objects(state, top_left, bottom_right); // 2 asteroids existing at current top_left and bottom_right
+	ListNode node;
+	int counter = 0;													
+	for(node = list_first(asteroids); 
+		node != LIST_EOF; 												
+		node = list_next(asteroids, node)){
+
+		Object obj = list_node_value(asteroids, node);
+		if(obj->type == ASTEROID){									
+			counter++;
+		}
+	}
+	
+	int remaining = ASTEROID_NUM - counter;
+
+	while (remaining > 0) {
+		Object new_asteroid = malloc(sizeof(Object));
+		new_asteroid->type = ASTEROID;
+		list_insert_next(asteroids, node, new_asteroid);
+		remaining--;
+	}
+	state_update(state, &keys); 
+	TEST_ASSERT(list_size(asteroids) == ASTEROID_NUM);
+
 }
 
 // Λίστα με όλα τα tests προς εκτέλεση

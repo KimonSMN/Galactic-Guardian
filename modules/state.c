@@ -279,7 +279,7 @@ void state_update(State state, KeyState keys) {
 
 	for (int i = 0; i < vector_size(state->objects); i++) {
 		Object asteroid = vector_get_at(state->objects, i);
-		if (asteroid == NULL || asteroid->type != ASTEROID)
+		if (asteroid == NULL || asteroid->type != ASTEROID){
 			continue;
 
 			if(spaceship == NULL || spaceship->type != SPACESHIP) 
@@ -296,7 +296,7 @@ void state_update(State state, KeyState keys) {
 				state->info.score = state->info.score / 2;
 				break;
 			}
-		
+		}
 	}
 
 	if (state->info.score % 100 == 0){
@@ -311,6 +311,8 @@ void state_update(State state, KeyState keys) {
 		state->info.paused = false;
 	}
 }
+// INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
+
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
 
