@@ -214,6 +214,21 @@ void test_state_update() {
 
 	// Check for Asteroid & Spaceship collision
 	
+	Object spaceship = malloc(sizeof(*spaceship));
+	spaceship->type = SPACESHIP;
+	spaceship->position = (Vector2){100, 100}; // Same postion for asteroid & spaceship
+	spaceship->speed = (Vector2){0, 0};
+	spaceship->orientation = (Vector2){0, 1};
+	spaceship->size = SPACESHIP_SIZE;
+	state_update(state, &keys); 
+
+	TEST_ASSERT(CheckCollisionCircles(spaceship->position, spaceship->size, asteroid->position, asteroid->size));
+
+	// free(spaceship);
+	// free(asteroid);
+	// free(bullet);
+	// free(asteroids);
+	// free(list);
 }
  
 
