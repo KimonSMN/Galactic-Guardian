@@ -108,8 +108,8 @@ void test_state_update() {
 	keys.up = true;
 	state_update(state, &keys);
 
-	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->position, (Vector2){0,SPACESHIP_ACCELERATION}) );
-	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed,    (Vector2){0,SPACESHIP_ACCELERATION}) );
+	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->position, (Vector2){0,-SPACESHIP_ACCELERATION}) );
+	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed,    (Vector2){0,-SPACESHIP_ACCELERATION}) );
 
 	// Προσθέστε επιπλέον ελέγχους
 	keys.up = false;
@@ -133,7 +133,7 @@ void test_state_update() {
 	state_info(state)->spaceship->orientation.x = 0; 
 	state_info(state)->spaceship->orientation.y = 1; // Initial Orientation 
 
-	Vector2 expected_right= vec2_rotate(state_info(state)->spaceship->orientation, -SPACESHIP_ROTATION); // Rotates spaceship clockwise
+	Vector2 expected_right= vec2_rotate(state_info(state)->spaceship->orientation, SPACESHIP_ROTATION); // Rotates spaceship clockwise
 
 	keys.right = true;
 	state_update(state, &keys);
@@ -147,7 +147,7 @@ void test_state_update() {
 	state_info(state)->spaceship->orientation.x = 0;
 	state_info(state)->spaceship->orientation.y = 1; // Initial Orientation 
 
-	Vector2 expected_left = vec2_rotate(state_info(state)->spaceship->orientation, SPACESHIP_ROTATION); // Rotates spaceship counter-clockwise
+	Vector2 expected_left = vec2_rotate(state_info(state)->spaceship->orientation, -SPACESHIP_ROTATION); // Rotates spaceship counter-clockwise
 
 	keys.left = true;
 	state_update(state, &keys); 

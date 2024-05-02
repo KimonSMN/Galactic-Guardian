@@ -15,6 +15,7 @@ void interface_init(){
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "asteroids");
 	SetTargetFPS(60);
     InitAudioDevice();
+	
 
 	// Φόρτωση εικόνων
 	spaceship_img = LoadTextureFromImage(LoadImage("assets/spaceship.png"));
@@ -28,7 +29,20 @@ void interface_close(){
 
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
 void interface_draw_frame(State state) {
+
+	Camera2D camera; // Αρχικοποιηση camera
+
+	camera.offset = (Vector2){SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}; // window origin
+	camera.target = (Vector2){0, 0}; 
+	camera.rotation = 0;
+	camera.zoom = 1;
+	
+	// Makes camera follow spaceship
+    camera.target.x = state_info(state)->spaceship->position.x;
+    camera.target.y = state_info(state)->spaceship->position.y;
+
     BeginDrawing();
+	BeginMode2D(camera); 
     ClearBackground(BLACK);
 
     float x = state_info(state)->spaceship->position.x;
@@ -39,8 +53,7 @@ void interface_draw_frame(State state) {
 						state_info(state)->spaceship->orientation.y
 						);
 
-
-	float rotation = radians * (-180.0 / PI);
+    float rotation = radians * (-180.0 / PI);
 
     Rectangle source = {0, 0, spaceship_img.width, spaceship_img.height};
     Rectangle dest = {x, y, spaceship_img.width, spaceship_img.height};
@@ -48,6 +61,9 @@ void interface_draw_frame(State state) {
 
     // Draw the rotated texture
     DrawTexturePro(spaceship_img, source, dest, origin, rotation, WHITE);
+
+    // End 2D mode with the camera
+    EndMode2D();
 
     // Draw the score and the FPS counter
     DrawText(TextFormat("%04i", state_info(state)->score), 780, 20, 40, WHITE);
