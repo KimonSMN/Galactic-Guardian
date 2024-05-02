@@ -9,6 +9,16 @@ State state;
 
 int main() {
 
+	// Vector2 top_left; 
+	// top_left.x = 0;
+	// top_left.y = 10000;
+
+	// // Set Cordinates for bottom_right
+    // Vector2 bottom_right;
+	// bottom_right.x = 10000;
+	// bottom_right.y = 0;
+
+
     interface_init();
     state = state_create(); 
 
@@ -25,7 +35,8 @@ int main() {
 			keys.space = IsKeyDown(KEY_SPACE);
 			keys.p = IsKeyDown(KEY_P);
 			keys.n = IsKeyDown(KEY_N);
-
+			keys.enter = IsKeyDown(KEY_ENTER);
+			
 			state_update(state, &keys);
 			interface_draw_frame(state);
 
@@ -36,6 +47,14 @@ int main() {
 			printf("Location of spaceship: %f,%f\n"
 				, state_info(state)->spaceship->position.x
 				, state_info(state)->spaceship->position.y);
+
+			// List objectsInRange = state_objects(state, top_left, bottom_right);
+			// ListNode node;
+			// for (node = list_first(objectsInRange); node != NULL; node = list_next(objectsInRange,node)) {
+			// 	Object object = list_node_value(objectsInRange,node);
+			// 	printf("Object in range: Type %d at (%f, %f)\n", object->type, object->position.x, object->position.y);
+			// }
+			
 
     }
 

@@ -11,8 +11,6 @@
 
 #include "raylib.h"		// Ο τύπος Vector2 ορίζεται στη raylib
 
-
-
 // Επιστρέφει το άθροισμα δύο διανυσμάτων
 
 Vector2 vec2_add(Vector2 vec1, Vector2 vec2);
