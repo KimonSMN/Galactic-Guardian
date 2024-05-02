@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include <math.h>
 
 #include "../include/state.h"
 #include "../include/interface.h"
@@ -27,19 +28,30 @@ void interface_close(){
 
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
 void interface_draw_frame(State state) {
-	BeginDrawing();
-	ClearBackground(BLACK);
-	
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    float x = state_info(state)->spaceship->position.x;
+    float y = state_info(state)->spaceship->position.y;
+
+    float radians = atan2(
+						state_info(state)->spaceship->orientation.x,
+						state_info(state)->spaceship->orientation.y
+						);
 
 
+	float rotation = radians * (-180.0 / PI);
 
-    DrawTexture(spaceship_img, state_info(state)->spaceship->position.x, 
-				state_info(state)->spaceship->position.y, WHITE);
+    Rectangle source = {0, 0, spaceship_img.width, spaceship_img.height};
+    Rectangle dest = {x, y, spaceship_img.width, spaceship_img.height};
+    Vector2 origin = {dest.width / 2, dest.height / 2};
 
-	// Σχεδιάζουμε το σκορ και το FPS counter
-	DrawText(TextFormat("%04i", state_info(state)->score), 780, 20, 40, WHITE);
-	DrawFPS(0, 0);
+    // Draw the rotated texture
+    DrawTexturePro(spaceship_img, source, dest, origin, rotation, WHITE);
 
-	EndDrawing();
+    // Draw the score and the FPS counter
+    DrawText(TextFormat("%04i", state_info(state)->score), 780, 20, 40, WHITE);
+    DrawFPS(0, 0);
 
+    EndDrawing();
 }
