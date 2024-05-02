@@ -45,9 +45,6 @@ void interface_draw_frame(State state) {
 	BeginMode2D(camera); 
     ClearBackground(BLACK);
 
-
-
-
     float radians = atan2(
 						state_info(state)->spaceship->orientation.x,
 						state_info(state)->spaceship->orientation.y
@@ -67,31 +64,31 @@ void interface_draw_frame(State state) {
 
     DrawTexturePro(spaceship_img, source, dest, origin, rotation, WHITE);
 
-
     Vector2 top_left = {state_info(state)->spaceship->position.x,ASTEROID_MAX_DIST}; 		// Set top_left
 	Vector2 bottom_right = {ASTEROID_MAX_DIST,state_info(state)->spaceship->position.y};	// Set bottom_right
     List objects_in_range = state_objects(state,top_left,bottom_right);
+    
 
     for(ListNode node = list_first(objects_in_range); 
-        node != LIST_EOF; 							// Loop through the list
+        node != LIST_EOF;
 		node = list_next(objects_in_range, node)){
+
             Object object = list_node_value(objects_in_range, node);
             if (object->type == ASTEROID) {
                 DrawRectangle(object->position.x, object->position.y, ASTEROID_MAX_SIZE, ASTEROID_MAX_SIZE, RED);
             }
-            else if (object->type == BULLET)
+            else
             {
                 DrawCircle(object->position.x, object->position.y, BULLET_SIZE, BLUE);
             }
             
         }
-
-    // End 2D mode with the camera
     EndMode2D();
 
     // Draw the score and the FPS counter
     DrawText(TextFormat("%04i", state_info(state)->score), 780, 20, 40, WHITE);
     DrawFPS(0, 0);
+
 
     EndDrawing();
 }

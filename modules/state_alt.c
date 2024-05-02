@@ -139,8 +139,6 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 
 void state_update(State state, KeyState keys) {
-	
-
 
 	// Handle Pause when N key isn't pressed
 	if(state->info.paused && !keys->n)
@@ -308,6 +306,15 @@ void state_update(State state, KeyState keys) {
 
 	if (state->info.score % 100 == 0){
 		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
+	}
+
+
+	for (int i = 0; i < vector_size(state->objects); i++) {
+			Object obj = vector_get_at(state->objects, i);
+			if (obj->type == BULLET || obj->type == ASTEROID) {
+
+				obj->position = vec2_add(obj->position, obj->speed);
+			}
 	}
 
 }

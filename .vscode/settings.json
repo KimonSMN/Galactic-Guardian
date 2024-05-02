@@ -42,6 +42,9 @@
 		"adtset.h": "c",
 		"interface.h": "c",
 		"raylib.h": "c",
-		"iterator": "c"
+		"iterator": "c",
+		"array": "c",
+		"string_view": "c",
+		"initializer_list": "c"
 	},
 }
