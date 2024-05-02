@@ -140,6 +140,8 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
 void state_update(State state, KeyState keys) {
 	
+
+
 	// Handle Pause when N key isn't pressed
 	if(state->info.paused && !keys->n)
 		return;
@@ -176,10 +178,16 @@ void state_update(State state, KeyState keys) {
 
 	// Δημιουργία αστεροειδών //
 
-	Vector2 top_left = {spaceship->position.x,ASTEROID_MAX_DIST}; 		// Set top_left
-	Vector2 bottom_left = {ASTEROID_MAX_DIST,spaceship->position.y};	// Set bottom_right
+	Vector2 top_left = {
+		spaceship->position.x - ASTEROID_MAX_DIST, 
+		spaceship->position.y + ASTEROID_MAX_DIST
+	};
+	Vector2 bottom_right = {
+		spaceship->position.x + ASTEROID_MAX_DIST, 
+		spaceship->position.y - ASTEROID_MAX_DIST
+	};
 
-	List objects = state_objects(state, top_left, bottom_left);
+	List objects = state_objects(state, top_left, bottom_right);
 	int asteroids = 0;													// Set asteroid counter to 0
 	for(ListNode node = list_first(objects); 
 		node != LIST_EOF; 												// Loop through the list
@@ -190,13 +198,13 @@ void state_update(State state, KeyState keys) {
 			asteroids++;
 		}
 	}
-	if (asteroids != ASTEROID_NUM){										// If asteroids != ASTEROID_NUM create more asteroids
-		int remaining = ASTEROID_NUM - asteroids;
-		if (remaining > 0) {
-			state->info.score += remaining; // Για κάθε νέο αστεροειδή που δημιουργείται το σκορ αυξάνεται κατά 1
-        	add_asteroids(state, remaining);
-    	}
+	int remaining = ASTEROID_NUM - asteroids;
+	if (remaining > 0) {
+		state->info.score += remaining; // Για κάθε νέο αστεροειδή που δημιουργείται το σκορ αυξάνεται κατά 1
+		add_asteroids(state, remaining);
+		printf("Created %d new asteroids\n", remaining);
 	}
+	
 
 	// Bullets
 
@@ -213,13 +221,15 @@ void state_update(State state, KeyState keys) {
 		if (bullet == NULL) {
         	return;
     	}
-
+	
 		vector_insert_last(state->objects, bullet);
+
+		printf("Created a bullet\n");
 
 		state->next_bullet = BULLET_DELAY;
 	}
 	if (state->next_bullet > 0 ) {
-    	state->next_bullet--;
+    	state->next_bullet--; 
 	}
 
 	// Συγκρουσεις Αστεροιδη και Σφαιρας
@@ -299,10 +309,6 @@ void state_update(State state, KeyState keys) {
 	if (state->info.score % 100 == 0){
 		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
 	}
-
-
-
-
 
 }
 // INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️

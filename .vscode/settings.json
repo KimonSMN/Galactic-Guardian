@@ -41,6 +41,7 @@
 		"math.h": "c",
 		"adtset.h": "c",
 		"interface.h": "c",
-		"raylib.h": "c"
+		"raylib.h": "c",
+		"iterator": "c"
 	},
 }

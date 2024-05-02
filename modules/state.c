@@ -140,17 +140,15 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
 void state_update(State state, KeyState keys) {
 	// Προς υλοποίηση
-	// if(keys->enter )
 
-	// Press N //
+	// Handle Pause when N key isn't pressed
+	if(state->info.paused && !keys->n)
+		return;
 
-    if (state->info.paused && !keys->n) {
-        return;
-    }
-
-    if (state->info.paused && keys->n) {
-		state->info.paused = false;
-    }
+	// Handle P key when pressed
+	if (keys->p) {
+        state->info.paused = true;
+	}
 
     Object spaceship = state->info.spaceship;
 
@@ -302,13 +300,6 @@ void state_update(State state, KeyState keys) {
 		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
 	}
 
-	// Pause
-	if (keys->p){
-		state->info.paused = true;
-		return;
-	}else{
-		state->info.paused = false;
-	}
 }
 // INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
 
