@@ -1,8 +1,7 @@
 # paths
-LIB = ../lib
-INCLUDE = ../include
-MODULES = ../modules
-
+LIB = ../../lib
+INCLUDE = ../../include
+MODULES = ../../modules
 # compiler
 CC = gcc
 
@@ -11,10 +10,10 @@ CFLAGS = -Wall -Werror -g -I$(INCLUDE)
 LDFLAGS = -lm
 
 # Αρχεία .o
-OBJS = state_test.o $(MODULES)/set_utils.o $(MODULES)/state.o $(MODULES)/vec2.o $(LIB)/k08.a $(LIB)/libraylib.a
+OBJS = game.o $(MODULES)/state.o $(MODULES)/interface.o $(MODULES)/vec2.o $(LIB)/k08.a $(LIB)/libraylib.a
 
 # Το εκτελέσιμο πρόγραμμα
-EXEC = state_test
+EXEC = game
 
 # Παράμετροι για δοκιμαστική εκτέλεση
 ARGS =
@@ -22,10 +21,13 @@ ARGS =
 # Παράμετροι της βιβλιοθήκης raylib
 include $(LIB)/libraylib.mk
 
-all: $(EXEC)
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS)
+
+# Για να φτιάξουμε τα k08.a/libraylib.a τρέχουμε το make στο lib directory.
+$(LIB)/%.a:
+	$(MAKE) -C $(LIB) $*.a
 
 clean:
 	rm -f $(OBJS) $(EXEC)
@@ -33,6 +35,5 @@ clean:
 run: $(EXEC)
 	./$(EXEC) $(ARGS)
 
-# Για να φτιάξουμε τα k08.a/libraylib.a τρέχουμε το make στο lib directory.
-$(LIB)/%.a:
-	$(MAKE) -C $(LIB) $*.a
+valgrind: $(EXEC)
+	valgrind --error-exitcode=1 --leak-check=full --show-leak-kinds=all ./$(EXEC) $(ARGS)

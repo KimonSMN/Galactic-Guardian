@@ -134,7 +134,6 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
     return list;
 }
 
-
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 
@@ -157,16 +156,16 @@ void state_update(State state, KeyState keys) {
 	// Orientation of Spaceship //
 
 	if(keys->right){
-		spaceship->orientation = vec2_rotate(spaceship->orientation, -SPACESHIP_ROTATION);
+		spaceship->orientation = vec2_rotate(spaceship->orientation, SPACESHIP_ROTATION);
 	}
 	if(keys->left){
-		spaceship->orientation = vec2_rotate(spaceship->orientation, SPACESHIP_ROTATION);
+		spaceship->orientation = vec2_rotate(spaceship->orientation, -SPACESHIP_ROTATION);
 	}
 
 	// Speed of Spaceship //
 
 	if (keys->up){
-		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, SPACESHIP_ACCELERATION)); // Handle Acceleration
+		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, -SPACESHIP_ACCELERATION)); // Handle Acceleration
 	}else{
 		// Check if speed is greater than 0 (speed >= 0)
     	spaceship->speed = vec2_scale(spaceship->speed, SPACESHIP_SLOWDOWN); // Handle Slowdown
@@ -175,7 +174,6 @@ void state_update(State state, KeyState keys) {
 	// Position of Spaceship //
 
 	spaceship->position = vec2_add(spaceship->position, spaceship->speed);
-
 
 	// Δημιουργία αστεροειδών //
 

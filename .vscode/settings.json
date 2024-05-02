@@ -1,10 +1,10 @@
 {
 	"c_project": {
 		// Όνομα του εκτελέσιμου προγράμματος (μόνο για μεταγλώττιση πολλών αρχείων & make)
-		"program": "game_example",
+		"program": "game",
 
 		// Directory στο οποίο βρίσκεται το πρόγραμμα (μόνο για μεταγλώτισση με make)
-		"dir": "programs/game_example",
+		"dir": "programs/game",
 
 		// Οι τιμές που δηλώνονται στα arg1 - arg8 παρακάτω δίνονται αυτόματα σαν ορίσματα
 		// σε οποιοδήποτε πρόγραμμα τρέχουμε (είτε με Ctrl-Shift-B είτε στον debugger).
@@ -38,6 +38,9 @@
 		"acutest.h": "c",
 		"vec2.h": "c",
 		"stdlib.h": "c",
-		"math.h": "c"
+		"math.h": "c",
+		"adtset.h": "c",
+		"interface.h": "c",
+		"raylib.h": "c"
 	},
 }

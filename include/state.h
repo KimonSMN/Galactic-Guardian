@@ -60,7 +60,6 @@ typedef struct key_state {
 // Η κατάσταση του παιχνιδιού (handle)
 typedef struct state* State;
 
-
 // Δημιουργεί και επιστρέφει την αρχική κατάσταση του παιχνιδιού
 
 State state_create();
