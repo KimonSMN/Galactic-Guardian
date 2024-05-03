@@ -212,11 +212,6 @@ void test_state_update() {
 	state_update(state, &keys); 
 	
 	TEST_ASSERT(CheckCollisionCircles(spaceship->position, spaceship->size, asteroid->position, asteroid->size));
-
-
-	// Have to add Bullet movement test
-	// Have to add Asterpod halfing in size test
-	// Have to add Score checks
 }
  
 
