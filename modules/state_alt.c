@@ -138,14 +138,21 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 
+
+
 void state_update(State state, KeyState keys) {
+
+	Object spaceship = state->info.spaceship;
 
 	// Κινηση Αντικειμένων
 	for (int i = 0; i < vector_size(state->objects); i++) {
 		Object obj = vector_get_at(state->objects, i);
-		if (obj->type == BULLET || obj->type == ASTEROID) {
-			obj->position = vec2_add(obj->position, obj->speed);
+		if (vec2_distance(spaceship->position, obj->position) <= 2 * SCREEN_HEIGHT){ // Check if distance is no more than 2 screens
+			if (obj->type == BULLET || obj->type == ASTEROID ) {
+				obj->position = vec2_add(obj->position, obj->speed);
+			}
 		}
+
 	}
 
 	// Παύση και διακοπή
@@ -155,8 +162,6 @@ void state_update(State state, KeyState keys) {
 	if (keys->p) {
         state->info.paused = true;
 	}
-
-	Object spaceship = state->info.spaceship;
 
 	// Περιστροφή διαστημοπλοίου
 
@@ -247,8 +252,9 @@ void state_update(State state, KeyState keys) {
 			Object bullet = vector_get_at(state->objects, j);
 			if(bullet == NULL || bullet->type != BULLET) 
 				continue;
-				
-			if (CheckCollisionCircles( 			// Check for collision bullet με αστεροειδή
+
+			// Ελεγχος συγκρουσης σφαιρας και αστεροειδη
+			if (CheckCollisionCircles( 	
 			bullet->position,
 			bullet->size,
 			asteroid->position,
@@ -289,23 +295,22 @@ void state_update(State state, KeyState keys) {
 
 	for (int i = 0; i < vector_size(state->objects); i++) {
 		Object asteroid = vector_get_at(state->objects, i);
-		if (asteroid == NULL || asteroid->type != ASTEROID){
+		if (asteroid == NULL || asteroid->type != ASTEROID) 
 			continue;
-
-			if(spaceship == NULL || spaceship->type != SPACESHIP) 
-				continue;
-				
-			if (CheckCollisionCircles( 			// Check for collision bullet με Διαστημοπλοιο
+			
+		if (spaceship == NULL || spaceship->type != SPACESHIP) 
+			continue; 
+		
+		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδη 
+		if (CheckCollisionCircles(
 			spaceship->position,
 			spaceship->size,
 			asteroid->position,
 			asteroid->size
-			)){
-
-				free(asteroid);
-				state->info.score = state->info.score / 2;
-				break;
-			}
+		)) {
+			free(asteroid);
+			state->info.score = state->info.score / 2;
+			break;
 		}
 	}
 

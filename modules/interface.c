@@ -68,11 +68,12 @@ void interface_draw_frame(State state) {
 	Vector2 top_left = {
 		state_info(state)->spaceship->position.x - ASTEROID_MAX_DIST, 
 		state_info(state)->spaceship->position.y + ASTEROID_MAX_DIST
-	};
+	}; // Set top_left
 	Vector2 bottom_right = {
 		state_info(state)->spaceship->position.x  + ASTEROID_MAX_DIST, 
 		state_info(state)->spaceship->position.y - ASTEROID_MAX_DIST
 	};	// Set bottom_right
+
     List objects_in_range = state_objects(state,top_left,bottom_right);
     
     for(ListNode node = list_first(objects_in_range); 
@@ -96,5 +97,5 @@ void interface_draw_frame(State state) {
     DrawFPS(0, 0);
 
 
-    EndDrawing();
+     EndDrawing();
 }
