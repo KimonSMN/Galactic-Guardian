@@ -253,7 +253,7 @@ void state_update(State state, KeyState keys) {
 					for (int k = 0; k < 2; k++) {
 						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
 						Vector2 asteroid_speed = vec2_from_polar(
-							length *state->speed_factor,
+							length * state->speed_factor,
 							randf(0, 2*PI)
 						);
 
@@ -308,6 +308,8 @@ void state_update(State state, KeyState keys) {
 		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
 	}
 
+	if(state->info.score < 0)
+		state->info.score = 0;
 
 	for (int i = 0; i < vector_size(state->objects); i++) {
 			Object obj = vector_get_at(state->objects, i);

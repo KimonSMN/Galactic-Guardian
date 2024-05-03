@@ -73,16 +73,16 @@ void interface_draw_frame(State state) {
         node != LIST_EOF;
 		node = list_next(objects_in_range, node)){
 
-            Object object = list_node_value(objects_in_range, node);
-            if (object->type == ASTEROID) {
-                DrawRectangle(object->position.x, object->position.y, ASTEROID_MAX_SIZE, ASTEROID_MAX_SIZE, RED);
-            }
-            else
-            {
-                DrawCircle(object->position.x, object->position.y, BULLET_SIZE, BLUE);
-            }
-            
+        Object object = list_node_value(objects_in_range, node);
+        if (object->type == ASTEROID) {
+            DrawRectangle(object->position.x, object->position.y, ASTEROID_MAX_SIZE, ASTEROID_MAX_SIZE, RED);
         }
+        else
+        {
+            DrawCircle(object->position.x, object->position.y, BULLET_SIZE, BLUE);
+        }
+            
+    }
     EndMode2D();
 
     // Draw the score and the FPS counter
