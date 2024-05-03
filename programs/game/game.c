@@ -33,9 +33,9 @@ int main() {
 			// printf("Keys pressed: Up(%d) Left(%d) Right(%d) Space(%d) P(%d) N(%d)\n",
 			// 	keys.up, keys.left, keys.right, keys.space, keys.p, keys.n);
 
-			// printf("Location of spaceship: %f,%f\n"
-			// 	, state_info(state)->spaceship->position.x
-			// 	, state_info(state)->spaceship->position.y);
+			printf("Location of spaceship: %f,%f\n"
+				, state_info(state)->spaceship->position.x
+				, state_info(state)->spaceship->position.y);
 
     }
 

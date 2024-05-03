@@ -140,19 +140,25 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
 void state_update(State state, KeyState keys) {
 
-	// Handle Pause when N key isn't pressed
+	// Κινηση Αντικειμένων
+	for (int i = 0; i < vector_size(state->objects); i++) {
+		Object obj = vector_get_at(state->objects, i);
+		if (obj->type == BULLET || obj->type == ASTEROID) {
+			obj->position = vec2_add(obj->position, obj->speed);
+		}
+	}
+
+	// Παύση και διακοπή
 	if(state->info.paused && !keys->n)
 		return;
 
-	// Handle P key when pressed
 	if (keys->p) {
         state->info.paused = true;
 	}
 
 	Object spaceship = state->info.spaceship;
 
-
-	// Orientation of Spaceship //
+	// Περιστροφή διαστημοπλοίου
 
 	if(keys->right){
 		spaceship->orientation = vec2_rotate(spaceship->orientation, SPACESHIP_ROTATION);
@@ -161,20 +167,20 @@ void state_update(State state, KeyState keys) {
 		spaceship->orientation = vec2_rotate(spaceship->orientation, -SPACESHIP_ROTATION);
 	}
 
-	// Speed of Spaceship //
+	// Επιτάχυνση διαστημοπλοίου
 
 	if (keys->up){
-		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, SPACESHIP_ACCELERATION)); // Handle Acceleration
+		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, SPACESHIP_ACCELERATION));
 	}else{
-		// Check if speed is greater than 0 (speed >= 0)
-    	spaceship->speed = vec2_scale(spaceship->speed, SPACESHIP_SLOWDOWN); // Handle Slowdown
+		// Επιβράδυνση διαστημοπλοίου
+    	spaceship->speed = vec2_scale(spaceship->speed, SPACESHIP_SLOWDOWN);
 	}
 
-	// Position of Spaceship //
+	// Θεση διαστημοπλοίου
 
 	spaceship->position = vec2_add(spaceship->position, spaceship->speed);
 
-	// Δημιουργία αστεροειδών //
+	// Δημιουργία αστεροειδών 
 
 	Vector2 top_left = {
 		spaceship->position.x - ASTEROID_MAX_DIST, 
@@ -192,7 +198,7 @@ void state_update(State state, KeyState keys) {
 		node = list_next(objects, node)){
 
 		Object obj = list_node_value(objects, node);
-		if(obj->type == ASTEROID){										// If object of list is asteroid ++ the counter
+		if(obj->type == ASTEROID){										// If list object is asteroid ++ the counter
 			asteroids++;
 		}
 	}
@@ -204,11 +210,11 @@ void state_update(State state, KeyState keys) {
 	}
 	
 
-	// Bullets
+	// Σφαιρες
 
 	if(keys->space && state->next_bullet <= 0){
 
-		Object bullet = create_object( // Create new bullet 
+		Object bullet = create_object( // Δημιουργεια καινουριας Σφαιρας
 			BULLET,
 			spaceship->position,
 			vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
@@ -224,7 +230,7 @@ void state_update(State state, KeyState keys) {
 
 		printf("Created a bullet\n");
 
-		state->next_bullet = BULLET_DELAY;
+		state->next_bullet = BULLET_DELAY; // Οριζεται το delay της σφαιρας σε BULLET_DELAY
 	}
 	if (state->next_bullet > 0 ) {
     	state->next_bullet--; 
@@ -248,13 +254,13 @@ void state_update(State state, KeyState keys) {
 			asteroid->position,
 			asteroid->size
 			)){
-
 				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) { // Πρέπει να είναι τουλάχιστον ASTEROID_MIN_SIZE σε μέγεθος
 					for (int k = 0; k < 2; k++) {
+						// Υπολογισμος Length
 						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
 						Vector2 asteroid_speed = vec2_from_polar(
-							length * state->speed_factor,
-							randf(0, 2*PI)
+							length * state->speed_factor, 
+							randf(0, 2*PI) // Τυχαιο angle
 						);
 
 						Object new_asteroid = create_object(
@@ -262,18 +268,17 @@ void state_update(State state, KeyState keys) {
 							asteroid->position,
 							asteroid_speed,
 							(Vector2){0, 0},
-							asteroid->size / 2
+							asteroid->size/2 // Μισό μέγεθος από τον αρχικό αστεροειδη
 							);
 
-						vector_insert_last(state->objects, &new_asteroid);
+						// Προστίθενται δύο νέεοι αστεροειδείς
+						vector_insert_last(state->objects, new_asteroid);
 						
-						state->info.score += 2; // Το σκορ αυξάνεται κατά 1 για καθε νεο αστεροειδη
+						state->info.score += 2; // Το σκορ αυξάνεται κατά 2 , επειδη δημιουρουνται 2 νεοι αστεροειδης
 					}
-
 				}
-
-				free(asteroid);
-				free(bullet);
+				free(asteroid); // Ο αστεροειδής αφαιρείται 
+				free(bullet); 	// Η σφαιρα αφαιρείται 
 				state->info.score -= 10; // Το σκορ μειώνεται κατά 10
 				break;	
 			}
@@ -306,17 +311,8 @@ void state_update(State state, KeyState keys) {
 
 	if (state->info.score % 100 == 0){
 		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
-	}
-
-	if(state->info.score < 0)
+	} else if(state->info.score < 0)
 		state->info.score = 0;
-
-	for (int i = 0; i < vector_size(state->objects); i++) {
-			Object obj = vector_get_at(state->objects, i);
-			if (obj->type == BULLET) {
-				obj->position = vec2_add(obj->position, obj->speed);
-			}
-	}
 
 }
 // INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️

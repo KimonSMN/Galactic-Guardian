@@ -75,7 +75,7 @@ void interface_draw_frame(State state) {
 
         Object object = list_node_value(objects_in_range, node);
         if (object->type == ASTEROID) {
-            DrawRectangle(object->position.x, object->position.y, ASTEROID_MAX_SIZE, ASTEROID_MAX_SIZE, RED);
+            DrawRectangle(object->position.x, object->position.y, object->size, object->size, RED);
         }
         else
         {
