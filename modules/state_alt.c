@@ -164,7 +164,7 @@ void state_update(State state, KeyState keys) {
 	// Speed of Spaceship //
 
 	if (keys->up){
-		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, -SPACESHIP_ACCELERATION)); // Handle Acceleration
+		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, SPACESHIP_ACCELERATION)); // Handle Acceleration
 	}else{
 		// Check if speed is greater than 0 (speed >= 0)
     	spaceship->speed = vec2_scale(spaceship->speed, SPACESHIP_SLOWDOWN); // Handle Slowdown
@@ -311,8 +311,7 @@ void state_update(State state, KeyState keys) {
 
 	for (int i = 0; i < vector_size(state->objects); i++) {
 			Object obj = vector_get_at(state->objects, i);
-			if (obj->type == BULLET || obj->type == ASTEROID) {
-
+			if (obj->type == BULLET) {
 				obj->position = vec2_add(obj->position, obj->speed);
 			}
 	}

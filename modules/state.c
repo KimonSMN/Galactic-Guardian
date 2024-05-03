@@ -164,7 +164,7 @@ void state_update(State state, KeyState keys) {
 	// Speed of Spaceship //
 
 	if (keys->up){
-		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, -SPACESHIP_ACCELERATION)); // Handle Acceleration
+		spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, SPACESHIP_ACCELERATION)); // Handle Acceleration
 	}else{
 		// Check if speed is greater than 0 (speed >= 0)
     	spaceship->speed = vec2_scale(spaceship->speed, SPACESHIP_SLOWDOWN); // Handle Slowdown
