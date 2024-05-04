@@ -18,6 +18,7 @@ struct state {
 	struct state_info info;	// Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
 	int next_bullet;		// Αριθμός frames μέχρι να επιτραπεί ξανά σφαίρα
 	float speed_factor;		// Πολλαπλασιαστής ταχύτητς (1 = κανονική ταχύτητα, 2 = διπλάσια, κλπ)
+	Vector objects_clean;
 };
 
 
@@ -88,7 +89,7 @@ State state_create() {
 	state->info.paused = false;				// Το παιχνίδι ξεκινάει χωρίς να είναι paused.
 	state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
-	state->info.score = 0;				// Αρχικό σκορ 0
+	state->info.score = 90;				// Αρχικό σκορ 0
 
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = vector_create(0, NULL);
@@ -135,9 +136,9 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
     return list;
 }
 
+
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
-
 
 
 void state_update(State state, KeyState keys) {
@@ -152,7 +153,6 @@ void state_update(State state, KeyState keys) {
 				obj->position = vec2_add(obj->position, obj->speed);
 			}
 		}
-
 	}
 
 	// Παύση και διακοπή
@@ -242,7 +242,7 @@ void state_update(State state, KeyState keys) {
 	}
 
 	// Συγκρουσεις Αστεροιδη και Σφαιρας
-
+	int created_asteroid = 0;
 	for (int i = 0; i < vector_size(state->objects); i++) {
 		Object asteroid = vector_get_at(state->objects, i);
 		if (asteroid == NULL || asteroid->type != ASTEROID)
@@ -265,7 +265,7 @@ void state_update(State state, KeyState keys) {
 						// Υπολογισμος Length
 						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
 						Vector2 asteroid_speed = vec2_from_polar(
-							length * state->speed_factor, 
+							length * state->speed_factor,
 							randf(0, 2*PI) // Τυχαιο angle
 						);
 
@@ -279,17 +279,27 @@ void state_update(State state, KeyState keys) {
 
 						// Προστίθενται δύο νέεοι αστεροειδείς
 						vector_insert_last(state->objects, new_asteroid);
-						
+						created_asteroid ++;
 						state->info.score += 2; // Το σκορ αυξάνεται κατά 2 , επειδη δημιουρουνται 2 νεοι αστεροειδης
 					}
 				}
-				free(asteroid); // Ο αστεροειδής αφαιρείται 
-				free(bullet); 	// Η σφαιρα αφαιρείται 
-				state->info.score -= 10; // Το σκορ μειώνεται κατά 10
+
+				if(created_asteroid == 2){
+					vector_remove_last(state->objects);
+					vector_remove_last(state->objects);
+
+				} else{
+					vector_remove_last(state->objects);
+				}
+				free(asteroid);
+				free(bullet);
+
+				if(state->info.score > 0)
+					state->info.score -= 10; // Το σκορ μειώνεται κατά 10
 				break;	
 			}
 		}
-	}
+}
 
 	// Συγκρουσεις Αστεροιδη και Διαστημοπλοιου
 
@@ -301,7 +311,7 @@ void state_update(State state, KeyState keys) {
 		if (spaceship == NULL || spaceship->type != SPACESHIP) 
 			continue; 
 		
-		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδη 
+		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
 		if (CheckCollisionCircles(
 			spaceship->position,
 			spaceship->size,
@@ -309,14 +319,20 @@ void state_update(State state, KeyState keys) {
 			asteroid->size
 		)) {
 			free(asteroid);
-			state->info.score = state->info.score / 2;
+			if(state->info.score > 0)
+				state->info.score = state->info.score / 2;
 			break;
 		}
 	}
 
-	if (state->info.score % 100 == 0){
-		state->speed_factor *= 1.10;	// Η ταχύτητα του παιχνιδιού γίνεται 10% μεγαλύτερη
-	} else if(state->info.score < 0)
+static int previous_score = 0;
+
+if (state->info.score / 100 > previous_score / 100) {
+    state->speed_factor *= 1.10;   
+    previous_score = state->info.score;
+    printf("SPEED FACTOR CHANGED\n");
+}
+	if(state->info.score < 0)
 		state->info.score = 0;
 
 }
