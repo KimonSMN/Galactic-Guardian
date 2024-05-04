@@ -4,21 +4,29 @@
 #include "../include/state.h"
 #include "../include/interface.h"
 
-
 // Assets
 Texture spaceship_img;
+Texture asteroid_img;
+Texture bullet_img;
 
+//Texture background_img;
 
 // Αρχικοποιεί το interface του παιχνιδιού
+
 void interface_init(){
-    // Αρχικοποίηση του παραθύρου
+    // Initialize the window
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "asteroids");
 	SetTargetFPS(60);
     InitAudioDevice();
 	
-
-	// Φόρτωση εικόνων
+	// Load images
 	spaceship_img = LoadTextureFromImage(LoadImage("assets/spaceship.png"));
+    asteroid_img = LoadTextureFromImage(LoadImage("assets/asteroid.png"));
+    bullet_img = LoadTextureFromImage(LoadImage("assets/bullet.png"));
+    //background_img = LoadTextureFromImage(LoadImage("assets/space.png"));
+    spaceship_img.height = spaceship_img.height * 3;
+    spaceship_img.width = spaceship_img.width * 3;
+
 }
 
 // Κλείνει το interface του παιχνιδιού
@@ -29,6 +37,7 @@ void interface_close(){
 
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
 void interface_draw_frame(State state) {
+    int scale_factor = 5;
 
 	Camera2D camera; // Αρχικοποιηση camera
 
@@ -50,8 +59,10 @@ void interface_draw_frame(State state) {
 						state_info(state)->spaceship->orientation.y
 						);
 
-    float rotation = radians * (-180.0 / PI);
-
+    float rotation = radians * (-180 / PI);
+    
+    rotation += 180; // add 180 for spaceship to look at correct angle
+    
     Rectangle source = {0, 0, spaceship_img.width, spaceship_img.height};
     Rectangle dest = {
                     state_info(state)->spaceship->position.x,
@@ -64,7 +75,6 @@ void interface_draw_frame(State state) {
 
     DrawTexturePro(spaceship_img, source, dest, origin, rotation, WHITE);
 
- 
 	Vector2 top_left = {
 		state_info(state)->spaceship->position.x - ASTEROID_MAX_DIST, 
 		state_info(state)->spaceship->position.y + ASTEROID_MAX_DIST
@@ -82,20 +92,22 @@ void interface_draw_frame(State state) {
 
         Object object = list_node_value(objects_in_range, node);
         if (object->type == ASTEROID) {
-            DrawRectangle(object->position.x, object->position.y, object->size, object->size, RED);
+            // DrawRectangle(object->position.x, object->position.y, object->size, object->size, WHITE);
+            Rectangle sourceRect = { 0, 0, asteroid_img.width, asteroid_img.height };
+            Rectangle destRect = { object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor };
+            Vector2 origin = { object->size * scale_factor / 2, object->size * scale_factor / 2 };
+            DrawTexturePro(asteroid_img, sourceRect, destRect, origin, 0, WHITE);
+
+        }else if(object->type == BULLET){
+            DrawCircle(object->position.x, object->position.y, BULLET_SIZE , WHITE); 
         }
-        else
-        {
-            DrawCircle(object->position.x, object->position.y, BULLET_SIZE, BLUE);
-        }
-            
     }
+    
     EndMode2D();
 
     // Draw the score and the FPS counter
     DrawText(TextFormat("%04i", state_info(state)->score), 780, 20, 40, WHITE);
     DrawFPS(0, 0);
 
-
-     EndDrawing();
+    EndDrawing();
 }

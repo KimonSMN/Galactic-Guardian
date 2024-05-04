@@ -89,7 +89,7 @@ State state_create() {
 	state->info.paused = false;				// Το παιχνίδι ξεκινάει χωρίς να είναι paused.
 	state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
-	state->info.score = 90;				// Αρχικό σκορ 0
+	state->info.score = 0;				// Αρχικό σκορ 0
 
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = vector_create(0, NULL);
@@ -130,7 +130,6 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 		if (object->position.x >= top_left.x && object->position.y <= top_left.y && 
 			object->position.x <= bottom_right.x && object->position.y >= bottom_right.y) {
 			list_insert_next(list, LIST_BOF, object);
-
 		}
     }
     return list;
@@ -144,6 +143,7 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 void state_update(State state, KeyState keys) {
 
 	Object spaceship = state->info.spaceship;
+
 
 	// Κινηση Αντικειμένων
 	for (int i = 0; i < vector_size(state->objects); i++) {
@@ -213,13 +213,12 @@ void state_update(State state, KeyState keys) {
 		add_asteroids(state, remaining);
 		printf("Created %d new asteroids\n", remaining);
 	}
-	
 
 	// Σφαιρες
 
 	if(keys->space && state->next_bullet <= 0){
 
-		Object bullet = create_object( // Δημιουργεια καινουριας Σφαιρας
+			Object bullet = create_object( // Δημιουργεια καινουριας Σφαιρας
 			BULLET,
 			spaceship->position,
 			vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
@@ -240,9 +239,8 @@ void state_update(State state, KeyState keys) {
 	if (state->next_bullet > 0 ) {
     	state->next_bullet--; 
 	}
-
+	
 	// Συγκρουσεις Αστεροιδη και Σφαιρας
-	int created_asteroid = 0;
 	for (int i = 0; i < vector_size(state->objects); i++) {
 		Object asteroid = vector_get_at(state->objects, i);
 		if (asteroid == NULL || asteroid->type != ASTEROID)
@@ -279,18 +277,10 @@ void state_update(State state, KeyState keys) {
 
 						// Προστίθενται δύο νέεοι αστεροειδείς
 						vector_insert_last(state->objects, new_asteroid);
-						created_asteroid ++;
 						state->info.score += 2; // Το σκορ αυξάνεται κατά 2 , επειδη δημιουρουνται 2 νεοι αστεροειδης
 					}
 				}
 
-				if(created_asteroid == 2){
-					vector_remove_last(state->objects);
-					vector_remove_last(state->objects);
-
-				} else{
-					vector_remove_last(state->objects);
-				}
 				free(asteroid);
 				free(bullet);
 
