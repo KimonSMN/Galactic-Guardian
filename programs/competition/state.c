@@ -18,8 +18,8 @@ struct state {
 	struct state_info info;	// Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
 	int next_bullet;		// Αριθμός frames μέχρι να επιτραπεί ξανά σφαίρα
 	float speed_factor;		// Πολλαπλασιαστής ταχύτητς (1 = κανονική ταχύτητα, 2 = διπλάσια, κλπ)
-	Vector objects_clean;
-};
+	int pickupTimer;
+	};
 
 
 // Δημιουργεί και επιστρέφει ένα αντικείμενο
@@ -90,7 +90,7 @@ State state_create() {
 	state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
 	state->info.score = 0;				// Αρχικό σκορ 0
-
+	state->pickupTimer = 0;
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = vector_create(0, NULL);
 
@@ -136,6 +136,14 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 }
 
 
+static Vector2 vec2_subtract(Vector2 vec1, Vector2 vec2) {
+	return (Vector2){
+		vec1.x - vec2.x,
+		vec1.y - vec2.y,
+	};
+}
+
+
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 
@@ -143,7 +151,6 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 void state_update(State state, KeyState keys) {
 
 	Object spaceship = state->info.spaceship;
-
 
 	// Κινηση Αντικειμένων
 	for (int i = 0; i < vector_size(state->objects); i++) {
@@ -217,7 +224,42 @@ void state_update(State state, KeyState keys) {
 	// Σφαιρες
 
 	if(keys->space && state->next_bullet <= 0){
+		if(state->pickupTimer > 0 && state->next_bullet <= 0){
 
+			Vector2 perpendicular = {-spaceship->orientation.y, spaceship->orientation.x };
+ 
+			Vector2 offset = vec2_scale(perpendicular, 20);
+
+				Object bullet1 = create_object(
+					BULLET,
+					vec2_add(spaceship->position, offset),
+					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
+					spaceship->orientation,
+					BULLET_SIZE
+				);
+				vector_insert_last(state->objects, bullet1);
+
+				Object bullet2 = create_object(
+					BULLET,
+					spaceship->position,
+					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
+					spaceship->orientation,
+					BULLET_SIZE
+				);
+				vector_insert_last(state->objects, bullet2);
+
+				Object bullet3 = create_object(
+					BULLET,
+					vec2_subtract(spaceship->position, offset),
+					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
+					spaceship->orientation,
+					BULLET_SIZE
+				);
+				vector_insert_last(state->objects, bullet3);
+
+				state->next_bullet = BULLET_DELAY; // Οριζεται το delay της σφαιρας σε BULLET_DELAY
+			
+		} else{
 			Object bullet = create_object( // Δημιουργεια καινουριας Σφαιρας
 			BULLET,
 			spaceship->position,
@@ -225,21 +267,46 @@ void state_update(State state, KeyState keys) {
 			spaceship->orientation,
 			BULLET_SIZE
 			);
+			vector_insert_last(state->objects, bullet);
 
-		if (bullet == NULL) {
-        	return;
-    	}
-	
-		vector_insert_last(state->objects, bullet);
+			if (bullet == NULL) {
+				return;
+			}
+		
+			printf("Created a bullet\n");
 
-		printf("Created a bullet\n");
+			state->next_bullet = BULLET_DELAY; // Οριζεται το delay της σφαιρας σε BULLET_DELAY
+		}
 
-		state->next_bullet = BULLET_DELAY; // Οριζεται το delay της σφαιρας σε BULLET_DELAY
 	}
 	if (state->next_bullet > 0 ) {
     	state->next_bullet--; 
 	}
-	
+
+
+	//pickup
+	for (int i = 0; i < vector_size(state->objects); i++) {
+		Object pickup = vector_get_at(state->objects, i);
+		if (pickup == NULL || pickup->type != PICKUP) 
+			continue;
+			
+		if (spaceship == NULL || spaceship->type != SPACESHIP) 
+			continue; 
+		
+		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
+		if (CheckCollisionCircles(
+			spaceship->position,
+			spaceship->size,
+			pickup->position,
+			pickup->size
+		)) {
+            state->pickupTimer = 250;  
+			free(pickup);
+			printf("PICKUP ACTUIALLY PICKED UP OLOLOLOL");
+			break;
+		}
+	}
+	state->pickupTimer--;
 	// Συγκρουσεις Αστεροιδη και Σφαιρας
 	for (int i = 0; i < vector_size(state->objects); i++) {
 		Object asteroid = vector_get_at(state->objects, i);
@@ -324,29 +391,6 @@ void state_update(State state, KeyState keys) {
 		}
 	}
 
-	//pickup
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object pickup = vector_get_at(state->objects, i);
-		if (pickup == NULL || pickup->type != PICKUP) 
-			continue;
-			
-		if (spaceship == NULL || spaceship->type != SPACESHIP) 
-			continue; 
-		
-		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
-		if (CheckCollisionCircles(
-			spaceship->position,
-			spaceship->size,
-			pickup->position,
-			pickup->size
-		)) {
-			free(pickup);
-			printf("PICKUP ACTUIALLY PICKED UP OLOLOLOL");
-			break;
-		}
-	}
-
-
 	static int previous_score = 0;
 
 	if (state->info.score / 100 > previous_score / 100) {
@@ -357,10 +401,6 @@ void state_update(State state, KeyState keys) {
 	if(state->info.score < 0)
 		state->info.score = 0;
 }
-
-
-
-
 
 
 // INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
