@@ -248,17 +248,17 @@ void state_update(State state, KeyState keys) {
 
 		for (int j = 0; j < vector_size(state->objects); j++) {
 			Object bullet = vector_get_at(state->objects, j);
-			if(bullet == NULL || bullet->type != BULLET) 
+			if (bullet == NULL || bullet->type != BULLET)
 				continue;
 
 			// Ελεγχος συγκρουσης σφαιρας και αστεροειδη
-			if (CheckCollisionCircles( 	
+			if (CheckCollisionCircles(
 			bullet->position,
 			bullet->size,
 			asteroid->position,
 			asteroid->size
-			)){
-				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) { // Πρέπει να είναι τουλάχιστον ASTEROID_MIN_SIZE σε μέγεθος
+			)) {
+				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) {
 					for (int k = 0; k < 2; k++) {
 						// Υπολογισμος Length
 						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
@@ -279,17 +279,26 @@ void state_update(State state, KeyState keys) {
 						vector_insert_last(state->objects, new_asteroid);
 						state->info.score += 2; // Το σκορ αυξάνεται κατά 2 , επειδη δημιουρουνται 2 νεοι αστεροειδης
 					}
-				}
 
+					// Creating a new PICKUP object where the asteroid was broken
+					Object new_pickup = create_object(
+						PICKUP,              // Object type
+						asteroid->position,  // Position at the location of the broken asteroid
+						(Vector2){0, 0},     // Zero velocity for the pickup object
+						(Vector2){0, 0},     // Zero acceleration
+						PICKUP_SIZE    // Set size of pickup, adjust based on game design
+					);
+					vector_insert_last(state->objects, new_pickup); // Add the pickup to the game state
+					printf("PICKUP CREATED LEGOOO\n");
+				}
 				free(asteroid);
 				free(bullet);
-
-				if(state->info.score > 0)
+				if (state->info.score > 0)
 					state->info.score -= 10; // Το σκορ μειώνεται κατά 10
-				break;	
+				break;  
 			}
 		}
-}
+	}
 
 	// Συγκρουσεις Αστεροιδη και Διαστημοπλοιου
 
@@ -315,17 +324,45 @@ void state_update(State state, KeyState keys) {
 		}
 	}
 
-static int previous_score = 0;
+	//pickup
+	for (int i = 0; i < vector_size(state->objects); i++) {
+		Object pickup = vector_get_at(state->objects, i);
+		if (pickup == NULL || pickup->type != PICKUP) 
+			continue;
+			
+		if (spaceship == NULL || spaceship->type != SPACESHIP) 
+			continue; 
+		
+		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
+		if (CheckCollisionCircles(
+			spaceship->position,
+			spaceship->size,
+			pickup->position,
+			pickup->size
+		)) {
+			free(pickup);
+			printf("PICKUP ACTUIALLY PICKED UP OLOLOLOL");
+			break;
+		}
+	}
 
-if (state->info.score / 100 > previous_score / 100) {
-    state->speed_factor *= 1.10;   
-    previous_score = state->info.score;
-    printf("SPEED FACTOR CHANGED\n");
-}
+
+	static int previous_score = 0;
+
+	if (state->info.score / 100 > previous_score / 100) {
+		state->speed_factor *= 1.10;   
+		previous_score = state->info.score;
+		printf("SPEED FACTOR CHANGED\n");
+	}
 	if(state->info.score < 0)
 		state->info.score = 0;
-
 }
+
+
+
+
+
+
 // INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
 
 

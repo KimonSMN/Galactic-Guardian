@@ -18,12 +18,15 @@
 #define SPACESHIP_ROTATION (PI/32)
 #define SPACESHIP_ACCELERATION 0.1
 #define SPACESHIP_SLOWDOWN 0.98
+#define PICKUP_NUM 2
+#define PICKUP_SIZE 32
+
 
 #define SCREEN_WIDTH 900	// Πλάτος της οθόνης
 #define SCREEN_HEIGHT 700	// Υψος της οθόνης
 
 typedef enum {
-	SPACESHIP, ASTEROID, BULLET
+	SPACESHIP, ASTEROID, BULLET, PICKUP
 } ObjectType;
 
 typedef enum {

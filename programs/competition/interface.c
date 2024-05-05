@@ -1,15 +1,22 @@
 #include "raylib.h"
 #include <math.h>
 
-#include "../include/state.h"
-#include "../include/interface.h"
+#include "state.h"
+#include "interface.h"
+
+#define PICKUP_SIZE 32
+#define PICKUP_COUNT 15
+#define PICKUP_TIME 4.0
 
 // Assets
 Texture spaceship_img;
 Texture asteroid_img;
 Texture bullet_img;
-
+Texture2D atlas;
 //Texture background_img;
+
+int pickupIndex = 0;
+float pickupTimer = PICKUP_TIME;
 
 // Αρχικοποιεί το interface του παιχνιδιού
 
@@ -20,10 +27,12 @@ void interface_init(){
     InitAudioDevice();
 	
 	// Load images
+
+    atlas = LoadTextureFromImage(LoadImage("assets/rocket_pickup.png"));
+
 	spaceship_img = LoadTextureFromImage(LoadImage("assets/spaceship.png"));
     asteroid_img = LoadTextureFromImage(LoadImage("assets/asteroid.png"));
     bullet_img = LoadTextureFromImage(LoadImage("assets/bullet.png"));
-    //background_img = LoadTextureFromImage(LoadImage("assets/space.png"));
     spaceship_img.height = spaceship_img.height * 3;
     spaceship_img.width = spaceship_img.width * 3;
 
@@ -38,6 +47,16 @@ void interface_close(){
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
 void interface_draw_frame(State state) {
     int scale_factor = 5;
+
+    pickupTimer --;
+    if (pickupTimer < 0){
+        pickupTimer = PICKUP_TIME;
+        pickupIndex++;
+        if(pickupIndex >= PICKUP_COUNT){
+            pickupIndex = 0;
+        }
+    }
+
 
 	Camera2D camera; // Αρχικοποιηση camera
 
@@ -93,13 +112,23 @@ void interface_draw_frame(State state) {
         Object object = list_node_value(objects_in_range, node);
         if (object->type == ASTEROID) {
             // DrawRectangle(object->position.x, object->position.y, object->size, object->size, WHITE);
-            Rectangle sourceRect = { 0, 0, asteroid_img.width, asteroid_img.height };
-            Rectangle destRect = { object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor };
+            Rectangle source = { 0, 0, asteroid_img.width, asteroid_img.height };
+            Rectangle dest = { object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor };
             Vector2 origin = { object->size * scale_factor / 2, object->size * scale_factor / 2 };
-            DrawTexturePro(asteroid_img, sourceRect, destRect, origin, 0, WHITE);
+            DrawTexturePro(asteroid_img, source, dest, origin, 0, WHITE);
 
         }else if(object->type == BULLET){
-            DrawCircle(object->position.x, object->position.y, BULLET_SIZE , WHITE); 
+            // DrawCircle(object->position.x, object->position.y, BULLET_SIZE , WHITE); 
+            float radians = atan2(object->orientation.y, object->orientation.x);
+            float rotation = radians * (180 / PI);
+            Rectangle source = { 0, 0, bullet_img.width, bullet_img.height };
+            Rectangle dest = { object->position.x, object->position.y, object->size * 30, object->size * 30 };
+            Vector2 origin = { object->size * 30 / 2, object->size * 30 / 2 };
+            DrawTexturePro(bullet_img, source, dest, origin, rotation, WHITE);
+        }else if(object->type == PICKUP){
+            Rectangle source = (Rectangle){PICKUP_SIZE * pickupIndex,0,PICKUP_SIZE,PICKUP_SIZE};
+            Rectangle dest = (Rectangle){object->position.x, object->position.y, source.width,source.height};
+            DrawTexturePro(atlas, source, dest, (Vector2){0, 0}, 0, WHITE);
         }
     }
     
