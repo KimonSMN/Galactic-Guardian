@@ -79,6 +79,19 @@ static void add_asteroids(State state, int num) {
 	}
 }
 
+// Forward function declarations  
+static void spaceship_pickup_collision(State state);
+
+static void asteroid_creation(State state);
+
+static void bullet_creation(State state, KeyState keys);
+
+static void spaceship_pickup_collision(State state);
+
+static void asteroid_bullet_collision(State state);
+
+static void spaceship_asteroid_collision(State state);
+
 // Δημιουργεί και επιστρέφει την αρχική κατάσταση του παιχνιδιού
 
 State state_create() {
@@ -105,7 +118,6 @@ State state_create() {
 
 	// Προσθήκη αρχικών αστεροειδών
 	add_asteroids(state, ASTEROID_NUM);
-
 	return state;
 }
 
@@ -119,7 +131,6 @@ StateInfo state_info(State state) {
 // Επιστρέφει μια λίστα με όλα τα αντικείμενα του παιχνιδιού στην κατάσταση state,
 // των οποίων η θέση position βρίσκεται εντός του παραλληλογράμμου με πάνω αριστερή
 // γωνία top_left και κάτω δεξιά bottom_right.
-
 
 List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
@@ -135,18 +146,8 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
     return list;
 }
 
-
-static Vector2 vec2_subtract(Vector2 vec1, Vector2 vec2) {
-	return (Vector2){
-		vec1.x - vec2.x,
-		vec1.y - vec2.y,
-	};
-}
-
-
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
-
 
 void state_update(State state, KeyState keys) {
 
@@ -192,36 +193,162 @@ void state_update(State state, KeyState keys) {
 
 	spaceship->position = vec2_add(spaceship->position, spaceship->speed);
 
-	// Δημιουργία αστεροειδών 
+	static int previous_score = 0;
 
-	Vector2 top_left = {
-		spaceship->position.x - ASTEROID_MAX_DIST, 
-		spaceship->position.y + ASTEROID_MAX_DIST
-	};
-	Vector2 bottom_right = {
-		spaceship->position.x + ASTEROID_MAX_DIST, 
-		spaceship->position.y - ASTEROID_MAX_DIST
-	};
+	if (state->info.score / 100 > previous_score / 100) {
+		state->speed_factor *= 1.10;   
+		previous_score = state->info.score;
+		printf("SPEED FACTOR CHANGED\n");
+	}
+	if(state->info.score < 0)
+		state->info.score = 0;
 
-	List objects = state_objects(state, top_left, bottom_right);
-	int asteroids = 0;													// Set asteroid counter to 0
-	for(ListNode node = list_first(objects); 
-		node != LIST_EOF; 												// Loop through the list
-		node = list_next(objects, node)){
 
-		Object obj = list_node_value(objects, node);
-		if(obj->type == ASTEROID){										// If list object is asteroid ++ the counter
-			asteroids++;
+	asteroid_creation(state);
+
+	bullet_creation(state, keys);
+
+	spaceship_pickup_collision(state);
+
+	asteroid_bullet_collision(state);
+
+	spaceship_asteroid_collision(state);
+
+}
+
+// INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
+
+
+// Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
+
+void state_destroy(State state) {
+	// Προς υλοποίηση
+}
+
+
+static void spaceship_asteroid_collision(State state){
+
+    Object spaceship = state->info.spaceship;
+
+    // Συγκρουσεις Αστεροιδη και Διαστημοπλοιου
+
+	for (int i = 0; i < vector_size(state->objects); i++) {
+		Object asteroid = vector_get_at(state->objects, i);
+		if (asteroid == NULL || asteroid->type != ASTEROID) 
+			continue;
+			
+		if (spaceship == NULL || spaceship->type != SPACESHIP) 
+			continue; 
+		
+		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
+		if (CheckCollisionCircles(
+			spaceship->position,
+			spaceship->size,
+			asteroid->position,
+			asteroid->size
+		)) {
+			free(asteroid);
+			if(state->info.score > 0)
+				state->info.score = state->info.score / 2;
+			break;
 		}
 	}
-	int remaining = ASTEROID_NUM - asteroids;
-	if (remaining > 0) {
-		state->info.score += remaining; // Για κάθε νέο αστεροειδή που δημιουργείται το σκορ αυξάνεται κατά 1
-		add_asteroids(state, remaining);
-		printf("Created %d new asteroids\n", remaining);
+}
+
+static void asteroid_bullet_collision(State state){
+
+	// Συγκρουσεις Αστεροιδη και Σφαιρας
+	for (int i = 0; i < vector_size(state->objects); i++) {
+		Object asteroid = vector_get_at(state->objects, i);
+		if (asteroid == NULL || asteroid->type != ASTEROID)
+			continue;
+
+		for (int j = 0; j < vector_size(state->objects); j++) {
+			Object bullet = vector_get_at(state->objects, j);
+			if (bullet == NULL || bullet->type != BULLET)
+				continue;
+
+			// Ελεγχος συγκρουσης σφαιρας και αστεροειδη
+			if (CheckCollisionCircles(
+			bullet->position,
+			bullet->size,
+			asteroid->position,
+			asteroid->size
+			)) {
+				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) {
+					for (int k = 0; k < 2; k++) {
+						// Υπολογισμος Length
+						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
+						Vector2 asteroid_speed = vec2_from_polar(
+							length * state->speed_factor,
+							randf(0, 2*PI) // Τυχαιο angle
+						);
+
+						Object new_asteroid = create_object(
+							ASTEROID,
+							asteroid->position,
+							asteroid_speed,
+							(Vector2){0, 0},
+							asteroid->size/2 // Μισό μέγεθος από τον αρχικό αστεροειδη
+							);
+
+						// Προστίθενται δύο νέεοι αστεροειδείς
+						vector_insert_last(state->objects, new_asteroid);
+						state->info.score += 2; // Το σκορ αυξάνεται κατά 2 , επειδη δημιουρουνται 2 νεοι αστεροειδης
+					}
+
+					// Creating a new PICKUP object where the asteroid was broken
+					Object new_pickup = create_object(
+						PICKUP,              // Object type
+						asteroid->position,  // Position at the location of the broken asteroid
+						(Vector2){0, 0},     // Zero velocity for the pickup object
+						(Vector2){0, 0},     // Zero acceleration
+						PICKUP_SIZE    // Set size of pickup, adjust based on game design
+					);
+					vector_insert_last(state->objects, new_pickup); // Add the pickup to the game state
+					printf("PICKUP CREATED LEGOOO\n");
+				}
+				free(asteroid);
+				free(bullet);
+				if (state->info.score > 0)
+					state->info.score -= 10; // Το σκορ μειώνεται κατά 10
+				break;  
+			}
+		}
 	}
+}
+
+static void spaceship_pickup_collision(State state){
+	Object spaceship = state->info.spaceship;
+
+	for (int i = 0; i < vector_size(state->objects); i++) {
+		Object pickup = vector_get_at(state->objects, i);
+		if (pickup == NULL || pickup->type != PICKUP) 
+			continue;
+			
+		if (spaceship == NULL || spaceship->type != SPACESHIP) 
+			continue; 
+		
+		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
+		if (CheckCollisionCircles(
+			spaceship->position,
+			spaceship->size,
+			pickup->position,
+			pickup->size
+		)) {
+            state->pickupTimer = 250;  
+			free(pickup);
+			printf("PICKUP ACTUIALLY PICKED UP OLOLOLOL");
+			break;
+		}
+	}
+	state->pickupTimer--;
+}
+
+static void bullet_creation(State state, KeyState keys){
 
 	// Σφαιρες
+	Object spaceship = state->info.spaceship;
 
 	if(keys->space && state->next_bullet <= 0){
 		if(state->pickupTimer > 0 && state->next_bullet <= 0){
@@ -282,132 +409,35 @@ void state_update(State state, KeyState keys) {
 	if (state->next_bullet > 0 ) {
     	state->next_bullet--; 
 	}
-
-
-	//pickup
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object pickup = vector_get_at(state->objects, i);
-		if (pickup == NULL || pickup->type != PICKUP) 
-			continue;
-			
-		if (spaceship == NULL || spaceship->type != SPACESHIP) 
-			continue; 
-		
-		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
-		if (CheckCollisionCircles(
-			spaceship->position,
-			spaceship->size,
-			pickup->position,
-			pickup->size
-		)) {
-            state->pickupTimer = 250;  
-			free(pickup);
-			printf("PICKUP ACTUIALLY PICKED UP OLOLOLOL");
-			break;
-		}
-	}
-	state->pickupTimer--;
-	// Συγκρουσεις Αστεροιδη και Σφαιρας
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object asteroid = vector_get_at(state->objects, i);
-		if (asteroid == NULL || asteroid->type != ASTEROID)
-			continue;
-
-		for (int j = 0; j < vector_size(state->objects); j++) {
-			Object bullet = vector_get_at(state->objects, j);
-			if (bullet == NULL || bullet->type != BULLET)
-				continue;
-
-			// Ελεγχος συγκρουσης σφαιρας και αστεροειδη
-			if (CheckCollisionCircles(
-			bullet->position,
-			bullet->size,
-			asteroid->position,
-			asteroid->size
-			)) {
-				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) {
-					for (int k = 0; k < 2; k++) {
-						// Υπολογισμος Length
-						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
-						Vector2 asteroid_speed = vec2_from_polar(
-							length * state->speed_factor,
-							randf(0, 2*PI) // Τυχαιο angle
-						);
-
-						Object new_asteroid = create_object(
-							ASTEROID,
-							asteroid->position,
-							asteroid_speed,
-							(Vector2){0, 0},
-							asteroid->size/2 // Μισό μέγεθος από τον αρχικό αστεροειδη
-							);
-
-						// Προστίθενται δύο νέεοι αστεροειδείς
-						vector_insert_last(state->objects, new_asteroid);
-						state->info.score += 2; // Το σκορ αυξάνεται κατά 2 , επειδη δημιουρουνται 2 νεοι αστεροειδης
-					}
-
-					// Creating a new PICKUP object where the asteroid was broken
-					Object new_pickup = create_object(
-						PICKUP,              // Object type
-						asteroid->position,  // Position at the location of the broken asteroid
-						(Vector2){0, 0},     // Zero velocity for the pickup object
-						(Vector2){0, 0},     // Zero acceleration
-						PICKUP_SIZE    // Set size of pickup, adjust based on game design
-					);
-					vector_insert_last(state->objects, new_pickup); // Add the pickup to the game state
-					printf("PICKUP CREATED LEGOOO\n");
-				}
-				free(asteroid);
-				free(bullet);
-				if (state->info.score > 0)
-					state->info.score -= 10; // Το σκορ μειώνεται κατά 10
-				break;  
-			}
-		}
-	}
-
-	// Συγκρουσεις Αστεροιδη και Διαστημοπλοιου
-
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object asteroid = vector_get_at(state->objects, i);
-		if (asteroid == NULL || asteroid->type != ASTEROID) 
-			continue;
-			
-		if (spaceship == NULL || spaceship->type != SPACESHIP) 
-			continue; 
-		
-		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
-		if (CheckCollisionCircles(
-			spaceship->position,
-			spaceship->size,
-			asteroid->position,
-			asteroid->size
-		)) {
-			free(asteroid);
-			if(state->info.score > 0)
-				state->info.score = state->info.score / 2;
-			break;
-		}
-	}
-
-	static int previous_score = 0;
-
-	if (state->info.score / 100 > previous_score / 100) {
-		state->speed_factor *= 1.10;   
-		previous_score = state->info.score;
-		printf("SPEED FACTOR CHANGED\n");
-	}
-	if(state->info.score < 0)
-		state->info.score = 0;
 }
 
+static void asteroid_creation(State state){
+	Object spaceship = state->info.spaceship;
 
-// INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
+	Vector2 top_left = {
+		spaceship->position.x - ASTEROID_MAX_DIST, 
+		spaceship->position.y + ASTEROID_MAX_DIST
+	};
+	Vector2 bottom_right = {
+		spaceship->position.x + ASTEROID_MAX_DIST, 
+		spaceship->position.y - ASTEROID_MAX_DIST
+	};
 
+	List objects = state_objects(state, top_left, bottom_right);
+	int asteroids = 0;													// Set asteroid counter to 0
+	for(ListNode node = list_first(objects); 
+		node != LIST_EOF; 												// Loop through the list
+		node = list_next(objects, node)){
 
-// Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
-
-void state_destroy(State state) {
-	// Προς υλοποίηση
+		Object obj = list_node_value(objects, node);
+		if(obj->type == ASTEROID){										// If list object is asteroid ++ the counter
+			asteroids++;
+		}
+	}
+	int remaining = ASTEROID_NUM - asteroids;
+	if (remaining > 0) {
+		state->info.score += remaining; // Για κάθε νέο αστεροειδή που δημιουργείται το σκορ αυξάνεται κατά 1
+		add_asteroids(state, remaining);
+		printf("Created %d new asteroids\n", remaining);
+	}
 }
