@@ -93,19 +93,13 @@ void interface_draw_frame(State state) {
         Object object = list_node_value(objects_in_range, node);
         if (object->type == ASTEROID) {
             // DrawRectangle(object->position.x, object->position.y, object->size, object->size, WHITE);
-            Rectangle source = { 0, 0, asteroid_img.width, asteroid_img.height };
-            Rectangle dest = { object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor };
+            Rectangle sourceRect = { 0, 0, asteroid_img.width, asteroid_img.height };
+            Rectangle destRect = { object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor };
             Vector2 origin = { object->size * scale_factor / 2, object->size * scale_factor / 2 };
-            DrawTexturePro(asteroid_img, source, dest, origin, 0, WHITE);
+            DrawTexturePro(asteroid_img, sourceRect, destRect, origin, 0, WHITE);
 
         }else if(object->type == BULLET){
-            // DrawCircle(object->position.x, object->position.y, BULLET_SIZE , WHITE); 
-            float radians = atan2(object->orientation.y, object->orientation.x);
-            float rotation = radians * (180 / PI);
-            Rectangle source = { 0, 0, bullet_img.width, bullet_img.height };
-            Rectangle dest = { object->position.x, object->position.y, object->size * 30, object->size * 30 };
-            Vector2 origin = { object->size * 30 / 2, object->size * 30 / 2 };
-            DrawTexturePro(bullet_img, source, dest, origin, rotation, WHITE);
+            DrawCircle(object->position.x, object->position.y, BULLET_SIZE , WHITE); 
         }
     }
     
