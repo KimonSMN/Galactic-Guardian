@@ -18,8 +18,15 @@
 #define SPACESHIP_ROTATION (PI/32)
 #define SPACESHIP_ACCELERATION 0.1
 #define SPACESHIP_SLOWDOWN 0.98
-#define PICKUP_NUM 2
+
+#define SPACESHIP_HEALTH 4
+#define HEART_SIZE 64
+#define HEART_COUNT 4
+
 #define PICKUP_SIZE 32
+#define PICKUP_NUM 2
+#define PICKUP_COUNT 15
+#define PICKUP_TIME 4.0
 
 
 #define SCREEN_WIDTH 900	// Πλάτος της οθόνης
@@ -40,6 +47,7 @@ typedef struct object {
 	Vector2 speed;				// Ταχύτητα (pixels/frame)
 	double size;				// Μέγεθος (pixels)
 	Vector2 orientation;		// Κατεύθυνση (μόνο για διαστημόπλοιο)
+	int health;					// Ζωη (μόνο για διαστημόπλοιο)
 }* Object;
 
 // Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
@@ -47,6 +55,7 @@ typedef struct state_info {
 	Object spaceship;				// πληροφορίες για τη το διαστημόπλοιο
 	bool paused;					// true αν το παιχνίδι είναι paused
 	int score;						// το τρέχον σκορ
+	bool lost;						// true αν οι καρδιες ειναι 0
 }* StateInfo;
 
 // Πληροφορίες για το ποια πλήκτρα είναι πατημένα

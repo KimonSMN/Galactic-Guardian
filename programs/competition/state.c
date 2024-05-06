@@ -24,13 +24,14 @@ struct state {
 
 // Δημιουργεί και επιστρέφει ένα αντικείμενο
 
-static Object create_object(ObjectType type, Vector2 position, Vector2 speed, Vector2 orientation, double size) {
+static Object create_object(ObjectType type, Vector2 position, Vector2 speed, Vector2 orientation, double size, int health) {
 	Object obj = malloc(sizeof(*obj));
 	obj->type = type;
 	obj->position = position;
 	obj->speed = speed;
 	obj->orientation = orientation;
 	obj->size = size;
+	obj->health = health;
 	return obj;
 }
 
@@ -73,7 +74,8 @@ static void add_asteroids(State state, int num) {
 			position,
 			speed,
 			(Vector2){0, 0},								// δεν χρησιμοποιείται για αστεροειδείς
-			randf(ASTEROID_MIN_SIZE, ASTEROID_MAX_SIZE)		// τυχαίο μέγεθος
+			randf(ASTEROID_MIN_SIZE, ASTEROID_MAX_SIZE),		// τυχαίο μέγεθος
+			0
 		);
 		vector_insert_last(state->objects, asteroid);
 	}
@@ -102,8 +104,9 @@ State state_create() {
 	state->info.paused = false;				// Το παιχνίδι ξεκινάει χωρίς να είναι paused.
 	state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
-	state->info.score = 0;				// Αρχικό σκορ 0
+	state->info.score = 0;					// Αρχικό σκορ 0
 	state->pickupTimer = 0;
+	
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = vector_create(0, NULL);
 
@@ -113,7 +116,8 @@ State state_create() {
 		(Vector2){0, 0},			// αρχική θέση στην αρχή των αξόνων
 		(Vector2){0, 0},			// μηδενική αρχική ταχύτητα
 		(Vector2){0, 1},			// κοιτάει προς τα πάνω
-		SPACESHIP_SIZE				// μέγεθος
+		SPACESHIP_SIZE,				// μέγεθος
+		SPACESHIP_HEALTH
 	);
 
 	// Προσθήκη αρχικών αστεροειδών
@@ -161,6 +165,10 @@ void state_update(State state, KeyState keys) {
 				obj->position = vec2_add(obj->position, obj->speed);
 			}
 		}
+	}
+
+	if(spaceship->health <= 0){
+		return;
 	}
 
 	// Παύση και διακοπή
@@ -248,6 +256,7 @@ static void spaceship_asteroid_collision(State state){
 			asteroid->size
 		)) {
 			free(asteroid);
+			spaceship->health --;
 			if(state->info.score > 0)
 				state->info.score = state->info.score / 2;
 			break;
@@ -289,7 +298,8 @@ static void asteroid_bullet_collision(State state){
 							asteroid->position,
 							asteroid_speed,
 							(Vector2){0, 0},
-							asteroid->size/2 // Μισό μέγεθος από τον αρχικό αστεροειδη
+							asteroid->size/2, // Μισό μέγεθος από τον αρχικό αστεροειδη
+							0
 							);
 
 						// Προστίθενται δύο νέεοι αστεροειδείς
@@ -303,7 +313,8 @@ static void asteroid_bullet_collision(State state){
 						asteroid->position,  // Position at the location of the broken asteroid
 						(Vector2){0, 0},     // Zero velocity for the pickup object
 						(Vector2){0, 0},     // Zero acceleration
-						PICKUP_SIZE    // Set size of pickup, adjust based on game design
+						PICKUP_SIZE,    // Set size of pickup, adjust based on game design
+						0
 					);
 					vector_insert_last(state->objects, new_pickup); // Add the pickup to the game state
 					printf("PICKUP CREATED LEGOOO\n");
@@ -362,7 +373,8 @@ static void bullet_creation(State state, KeyState keys){
 					vec2_add(spaceship->position, offset),
 					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
 					spaceship->orientation,
-					BULLET_SIZE
+					BULLET_SIZE,
+					0
 				);
 				vector_insert_last(state->objects, bullet1);
 
@@ -371,7 +383,8 @@ static void bullet_creation(State state, KeyState keys){
 					spaceship->position,
 					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
 					spaceship->orientation,
-					BULLET_SIZE
+					BULLET_SIZE,
+					0
 				);
 				vector_insert_last(state->objects, bullet2);
 
@@ -380,7 +393,8 @@ static void bullet_creation(State state, KeyState keys){
 					vec2_subtract(spaceship->position, offset),
 					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
 					spaceship->orientation,
-					BULLET_SIZE
+					BULLET_SIZE,
+					0
 				);
 				vector_insert_last(state->objects, bullet3);
 
@@ -392,7 +406,8 @@ static void bullet_creation(State state, KeyState keys){
 			spaceship->position,
 			vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
 			spaceship->orientation,
-			BULLET_SIZE
+			BULLET_SIZE,
+			0
 			);
 			vector_insert_last(state->objects, bullet);
 
