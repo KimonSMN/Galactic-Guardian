@@ -18,6 +18,7 @@ int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
+int testIndex = 0;
 // Αρχικοποιεί το interface του παιχνιδιού
 
 void interface_init(){
@@ -58,6 +59,12 @@ void interface_draw_frame(State state) {
     }
 
 
+    if(IsKeyPressed(KEY_R)){
+        testIndex++;
+        if(testIndex >= 4)
+            testIndex = 0;
+    }
+
 
 	Camera2D camera; // Αρχικοποιηση camera
 
@@ -83,17 +90,15 @@ void interface_draw_frame(State state) {
     
     rotation += 180; // add 180 for spaceship to look at correct angle
     
-    Rectangle source = {0, 0, spaceship_img.width, spaceship_img.height};
-    Rectangle dest = {
+    Rectangle spaceship_source = {-heartIndex * 90, 0, 90, 78};
+    Rectangle spaceship_dest = {
                     state_info(state)->spaceship->position.x,
                     state_info(state)->spaceship->position.y, 
-                    spaceship_img.width, 
-                    spaceship_img.height
+                    spaceship_source.width, 
+                    spaceship_source.height
                     };
                     
-    Vector2 origin = {dest.width / 2, dest.height / 2};
-
-    DrawTexturePro(spaceship_img, source, dest, origin, rotation, WHITE);
+    DrawTexturePro(spaceship_img, spaceship_source, spaceship_dest, (Vector2){spaceship_dest.width/2, spaceship_dest.height/2}, rotation, WHITE);
 
 	Vector2 top_left = {
 		state_info(state)->spaceship->position.x - ASTEROID_MAX_DIST, 
@@ -133,13 +138,12 @@ void interface_draw_frame(State state) {
     
     EndMode2D();
 
+    
     heartIndex = state_info(state)->spaceship->health;
 
     Rectangle heart_source = (Rectangle){0,0,HEART_SIZE * heartIndex,HEART_SIZE};
     Rectangle heart_dest = (Rectangle){0,10,heart_source.width,heart_source.height};
     DrawTexturePro(heart, heart_source, heart_dest, (Vector2){0,0}, 0, WHITE);
-
-    
 
     // Draw the score and the FPS counter
     DrawText(TextFormat("%04i", state_info(state)->score), 780, 20, 40, WHITE);

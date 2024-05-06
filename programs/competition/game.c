@@ -2,13 +2,14 @@
 #include <stdio.h>
 #include "raylib.h"
 
-#include "../include/interface.h"
-#include "../include/state.h"
+#include "interface.h"
+#include "state.h"
 
 State state;
 
-int main() {
 
+
+int main() {
 	interface_init();
     state = state_create(); 
 
@@ -28,6 +29,10 @@ int main() {
 
 			state_update(state, &keys);
 			interface_draw_frame(state);
+
+			// if hearts <= 0
+			if(state_info(state)->lost)
+				break;
 
 			// Debug output for key states
 			// printf("Keys pressed: Up(%d) Left(%d) Right(%d) Space(%d) P(%d) N(%d)\n",

@@ -106,7 +106,8 @@ State state_create() {
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
 	state->info.score = 0;					// Αρχικό σκορ 0
 	state->pickupTimer = 0;
-	
+	state->info.lost = false;
+
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = vector_create(0, NULL);
 
@@ -167,7 +168,10 @@ void state_update(State state, KeyState keys) {
 		}
 	}
 
+	// Health handle
 	if(spaceship->health <= 0){
+		state->info.lost = true;
+		printf("YOU HAVE LOST THE GAME TRY AGAIN FOO\n");
 		return;
 	}
 
