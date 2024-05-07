@@ -44,7 +44,7 @@ void test_state_create() {
 
 	// Tests για state_objects 
 	// Πρωτη Κληση της state_object:
-	// First Testing, Object has Position (182.717728, 314.321869)
+	// Το Object εχει Θεση (182.717728, 314.321869)
 
 	// Set Cordinates for top_left
     Vector2 top_left; 
@@ -57,11 +57,11 @@ void test_state_create() {
 	bottom_right.y = 0;
 
 	List list = state_objects(state, top_left, bottom_right); 
-	TEST_ASSERT(list_size(list) != 0); // Check if list isn't empty
+	TEST_ASSERT(list_size(list) != 0); // Ελεγχος αν η λιστα ειναι κενη
 
-	ListNode node = list_first(list); // Set node to first element of list
+	ListNode node = list_first(list); 
 
-	Object object = list_node_value(list, node); // Save the value of the node to the object
+	Object object = list_node_value(list, node);
 	
     TEST_ASSERT(object->position.x >= top_left.x && 
 				object->position.y <= top_left.y && 
@@ -69,7 +69,7 @@ void test_state_create() {
 				object->position.y >= bottom_right.y);
 
 	// Δευτερη Κληση της state_object:
-	// Second Testing, Object has Position (286.382477, 182.218079)
+	// Το Object εχει θεση (286.382477, 182.218079)
 	
 	// Set Cordinates
 	top_left.x = 0;
@@ -78,9 +78,9 @@ void test_state_create() {
 	bottom_right.y = 0;
 
 	list = state_objects(state, top_left, bottom_right); 
-	TEST_ASSERT(list_size(list) != 0); // Check if list isn't empty
+	TEST_ASSERT(list_size(list) != 0);
 
-	node = list_next(list, node); // Set node to second element of list
+	node = list_next(list, node);
 	
 	object = list_node_value(list, node);
 
@@ -114,8 +114,6 @@ void test_state_update() {
 	// Προσθέστε επιπλέον ελέγχους
 	keys.up = false;
 
-	// maybe add N and P checks
-
 	// Με πατημενο το RIGHT, το orientation του spaceship αλλαζει 
 
 	state_info(state)->spaceship->orientation.x = 0; 
@@ -144,6 +142,14 @@ void test_state_update() {
 
 	keys.left = false;
 
+	// Με πατημενο το P
+
+	keys.p = true;
+	state_update(state, &keys); 
+
+	TEST_ASSERT(state_info(state)->paused = true);
+
+	keys.p = false;
 
 	// Ασκηση 3 Tests 
 

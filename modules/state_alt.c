@@ -296,83 +296,80 @@ void state_update(State state, KeyState keys) {
     	state->next_bullet--; 
 	}
 	
-// Συγκρούσεις Αστεροειδή και Σφαίρας
-List asteroid_list = list_create(NULL);
-List bullets_list = list_create(NULL);
+	// Συγκρούσεις Αστεροειδή και Σφαίρας
+	
+	List asteroid_list = list_create(NULL);
+	List bullets_list = list_create(NULL);
 
-// Separate asteroids and bullets into their respective lists
-for (SetNode node = set_first(state->objects_set);
-     node != SET_EOF;
-     node = set_next(state->objects_set, node)) {
+	// Separate asteroids and bullets into their respective lists
+	for (SetNode node = set_first(state->objects_set);
+		node != SET_EOF;
+		node = set_next(state->objects_set, node)) {
 
-    Object obj = set_node_value(state->objects_set, node);
-    if (obj->type == ASTEROID) {
-        list_insert_next(asteroid_list, LIST_BOF, obj);
-    } else if (obj->type == BULLET) {
-        list_insert_next(bullets_list, LIST_BOF, obj);
-    }
-}
+		Object obj = set_node_value(state->objects_set, node);
+		if (obj->type == ASTEROID) {
+			list_insert_next(asteroid_list, LIST_BOF, obj);
+		} else if (obj->type == BULLET) {
+			list_insert_next(bullets_list, LIST_BOF, obj);
+		}
+	}
 
-// Check collisions between each asteroid and bullet
-for (ListNode asteroid_node = list_first(asteroid_list);
-     asteroid_node != LIST_EOF;
-     asteroid_node = list_next(asteroid_list, asteroid_node)) {
+	// Συγκρουσεις Αστεροιδη και Σφαιρας
+	for (ListNode asteroid_node = list_first(asteroid_list);
+		asteroid_node != LIST_EOF;
+		asteroid_node = list_next(asteroid_list, asteroid_node)) {
 
-    Object asteroid = list_node_value(asteroid_list, asteroid_node);
+		Object asteroid = list_node_value(asteroid_list, asteroid_node);
 
-    for (ListNode bullet_node = list_first(bullets_list);
-         bullet_node != LIST_EOF;
-         bullet_node = list_next(bullets_list, bullet_node)) {
+		for (ListNode bullet_node = list_first(bullets_list);
+			bullet_node != LIST_EOF;
+			bullet_node = list_next(bullets_list, bullet_node)) {
 
-        Object bullet = list_node_value(bullets_list, bullet_node);
+			Object bullet = list_node_value(bullets_list, bullet_node);
 
-        // Ελεγχος συγκρουσης σφαιρας και αστεροειδη
-        if (CheckCollisionCircles(
-                bullet->position,
-                bullet->size,
-                asteroid->position,
-                asteroid->size)) {
+			if (CheckCollisionCircles(
+					bullet->position,
+					bullet->size,
+					asteroid->position,
+					asteroid->size)) {
 
-            if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) {
-                for (int k = 0; k < 2; k++) {
-                    // Υπολογισμός Length
-                    double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
-                    Vector2 asteroid_speed = vec2_from_polar(
-                        length * state->speed_factor,
-                        randf(0, 2 * PI) // Τυχαιο angle
-                    );
+				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) {
+					for (int k = 0; k < 2; k++) {
+						// Υπολογισμός Length
+						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
+						Vector2 asteroid_speed = vec2_from_polar(
+							length * state->speed_factor,
+							randf(0, 2 * PI) // Τυχαιο angle
+						);
 
-                    Object new_asteroid = create_object(
-                        ASTEROID,
-                        asteroid->position,
-                        asteroid_speed,
-                        (Vector2){0, 0},
-                        asteroid->size / 2 // Μισό μέγεθος από τον αρχικό αστεροειδη
-                    );
+						Object new_asteroid = create_object(
+							ASTEROID,
+							asteroid->position,
+							asteroid_speed,
+							(Vector2){0, 0},
+							asteroid->size / 2 // Μισό μέγεθος από τον αρχικό αστεροειδη
+						);
 
-                    // Προστίθενται δύο νέοι αστεροειδείς
-                    set_insert(state->objects_set, new_asteroid);
-                    state->info.score += 2; // Το σκορ αυξάνεται κατά 2, επειδη δημιουργούνται 2 νέοι αστεροειδείς
-                }
-            }
+						// Προστίθενται δύο νέοι αστεροειδείς
+						set_insert(state->objects_set, new_asteroid);
+					}
+				}
 
-            set_remove(state->objects_set, asteroid);
-            free(asteroid);
+				set_remove(state->objects_set, asteroid);
+				free(asteroid);
 
-            set_remove(state->objects_set, bullet);
-            free(bullet);
+				set_remove(state->objects_set, bullet);
+				free(bullet);
 
-            if (state->info.score > 0) {
-                state->info.score -= 10;
-            }
-            break;
-        }
-    }
-}
+				if (state->info.score > 0) 
+					state->info.score -= 10;
+				break;
+			}
+		}
+	}
 
-// Cleanup temporary lists
-list_destroy(asteroid_list);
-list_destroy(bullets_list);
+	list_destroy(asteroid_list);
+	list_destroy(bullets_list);
 
 	// Συγκρουσεις Αστεροιδη και Διαστημοπλοιου
 
@@ -415,7 +412,6 @@ list_destroy(bullets_list);
 	if (state->info.score / 100 > previous_score / 100) {
 		state->speed_factor *= 1.10;   
 		previous_score = state->info.score;
-		printf("SPEED FACTOR CHANGED\n");
 	}
 		if(state->info.score < 0)
 			state->info.score = 0;

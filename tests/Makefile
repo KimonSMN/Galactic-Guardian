@@ -11,7 +11,7 @@ CFLAGS = -Wall -Werror -g -I$(INCLUDE)
 LDFLAGS = -lm
 
 # Αρχεία .o
-OBJS = state_test.o $(MODULES)/set_utils.o $(MODULES)/state_alt.o $(MODULES)/vec2.o $(LIB)/k08.a $(LIB)/libraylib.a
+OBJS = state_test.o $(MODULES)/set_utils.o $(MODULES)/state.o $(MODULES)/vec2.o $(LIB)/k08.a $(LIB)/libraylib.a
 
 # Το εκτελέσιμο πρόγραμμα
 EXEC = state_test
