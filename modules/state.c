@@ -141,6 +141,7 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
 void state_update(State state, KeyState keys) {
 
+
 	// Κινηση Αντικειμένων
 	for (int i = 0; i < vector_size(state->objects); i++) {
 		Object obj = vector_get_at(state->objects, i);
