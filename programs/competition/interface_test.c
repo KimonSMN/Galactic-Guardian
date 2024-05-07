@@ -8,6 +8,10 @@
 #define PICKUP_COUNT 15
 #define PICKUP_TIME 4.0
 
+#define EXPLOSION_SIZE 96
+#define EXPLOSION_COUNT 4
+#define EXPLOSION_TIME 4.0
+
 // Assets
 Texture spaceship_img;
 Texture asteroid_img;
@@ -15,8 +19,8 @@ Texture bullet_img;
 Texture2D atlas;
 //Texture background_img;
 
-int pickupIndex = 0;
-float pickupTimer = PICKUP_TIME;
+int explosionIndex = 0;
+float explosionTimer = PICKUP_TIME;
 // Αρχικοποιεί το interface του παιχνιδιού
 
 void interface_init(){
@@ -27,7 +31,7 @@ void interface_init(){
 	
 	// Load images
 
-    atlas = LoadTextureFromImage(LoadImage("assets/rocket_pickup.png"));
+    atlas = LoadTextureFromImage(LoadImage("assets/explosion.png"));
 
 	spaceship_img = LoadTextureFromImage(LoadImage("assets/spaceship.png"));
     asteroid_img = LoadTextureFromImage(LoadImage("assets/asteroid.png"));
@@ -43,23 +47,22 @@ void interface_close(){
 	CloseWindow();
 }
 
-// Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
-void interface_draw_frame(State state) {
 
-
-    pickupTimer --;
-    if (pickupTimer < 0){
-        pickupTimer = PICKUP_TIME;
-        pickupIndex++;
-        if(pickupIndex >= PICKUP_COUNT){
-            pickupIndex = 0;
+void draw_explosion(State state){
+    
+    explosionTimer --;
+    if (explosionTimer < 0){
+        explosionTimer = EXPLOSION_TIME;
+        explosionIndex++;
+        if(explosionIndex >= EXPLOSION_COUNT){
+            explosionIndex = 0;
         }
     }
 
     BeginDrawing();
     ClearBackground(BLACK);
 
-    Rectangle source = (Rectangle){PICKUP_SIZE * pickupIndex,0,PICKUP_SIZE,PICKUP_SIZE};
+    Rectangle source = (Rectangle){EXPLOSION_SIZE * explosionIndex,0,EXPLOSION_SIZE,EXPLOSION_SIZE};
     Rectangle dest = (Rectangle){SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, source.width,source.height};
     DrawTexturePro(atlas, source, dest, (Vector2){0, 0}, 0, WHITE);
 
@@ -71,4 +74,16 @@ void interface_draw_frame(State state) {
     DrawFPS(0, 0);
 
     EndDrawing();
+}
+int counter = 4;
+// Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
+void interface_draw_frame(State state) {
+
+    if(IsKeyPressed(KEY_A))
+        counter--;
+
+    if(counter!= 0){
+        draw_explosion(state);
+
+    }
 }

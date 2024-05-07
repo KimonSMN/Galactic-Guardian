@@ -129,6 +129,7 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 		if (object->position.x >= top_left.x && object->position.y <= top_left.y && 
 			object->position.x <= bottom_right.x && object->position.y >= bottom_right.y) {
 			list_insert_next(list, LIST_BOF, object);
+			printf("\nobject:x:%lf, y:%lf\n", object->position.x,object->position.y );
 
 		}
     }

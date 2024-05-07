@@ -21,6 +21,7 @@ Pointer set_find_eq_or_greater(Set set, Pointer value){
     return result;
 }
 
+
 Pointer set_find_eq_or_smaller(Set set, Pointer value){
     Pointer found = set_find(set, value);
     if (found != NULL)                          // Πρώτα ελέγχετε αν το value υπάρχει ήδη

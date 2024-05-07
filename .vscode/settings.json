@@ -4,7 +4,7 @@
 		"program": "game",
 
 		// Directory στο οποίο βρίσκεται το πρόγραμμα (μόνο για μεταγλώτισση με make)
-		"dir": "programs/competition",
+		"dir": "programs/game",
 
 		// Οι τιμές που δηλώνονται στα arg1 - arg8 παρακάτω δίνονται αυτόματα σαν ορίσματα
 		// σε οποιοδήποτε πρόγραμμα τρέχουμε (είτε με Ctrl-Shift-B είτε στον debugger).
@@ -47,6 +47,7 @@
 		"string_view": "c",
 		"initializer_list": "c",
 		"adtvector.h": "c",
-		"adtlist.h": "c"
+		"adtlist.h": "c",
+		"set": "c"
 	},
 }

@@ -12,6 +12,8 @@ Texture2D asteroid_img;
 Texture2D bullet_img;
 Texture2D pickup;
 Texture2D heart;
+Texture2D explosion;
+
 //Texture background_img;
 
 int pickupIndex = 0;
@@ -19,6 +21,15 @@ float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
 int testIndex = 0;
+
+bool explosionActive = false;
+int explosionFrame = 0;
+int explosionFrameCount = 4;
+int explosionFrameDuration = 10; // Duration of each frame in game ticks
+int explosionFrameTimer = 0; // Timer to change frames
+Vector2 explosionPosition; // Position of the explosion
+
+
 // Αρχικοποιεί το interface του παιχνιδιού
 
 void interface_init(){
@@ -34,6 +45,7 @@ void interface_init(){
 	spaceship_img = LoadTextureFromImage(LoadImage("assets/spaceship.png"));
     asteroid_img = LoadTextureFromImage(LoadImage("assets/asteroid.png"));
     bullet_img = LoadTextureFromImage(LoadImage("assets/bullet.png"));
+    explosion = LoadTextureFromImage(LoadImage("assets/explosion.png"));
     spaceship_img.height = spaceship_img.height * 3;
     spaceship_img.width = spaceship_img.width * 3;
 
@@ -138,7 +150,7 @@ void interface_draw_frame(State state) {
     
     EndMode2D();
 
-    
+
     heartIndex = state_info(state)->spaceship->health;
 
     Rectangle heart_source = (Rectangle){0,0,HEART_SIZE * heartIndex,HEART_SIZE};
