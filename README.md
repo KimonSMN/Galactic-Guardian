@@ -21,6 +21,7 @@ __Α.Μ.__: sdi2200165
 - Ασκηση 4
 - Ασκηση 5
 - Ασκηση 6
+- Design Competition
 
 ### Documentation
 

@@ -6,8 +6,6 @@
 #include "../include/state.h"
 
 State state;
-// Example function to create and insert a new object into the game state
-
 
 int main() {
 
@@ -30,15 +28,6 @@ int main() {
 
 			state_update(state, &keys);
 			interface_draw_frame(state);
-
-			// Debug output for key states
-			// printf("Keys pressed: Up(%d) Left(%d) Right(%d) Space(%d) P(%d) N(%d)\n",
-			// 	keys.up, keys.left, keys.right, keys.space, keys.p, keys.n);
-
-			// printf("Location of spaceship: %f,%f\n"
-			// 	, state_info(state)->spaceship->position.x
-			// 	, state_info(state)->spaceship->position.y);
-
     }
 
     state_destroy(state); 

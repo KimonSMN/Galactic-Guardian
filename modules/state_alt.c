@@ -22,7 +22,6 @@ struct state {
 	float speed_factor;		// Πολλαπλασιαστής ταχύτητς (1 = κανονική ταχύτητα, 2 = διπλάσια, κλπ)
 };
 
-
 // Δημιουργεί και επιστρέφει ένα αντικείμενο
 
 static Object create_object(ObjectType type, Vector2 position, Vector2 speed, Vector2 orientation, double size) {
@@ -62,8 +61,6 @@ static int compare_objects(Pointer a_ptr, Pointer b_ptr) {
 
     return 0;
 }
-
-
 
 // Προσθέτει num αστεροειδείς στην πίστα (η οποία μπορεί να περιέχει ήδη αντικείμενα).
 //
@@ -143,11 +140,9 @@ StateInfo state_info(State state) {
 	return &(state->info);
 }
 
-
 // Επιστρέφει μια λίστα με όλα τα αντικείμενα του παιχνιδιού στην κατάσταση state,
 // των οποίων η θέση position βρίσκεται εντός του παραλληλογράμμου με πάνω αριστερή
 // γωνία top_left και κάτω δεξιά bottom_right.
-
 
 List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
     List result_list = list_create(NULL);
@@ -164,7 +159,6 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
     while (node != SET_EOF) {
         Object object_to_add = set_node_value(state->objects_set, node);
         if (object_to_add == NULL) {
-            printf("Warning: Found NULL object in set at node %p\n", (void *)node);
             break;
         }
         if (object_to_add->position.x >= top_left.x && 
@@ -183,10 +177,8 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
     return result_list;
 }
 
-
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
-
 
 void state_update(State state, KeyState keys) {
 
@@ -206,10 +198,9 @@ void state_update(State state, KeyState keys) {
 		Object obj = list_node_value(objects_to_update, node);
 		if (obj->type == BULLET || obj->type == ASTEROID ) {
 			set_remove(state->objects_set,obj);
-			obj->position = vec2_add(obj->position, obj->speed);
+            obj->position = vec2_add(obj->position, vec2_scale(obj->speed, state->speed_factor));
 			set_insert(state->objects_set,obj);
 		}
-		
 	}
 	// Παύση και διακοπή
 	if(state->info.paused && !keys->n)
@@ -267,7 +258,6 @@ void state_update(State state, KeyState keys) {
 	if (remaining > 0) {
 		state->info.score += remaining; // Για κάθε νέο αστεροειδή που δημιουργείται το σκορ αυξάνεται κατά 1
 		add_asteroids(state, remaining);
-		printf("Created %d new asteroids\n", remaining);
 	}
 
 	// Σφαιρες
@@ -277,7 +267,7 @@ void state_update(State state, KeyState keys) {
 			Object bullet = create_object( // Δημιουργεια καινουριας Σφαιρας
 			BULLET,
 			spaceship->position,
-			vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
+            vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED * state->speed_factor)),
 			spaceship->orientation,
 			BULLET_SIZE
 			);
@@ -287,8 +277,6 @@ void state_update(State state, KeyState keys) {
     	}
 	
 		set_insert(state->objects_set, bullet);
-
-		printf("Created a bullet\n");
 
 		state->next_bullet = BULLET_DELAY; // Οριζεται το delay της σφαιρας σε BULLET_DELAY
 	}
@@ -301,7 +289,6 @@ void state_update(State state, KeyState keys) {
 	List asteroid_list = list_create(NULL);
 	List bullets_list = list_create(NULL);
 
-	// Separate asteroids and bullets into their respective lists
 	for (SetNode node = set_first(state->objects_set);
 		node != SET_EOF;
 		node = set_next(state->objects_set, node)) {
@@ -406,7 +393,6 @@ void state_update(State state, KeyState keys) {
 		}
 	}
 	
-
 	static int previous_score = 0;
 
 	if (state->info.score / 100 > previous_score / 100) {
@@ -416,8 +402,6 @@ void state_update(State state, KeyState keys) {
 		if(state->info.score < 0)
 			state->info.score = 0;
 }
-// INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
-
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
 

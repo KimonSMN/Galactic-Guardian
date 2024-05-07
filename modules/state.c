@@ -315,11 +315,16 @@ void state_update(State state, KeyState keys) {
 			state->info.score = 0;
 
 }
-// INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
-
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
 
 void state_destroy(State state) {
-	// Προς υλοποίηση
+
+    for (int i = 0; i < vector_size(state->objects); i++) {
+        Object obj = vector_get_at(state->objects, i);
+        free(obj);
+    }
+    vector_destroy(state->objects); 
+
+    free(state);
 }

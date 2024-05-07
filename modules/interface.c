@@ -9,8 +9,6 @@ Texture spaceship_img;
 Texture asteroid_img;
 Texture bullet_img;
 
-//Texture background_img;
-
 // Αρχικοποιεί το interface του παιχνιδιού
 
 void interface_init(){
@@ -78,11 +76,11 @@ void interface_draw_frame(State state) {
 	Vector2 top_left = {
 		state_info(state)->spaceship->position.x - ASTEROID_MAX_DIST, 
 		state_info(state)->spaceship->position.y + ASTEROID_MAX_DIST
-	}; // Set top_left
+	};
 	Vector2 bottom_right = {
 		state_info(state)->spaceship->position.x  + ASTEROID_MAX_DIST, 
 		state_info(state)->spaceship->position.y - ASTEROID_MAX_DIST
-	};	// Set bottom_right
+	};
 
     List objects_in_range = state_objects(state,top_left,bottom_right);
     
@@ -92,14 +90,12 @@ void interface_draw_frame(State state) {
 
         Object object = list_node_value(objects_in_range, node);
         if (object->type == ASTEROID) {
-            // DrawRectangle(object->position.x, object->position.y, object->size, object->size, WHITE);
             Rectangle source = { 0, 0, asteroid_img.width, asteroid_img.height };
             Rectangle dest = { object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor };
             Vector2 origin = { object->size * scale_factor / 2, object->size * scale_factor / 2 };
             DrawTexturePro(asteroid_img, source, dest, origin, 0, WHITE);
 
         }else if(object->type == BULLET){
-            // DrawCircle(object->position.x, object->position.y, BULLET_SIZE , WHITE); 
             float radians = atan2(object->orientation.y, object->orientation.x);
             float rotation = radians * (180 / PI);
             Rectangle source = { 0, 0, bullet_img.width, bullet_img.height };
