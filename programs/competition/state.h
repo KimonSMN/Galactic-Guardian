@@ -19,6 +19,15 @@
 #define SPACESHIP_ACCELERATION 0.1
 #define SPACESHIP_SLOWDOWN 0.98
 
+#define ENEMY_NUM 3
+// #define ASTEROID_MIN_SIZE 10
+// #define ASTEROID_MAX_SIZE 80
+// #define ASTEROID_MIN_SPEED 1
+// #define ASTEROID_MAX_SPEED 1.5
+#define ENEMY_SPEED 2
+#define ENEMY_MIN_DIST 900
+#define ENEMY_MAX_DIST 1200
+
 #define SPACESHIP_HEALTH 4
 #define HEART_SIZE 64
 #define HEART_COUNT 4
@@ -33,7 +42,7 @@
 #define SCREEN_HEIGHT 700	// Υψος της οθόνης
 
 typedef enum {
-	SPACESHIP, ASTEROID, BULLET, PICKUP
+	SPACESHIP, ASTEROID, BULLET, PICKUP, ENEMY
 } ObjectType;
 
 typedef enum {

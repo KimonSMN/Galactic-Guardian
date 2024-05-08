@@ -19,6 +19,8 @@ Vector2 vec2_add(Vector2 vec1, Vector2 vec2);
 
 Vector2 vec2_subtract(Vector2 vec1, Vector2 vec2);
 
+Vector2 vec2_from_to(Vector2 from, Vector2 to);
+
 // Πολλαπλασιάζει ένα διάνυσμα vec με έναν πραγματικό αριθμό scalar
 
 Vector2 vec2_scale(Vector2 vec, double scalar);

@@ -17,6 +17,10 @@ Vector2 vec2_subtract(Vector2 vec1, Vector2 vec2) {
 	};
 }
 
+Vector2 vec2_from_to(Vector2 from, Vector2 to){
+	return (Vector2){to.x - from.x, to.y - from.y};
+}
+
 Vector2 vec2_scale(Vector2 vec, double scalar) {
 	return (Vector2){
 		vec.x * scalar,

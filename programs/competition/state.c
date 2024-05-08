@@ -122,10 +122,45 @@ static void add_asteroids(State state, int num) {
 	}
 }
 
+static void add_enemies(State state, int num) {
+	for (int i = 0; i < num; i++) {
+		// Τυχαία θέση σε απόσταση [ASTEROID_MIN_DIST, ASTEROID_MAX_DIST]
+		// από το διστημόπλοιο.
+		//
+		Vector2 position = vec2_add(
+			state->info.spaceship->position,
+			vec2_from_polar(
+				randf(ENEMY_MIN_DIST, ENEMY_MAX_DIST),	// απόσταση
+				randf(0, 2*PI)							// κατεύθυνση
+			)
+		);
+
+		// Τυχαία ταχύτητα στο διάστημα [ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED]
+		// με τυχαία κατεύθυνση.
+		//
+		Vector2 speed = vec2_from_polar(
+			ENEMY_SPEED * state->speed_factor,
+			randf(0, 2*PI)
+		);
+
+		Object enemy = create_object(
+			ENEMY,
+			position,
+			speed,
+			(Vector2){0, 0},								// δεν χρησιμοποιείται για αστεροειδείς
+			randf(ASTEROID_MIN_SIZE, ASTEROID_MAX_SIZE),		// τυχαίο μέγεθος
+			0
+		);
+		set_insert(state->objects, enemy);
+	}
+}
+
 // Forward function declarations  
 static void spaceship_pickup_collision(State state);
 
 static void asteroid_creation(State state);
+
+static void enemy_creation(State state);
 
 static void bullet_creation(State state, KeyState keys);
 
@@ -164,6 +199,8 @@ State state_create() {
 
 	// Προσθήκη αρχικών αστεροειδών
 	add_asteroids(state, ASTEROID_NUM);
+
+	add_enemies(state, ENEMY_NUM);
 	return state;
 }
 
@@ -213,7 +250,13 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
     return result_list;
 }
 
-
+Vector2 vec2_normalize(Vector2 v) {
+    float length = sqrt(v.x * v.x + v.y * v.y);
+    if (length != 0) {
+        return (Vector2){v.x / length, v.y / length};
+    }
+    return (Vector2){0, 0};  // Return zero vector if input has zero length
+}
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 
@@ -237,7 +280,17 @@ void state_update(State state, KeyState keys) {
 			set_remove(state->objects,obj);
             obj->position = vec2_add(obj->position, vec2_scale(obj->speed, state->speed_factor));
 			set_insert(state->objects,obj);
-		}
+		} else if (obj->type == ENEMY) {
+
+        Vector2 direction = vec2_from_to(obj->position, state->info.spaceship->position);
+        direction = vec2_normalize(direction); 
+
+        Vector2 velocity = vec2_scale(direction, ENEMY_SPEED);
+
+        set_remove(state->objects, obj);
+        obj->position = vec2_add(obj->position, velocity);
+        set_insert(state->objects, obj);
+    }
 	}
 
 	// Health handle
@@ -277,6 +330,7 @@ void state_update(State state, KeyState keys) {
 
 	spaceship->position = vec2_add(spaceship->position, spaceship->speed);
 
+
 	static int previous_score = 0;
 
 	if (state->info.score / 100 > previous_score / 100) {
@@ -289,6 +343,8 @@ void state_update(State state, KeyState keys) {
 
 
 	asteroid_creation(state);
+
+	enemy_creation(state);
 
 	bullet_creation(state, keys);
 
@@ -574,5 +630,36 @@ static void asteroid_creation(State state){
 		state->info.score += remaining; // Για κάθε νέο αστεροειδή που δημιουργείται το σκορ αυξάνεται κατά 1
 		add_asteroids(state, remaining);
 		printf("Created %d new asteroids\n", remaining);
+	}
+}
+
+static void enemy_creation(State state){
+	// Enemy creation
+	Object spaceship = state->info.spaceship;
+
+	Vector2 top_left = {
+		spaceship->position.x - ENEMY_MAX_DIST, 
+		spaceship->position.y + ENEMY_MAX_DIST
+	};
+	Vector2 bottom_right = {
+		spaceship->position.x + ENEMY_MAX_DIST, 
+		spaceship->position.y - ENEMY_MAX_DIST
+	};
+
+	List objects = state_objects(state, top_left, bottom_right);
+	int enemies = 0;												
+	for(ListNode node = list_first(objects); 
+		node != LIST_EOF; 												
+		node = list_next(objects, node)){
+
+		Object obj = list_node_value(objects, node);
+		if(obj->type == ENEMY){										
+			enemies++;
+		}
+	}
+	int remaining = ENEMY_NUM - enemies;
+	if (remaining > 0) {
+		add_enemies(state, remaining);
+		printf("Created %d new enemies\n", remaining);
 	}
 }

@@ -129,7 +129,6 @@ void interface_draw_frame(State state) {
 
         Object object = list_node_value(objects_in_range, node);
         if (object->type == ASTEROID) {
-            // DrawRectangle(object->position.x, object->position.y, object->size, object->size, WHITE);
             Rectangle source = { 0, 0, asteroid_img.width, asteroid_img.height };
             Rectangle dest = { object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor };
             Vector2 origin = { object->size * scale_factor / 2, object->size * scale_factor / 2 };
@@ -145,6 +144,8 @@ void interface_draw_frame(State state) {
             Rectangle source = (Rectangle){PICKUP_SIZE * pickupIndex,0,PICKUP_SIZE,PICKUP_SIZE};
             Rectangle dest = (Rectangle){object->position.x, object->position.y, source.width,source.height};
             DrawTexturePro(pickup, source, dest, (Vector2){0, 0}, 0, WHITE);
+        }else if (object->type == ENEMY){
+            DrawRectangle(object->position.x, object->position.y, object->size, object->size, GREEN);
         }
     }
     
