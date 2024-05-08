@@ -5,6 +5,7 @@
 
 #include "ADTVector.h"
 #include "ADTList.h"
+#include "ADTSet.h"
 #include "state.h"
 #include "vec2.h"
 
@@ -14,7 +15,7 @@
 // δεν είναι ορατό στον χρήστη.
 
 struct state {
-	Vector objects;			// περιέχει στοιχεία Object (αστεροειδείς, σφαίρες)
+	Set objects;			// περιέχει στοιχεία Object (αστεροειδείς, σφαίρες)
 	struct state_info info;	// Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
 	int next_bullet;		// Αριθμός frames μέχρι να επιτραπεί ξανά σφαίρα
 	float speed_factor;		// Πολλαπλασιαστής ταχύτητς (1 = κανονική ταχύτητα, 2 = διπλάσια, κλπ)
@@ -40,6 +41,46 @@ static Object create_object(ObjectType type, Vector2 position, Vector2 speed, Ve
 static double randf(double min, double max) {
 	return min + (double)rand() / RAND_MAX * (max - min);
 }
+
+static int compare_objects(Pointer a_ptr, Pointer b_ptr) {
+    Object a = a_ptr;
+    Object b = b_ptr;
+
+    if (a->position.x < b->position.x)
+        return -1;
+    else if (a->position.x > b->position.x)
+        return 1;
+
+    if (a->position.y < b->position.y)
+        return -1;
+    else if (a->position.y > b->position.y)
+        return 1;
+
+    if (a < b)
+        return -1;
+    else if (a > b)
+        return 1;
+
+    return 0;
+}
+
+static Pointer set_find_eq_or_greater(Set set, Pointer value){
+    Pointer found = set_find(set, value);
+    if (found != NULL)                          // Πρώτα ελέγχετε αν το value υπάρχει ήδη
+        return found; 
+    
+    set_insert(set, value);                     // Αν όχι, τότε το εισάγετε 
+    SetNode node = set_find_node(set, value);   // Χρησιμοποιείτε το νέο στοιχείο 
+    node = set_next(set, node);                 // για να βρείτε το αμέσως επόμενο
+    Pointer result = NULL; 
+
+    if (node != SET_EOF) 
+        result = set_node_value(set, node);
+    
+    set_remove(set, value);                     // Τέλος το αφαιρείτε
+    return result;
+}
+
 
 // Προσθέτει num αστεροειδείς στην πίστα (η οποία μπορεί να περιέχει ήδη αντικείμενα).
 //
@@ -77,7 +118,7 @@ static void add_asteroids(State state, int num) {
 			randf(ASTEROID_MIN_SIZE, ASTEROID_MAX_SIZE),		// τυχαίο μέγεθος
 			0
 		);
-		vector_insert_last(state->objects, asteroid);
+		set_insert(state->objects, asteroid);
 	}
 }
 
@@ -109,7 +150,7 @@ State state_create() {
 	state->info.lost = false;
 
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
-	state->objects = vector_create(0, NULL);
+	state->objects = set_create(compare_objects, NULL);
 
 	// Δημιουργούμε το διαστημόπλοιο
 	state->info.spaceship = create_object(
@@ -137,19 +178,41 @@ StateInfo state_info(State state) {
 // των οποίων η θέση position βρίσκεται εντός του παραλληλογράμμου με πάνω αριστερή
 // γωνία top_left και κάτω δεξιά bottom_right.
 
-List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 
-	List list = list_create(free); // Creates the List to store the data and eventually return them
+List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
+    List result_list = list_create(NULL);
+
+    Object search_obj = create_object(ASTEROID,
+									(Vector2){top_left.x, bottom_right.y}, 
+									(Vector2){0, 0},
+									(Vector2){0, 0},
+									0,
+									0);
+    Object start_obj = set_find_eq_or_greater(state->objects, search_obj);
     
-	for (int i = 0; i < vector_size(state->objects); i++) {
-        Object object = vector_get_at(state->objects, i);
-		if (object->position.x >= top_left.x && object->position.y <= top_left.y && 
-			object->position.x <= bottom_right.x && object->position.y >= bottom_right.y) {
-			list_insert_next(list, LIST_BOF, object);
-		}
+    SetNode node = set_find_node(state->objects, start_obj);
+	
+    while (node != SET_EOF) {
+        Object object_to_add = set_node_value(state->objects, node);
+        if (object_to_add == NULL) {
+            break;
+        }
+        if (object_to_add->position.x >= top_left.x && 
+            object_to_add->position.y <= top_left.y && 
+            object_to_add->position.x <= bottom_right.x && 
+            object_to_add->position.y >= bottom_right.y) {
+            list_insert_next(result_list, LIST_BOF, object_to_add);
+        }
+
+        if (object_to_add->position.x > bottom_right.x) {
+            break;
+        }
+        
+        node = set_next(state->objects, node);
     }
-    return list;
+    return result_list;
 }
+
 
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
@@ -158,13 +221,22 @@ void state_update(State state, KeyState keys) {
 
 	Object spaceship = state->info.spaceship;
 
+	Vector2 top_left = {spaceship->position.x - 2 * SCREEN_HEIGHT, spaceship->position.y + 2 * SCREEN_HEIGHT};
+	Vector2 bottom_right = {spaceship->position.x + 2 * SCREEN_HEIGHT, spaceship->position.y - 2 * SCREEN_HEIGHT};
+
 	// Κινηση Αντικειμένων
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object obj = vector_get_at(state->objects, i);
-		if (vec2_distance(spaceship->position, obj->position) <= 2 * SCREEN_HEIGHT){ // Check if distance is no more than 2 screens
-			if (obj->type == BULLET || obj->type == ASTEROID ) {
-				obj->position = vec2_add(obj->position, obj->speed);
-			}
+
+	List objects_to_update = state_objects(state, top_left, bottom_right);
+
+	for(ListNode node = list_first(objects_to_update); 
+		node != LIST_EOF; 						
+		node = list_next(objects_to_update, node)){
+
+		Object obj = list_node_value(objects_to_update, node);
+		if (obj->type == BULLET || obj->type == ASTEROID ) {
+			set_remove(state->objects,obj);
+            obj->position = vec2_add(obj->position, vec2_scale(obj->speed, state->speed_factor));
+			set_insert(state->objects,obj);
 		}
 	}
 
@@ -244,14 +316,24 @@ static void spaceship_asteroid_collision(State state){
 
     // Συγκρουσεις Αστεροιδη και Διαστημοπλοιου
 
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object asteroid = vector_get_at(state->objects, i);
+	float search_radius = 2 * ASTEROID_MAX_DIST;
+
+	List asteroids_in_range = state_objects(state,
+											(Vector2){spaceship->position.x - search_radius,spaceship->position.y + search_radius}, 
+											(Vector2){spaceship->position.x + search_radius,spaceship->position.y - search_radius}
+											);
+
+	for(ListNode node = list_first(asteroids_in_range); 
+		node != LIST_EOF; 						
+		node = list_next(asteroids_in_range, node)){
+
+		Object asteroid = list_node_value(asteroids_in_range, node);
 		if (asteroid == NULL || asteroid->type != ASTEROID) 
 			continue;
-			
+
 		if (spaceship == NULL || spaceship->type != SPACESHIP) 
 			continue; 
-		
+
 		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
 		if (CheckCollisionCircles(
 			spaceship->position,
@@ -259,8 +341,8 @@ static void spaceship_asteroid_collision(State state){
 			asteroid->position,
 			asteroid->size
 		)) {
+			set_remove(state->objects,asteroid);
 			free(asteroid);
-			spaceship->health --;
 			if(state->info.score > 0)
 				state->info.score = state->info.score / 2;
 			break;
@@ -270,31 +352,49 @@ static void spaceship_asteroid_collision(State state){
 
 static void asteroid_bullet_collision(State state){
 
+	// Συγκρούσεις Αστεροειδή και Σφαίρας
+	
+	List asteroid_list = list_create(NULL);
+	List bullets_list = list_create(NULL);
+
+	for (SetNode node = set_first(state->objects);
+		node != SET_EOF;
+		node = set_next(state->objects, node)) {
+
+		Object obj = set_node_value(state->objects, node);
+		if (obj->type == ASTEROID) {
+			list_insert_next(asteroid_list, LIST_BOF, obj);
+		} else if (obj->type == BULLET) {
+			list_insert_next(bullets_list, LIST_BOF, obj);
+		}
+	}
+
 	// Συγκρουσεις Αστεροιδη και Σφαιρας
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object asteroid = vector_get_at(state->objects, i);
-		if (asteroid == NULL || asteroid->type != ASTEROID)
-			continue;
+	for (ListNode asteroid_node = list_first(asteroid_list);
+		asteroid_node != LIST_EOF;
+		asteroid_node = list_next(asteroid_list, asteroid_node)) {
 
-		for (int j = 0; j < vector_size(state->objects); j++) {
-			Object bullet = vector_get_at(state->objects, j);
-			if (bullet == NULL || bullet->type != BULLET)
-				continue;
+		Object asteroid = list_node_value(asteroid_list, asteroid_node);
 
-			// Ελεγχος συγκρουσης σφαιρας και αστεροειδη
+		for (ListNode bullet_node = list_first(bullets_list);
+			bullet_node != LIST_EOF;
+			bullet_node = list_next(bullets_list, bullet_node)) {
+
+			Object bullet = list_node_value(bullets_list, bullet_node);
+
 			if (CheckCollisionCircles(
-			bullet->position,
-			bullet->size,
-			asteroid->position,
-			asteroid->size
-			)) {
+					bullet->position,
+					bullet->size,
+					asteroid->position,
+					asteroid->size)) {
+
 				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) {
 					for (int k = 0; k < 2; k++) {
-						// Υπολογισμος Length
+						// Υπολογισμός Length
 						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
 						Vector2 asteroid_speed = vec2_from_polar(
 							length * state->speed_factor,
-							randf(0, 2*PI) // Τυχαιο angle
+							randf(0, 2 * PI) // Τυχαιο angle
 						);
 
 						Object new_asteroid = create_object(
@@ -302,16 +402,18 @@ static void asteroid_bullet_collision(State state){
 							asteroid->position,
 							asteroid_speed,
 							(Vector2){0, 0},
-							asteroid->size/2, // Μισό μέγεθος από τον αρχικό αστεροειδη
+							asteroid->size / 2, // Μισό μέγεθος από τον αρχικό αστεροειδη
 							0
-							);
+						);
 
-						// Προστίθενται δύο νέεοι αστεροειδείς
-						vector_insert_last(state->objects, new_asteroid);
-						state->info.score += 2; // Το σκορ αυξάνεται κατά 2 , επειδη δημιουρουνται 2 νεοι αστεροειδης
+						// Προστίθενται δύο νέοι αστεροειδείς
+						set_insert(state->objects, new_asteroid);
+
 					}
 
-					// Creating a new PICKUP object where the asteroid was broken
+				}
+
+				// Creating a new PICKUP object where the asteroid was broken
 					Object new_pickup = create_object(
 						PICKUP,              // Object type
 						asteroid->position,  // Position at the location of the broken asteroid
@@ -320,30 +422,47 @@ static void asteroid_bullet_collision(State state){
 						PICKUP_SIZE,    // Set size of pickup, adjust based on game design
 						0
 					);
-					vector_insert_last(state->objects, new_pickup); // Add the pickup to the game state
+					set_insert(state->objects, new_pickup); // Add the pickup to the game state
 					printf("PICKUP CREATED LEGOOO\n");
-				}
+
+				set_remove(state->objects, asteroid);
 				free(asteroid);
+
+				set_remove(state->objects, bullet);
 				free(bullet);
-				if (state->info.score > 0)
-					state->info.score -= 10; // Το σκορ μειώνεται κατά 10
-				break;  
+
+				if (state->info.score > 0) 
+					state->info.score -= 10;
+				break;
 			}
 		}
 	}
+
+	list_destroy(asteroid_list);
+	list_destroy(bullets_list);
 }
 
 static void spaceship_pickup_collision(State state){
 	Object spaceship = state->info.spaceship;
 
-	for (int i = 0; i < vector_size(state->objects); i++) {
-		Object pickup = vector_get_at(state->objects, i);
+	float search_radius = 2 * ASTEROID_MAX_DIST;
+
+	List pickups_in_range = state_objects(state,
+											(Vector2){spaceship->position.x - search_radius,spaceship->position.y + search_radius}, 
+											(Vector2){spaceship->position.x + search_radius,spaceship->position.y - search_radius}
+											);
+
+	for(ListNode node = list_first(pickups_in_range); 
+		node != LIST_EOF; 						
+		node = list_next(pickups_in_range, node)){
+
+		Object pickup = list_node_value(pickups_in_range, node);
 		if (pickup == NULL || pickup->type != PICKUP) 
 			continue;
-			
+
 		if (spaceship == NULL || spaceship->type != SPACESHIP) 
 			continue; 
-		
+
 		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
 		if (CheckCollisionCircles(
 			spaceship->position,
@@ -351,7 +470,8 @@ static void spaceship_pickup_collision(State state){
 			pickup->position,
 			pickup->size
 		)) {
-            state->pickupTimer = 250;  
+			state->pickupTimer = 250;  
+			set_remove(state->objects,pickup);
 			free(pickup);
 			printf("PICKUP ACTUIALLY PICKED UP OLOLOLOL");
 			break;
@@ -360,75 +480,65 @@ static void spaceship_pickup_collision(State state){
 	state->pickupTimer--;
 }
 
-static void bullet_creation(State state, KeyState keys){
+static void bullet_creation(State state, KeyState keys) {
 
-	// Σφαιρες
-	Object spaceship = state->info.spaceship;
+    if (state->next_bullet > 0) {
+        state->next_bullet--;
+    }
 
-	if(keys->space && state->next_bullet <= 0){
-		if(state->pickupTimer > 0 && state->next_bullet <= 0){
+    if (keys->space && state->next_bullet <= 0) {
+        Object spaceship = state->info.spaceship;
+        Vector2 perpendicular = {-spaceship->orientation.y, spaceship->orientation.x};
+        Vector2 offset = vec2_scale(perpendicular, 20);
 
-			Vector2 perpendicular = {-spaceship->orientation.y, spaceship->orientation.x };
- 
-			Vector2 offset = vec2_scale(perpendicular, 20);
+        // Determine if special bullet mode is active
+        if (state->pickupTimer > 0) {
+            // Create three bullets in perpendicular directions
+            Object bullets[3];
+            Vector2 positions[3] = {
+                vec2_add(spaceship->position, offset),
+                spaceship->position,
+                vec2_subtract(spaceship->position, offset)
+            };
 
-				Object bullet1 = create_object(
-					BULLET,
-					vec2_add(spaceship->position, offset),
-					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
-					spaceship->orientation,
-					BULLET_SIZE,
-					0
-				);
-				vector_insert_last(state->objects, bullet1);
+            for (int i = 0; i < 3; i++) {
+                bullets[i] = create_object(
+                    BULLET,
+                    positions[i],
+            		vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED * state->speed_factor)),
+                    spaceship->orientation,
+                    BULLET_SIZE,
+                    0
+                );
+                if (bullets[i] == NULL) {
+                    printf("Failed to create bullet\n");
+                    continue;
+                }
+				set_insert(state->objects, bullets[i]);
+            }
+        } else {
+            // Create a single bullet
+            Object bullet = create_object(
+                BULLET,
+                spaceship->position,
+                vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
+                spaceship->orientation,
+                BULLET_SIZE,
+                0
+            );
+            if (bullet == NULL) {
+                printf("Failed to create bullet\n");
+                return;
+            }
+			set_insert(state->objects, bullet);
+        }
 
-				Object bullet2 = create_object(
-					BULLET,
-					spaceship->position,
-					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
-					spaceship->orientation,
-					BULLET_SIZE,
-					0
-				);
-				vector_insert_last(state->objects, bullet2);
-
-				Object bullet3 = create_object(
-					BULLET,
-					vec2_subtract(spaceship->position, offset),
-					vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
-					spaceship->orientation,
-					BULLET_SIZE,
-					0
-				);
-				vector_insert_last(state->objects, bullet3);
-
-				state->next_bullet = BULLET_DELAY; // Οριζεται το delay της σφαιρας σε BULLET_DELAY
-			
-		} else{
-			Object bullet = create_object( // Δημιουργεια καινουριας Σφαιρας
-			BULLET,
-			spaceship->position,
-			vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
-			spaceship->orientation,
-			BULLET_SIZE,
-			0
-			);
-			vector_insert_last(state->objects, bullet);
-
-			if (bullet == NULL) {
-				return;
-			}
-		
-			printf("Created a bullet\n");
-
-			state->next_bullet = BULLET_DELAY; // Οριζεται το delay της σφαιρας σε BULLET_DELAY
-		}
-
-	}
-	if (state->next_bullet > 0 ) {
-    	state->next_bullet--; 
-	}
+        // Reset bullet firing delay
+        state->next_bullet = BULLET_DELAY;
+        printf("Created bullet(s)\n");
+    }
 }
+
 
 static void asteroid_creation(State state){
 	Object spaceship = state->info.spaceship;

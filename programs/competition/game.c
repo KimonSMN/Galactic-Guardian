@@ -7,8 +7,6 @@
 
 State state;
 
-
-
 int main() {
 	interface_init();
     state = state_create(); 
