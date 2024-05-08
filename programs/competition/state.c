@@ -413,7 +413,11 @@ static void asteroid_bullet_collision(State state){
 
 				}
 
-				// Creating a new PICKUP object where the asteroid was broken
+				const int pickup_probability_percent = 20;
+
+				int random_value = rand() % 100 + 1;
+				if(random_value <= pickup_probability_percent){
+					// Creating a new PICKUP object where the asteroid was broken
 					Object new_pickup = create_object(
 						PICKUP,              // Object type
 						asteroid->position,  // Position at the location of the broken asteroid
@@ -424,6 +428,8 @@ static void asteroid_bullet_collision(State state){
 					);
 					set_insert(state->objects, new_pickup); // Add the pickup to the game state
 					printf("PICKUP CREATED LEGOOO\n");
+				}
+
 
 				set_remove(state->objects, asteroid);
 				free(asteroid);
