@@ -82,6 +82,16 @@ static Pointer set_find_eq_or_greater(Set set, Pointer value){
 }
 
 
+static Rectangle enemyToRectangle(Object obj) {
+    Rectangle rect;
+    rect.x = obj->position.x - (obj->size / 2); // Offset by half the width
+    rect.y = obj->position.y - (obj->size / 2); // Offset by half the height
+    rect.width = obj->size * 1.5;
+    rect.height = obj->size * 1.5;
+    return rect;
+}
+
+
 // Προσθέτει num αστεροειδείς στην πίστα (η οποία μπορεί να περιέχει ήδη αντικείμενα).
 //
 // ΠΡΟΣΟΧΗ: όλα τα αντικείμενα έχουν συντεταγμένες x,y σε ένα καρτεσιανό επίπεδο.
@@ -148,8 +158,8 @@ static void add_enemies(State state, int num) {
 			position,
 			speed,
 			(Vector2){0, 0},								// δεν χρησιμοποιείται για αστεροειδείς
-			ENEMY_SIZE,		// τυχαίο μέγεθος
-			6
+			ENEMY_SIZE,
+			3
 		);
 		set_insert(state->objects, enemy);
 	}
@@ -172,7 +182,7 @@ static void spaceship_asteroid_collision(State state);
 
 static void spaceship_enemy_collision(State state);
 
-// static void enemy_bullet_collision(State state);
+static void enemy_bullet_collision(State state);
 
 // Fix enemy_bullet_collision, maybe add one collision for everything
 
@@ -360,7 +370,7 @@ void state_update(State state, KeyState keys) {
 
 	spaceship_asteroid_collision(state);
 
-	// enemy_bullet_collision(state);
+	enemy_bullet_collision(state);
 
 	spaceship_enemy_collision(state);
 
@@ -675,60 +685,61 @@ static void enemy_creation(State state){
 	}
 }
 
-// static void enemy_bullet_collision(State state){
+static void enemy_bullet_collision(State state){
 
-// 	// Συγκρούσεις Αστεροειδή και Σφαίρας
+	// Συγκρούσεις Αστεροειδή και Σφαίρας
 	
-// 	List enemy_list = list_create(NULL);
-// 	List bullets_list = list_create(NULL);
+	List enemy_list = list_create(NULL);
+	List bullets_list = list_create(NULL);
 
-// 	for (SetNode node = set_first(state->objects);
-// 		node != SET_EOF;
-// 		node = set_next(state->objects, node)) {
+	for (SetNode node = set_first(state->objects);
+		node != SET_EOF;
+		node = set_next(state->objects, node)) {
 
-// 		Object obj = set_node_value(state->objects, node);
-// 		if (obj->type == ENEMY) {
-// 			list_insert_next(enemy_list, LIST_BOF, obj);
-// 		} else if (obj->type == BULLET) {
-// 			list_insert_next(bullets_list, LIST_BOF, obj);
-// 		}
-// 	}
+		Object obj = set_node_value(state->objects, node);
+		if (obj->type == ENEMY) {
+			list_insert_next(enemy_list, LIST_BOF, obj);
+		} else if (obj->type == BULLET) {
+			list_insert_next(bullets_list, LIST_BOF, obj);
+		}
+	}
 
-// 	// Συγκρουσεις Αστεροιδη και Σφαιρας
-// 	for (ListNode enemy_node = list_first(enemy_list);
-// 		enemy_node != LIST_EOF;
-// 		enemy_node = list_next(enemy_list, enemy_node)) {
+	// Συγκρουσεις Εχθρου και Σφαιρας
+	for (ListNode enemy_node = list_first(enemy_list);
+		enemy_node != LIST_EOF;
+		enemy_node = list_next(enemy_list, enemy_node)) {
 
-// 		Object enemy = list_node_value(enemy_list, enemy_node);
+		Object enemy = list_node_value(enemy_list, enemy_node);
 
-// 		for (ListNode bullet_node = list_first(bullets_list);
-// 			bullet_node != LIST_EOF;
-// 			bullet_node = list_next(bullets_list, bullet_node)) {
+		for (ListNode bullet_node = list_first(bullets_list);
+			bullet_node != LIST_EOF;
+			bullet_node = list_next(bullets_list, bullet_node)) {
 
-// 			Object bullet = list_node_value(bullets_list, bullet_node);
+			Object bullet = list_node_value(bullets_list, bullet_node);
 
-// 			if (CheckCollisionCircles(
-// 					bullet->position,
-// 					bullet->size,
-// 					enemy->position,
-// 					enemy->size)) {
+			Rectangle enemyRect = enemyToRectangle(enemy);
 
-// 					enemy->health--;
-// 					if(enemy->health <= 0){
-// 						set_remove(state->objects, enemy);
-// 						free(enemy);
-// 					}
-// 				}
+			if (CheckCollisionCircleRec(
+					bullet->position,
+					bullet->size,
+					enemyRect)) {
+	
+				enemy->health--;
+				printf(" ENEMY HIT \n");
+				set_remove(state->objects, bullet);
+				free(bullet);
 
-// 				set_remove(state->objects, bullet);
-// 				free(bullet);
+				if(enemy->health <= 0){
+					set_remove(state->objects, enemy);
+					free(enemy);
+				}
+			}
+		}
+	}
 
-// 		}
-// 	}
-
-// 	list_destroy(enemy_list);
-// 	list_destroy(bullets_list);
-// }
+	list_destroy(enemy_list);
+	list_destroy(bullets_list);
+}
 
 static void spaceship_enemy_collision(State state){
 	Object spaceship = state->info.spaceship;

@@ -13,7 +13,7 @@ Texture2D bullet_img;
 Texture2D pickup;
 Texture2D heart;
 Texture2D explosion;
-
+Texture2D enemy_scout;
 //Texture background_img;
 
 int pickupIndex = 0;
@@ -22,12 +22,13 @@ float pickupTimer = PICKUP_TIME;
 int heartIndex = 0;
 int testIndex = 0;
 
-bool explosionActive = false;
-int explosionFrame = 0;
-int explosionFrameCount = 4;
-int explosionFrameDuration = 10; // Duration of each frame in game ticks
-int explosionFrameTimer = 0; // Timer to change frames
-Vector2 explosionPosition; // Position of the explosion
+// bool explosionActive = false;
+// int explosionFrame = 0;
+// int explosionFrameCount = 4;
+// int explosionFrameDuration = 10; // Duration of each frame in game ticks
+// int explosionFrameTimer = 0; // Timer to change frames
+// Vector2 explosionPosition; // Position of the explosion
+
 
 
 // Αρχικοποιεί το interface του παιχνιδιού
@@ -40,6 +41,7 @@ void interface_init(){
 	
 	// Load images
 
+    enemy_scout = LoadTextureFromImage(LoadImage("assets/enemy_scout.png"));
     pickup = LoadTextureFromImage(LoadImage("assets/rocket_pickup.png"));
     heart = LoadTextureFromImage(LoadImage("assets/hearts.png"));
 	spaceship_img = LoadTextureFromImage(LoadImage("assets/spaceship.png"));
@@ -145,7 +147,17 @@ void interface_draw_frame(State state) {
             Rectangle dest = (Rectangle){object->position.x, object->position.y, source.width,source.height};
             DrawTexturePro(pickup, source, dest, (Vector2){0, 0}, 0, WHITE);
         }else if (object->type == ENEMY){
-            DrawRectangle(object->position.x, object->position.y, object->size, object->size, GREEN);
+            Vector2 directionToSpaceship = {
+            state_info(state)->spaceship->position.x - object->position.x,
+            state_info(state)->spaceship->position.y - object->position.y
+            };
+            float enemy_radians = atan2(directionToSpaceship.y, directionToSpaceship.x);
+            float enemy_rotation = enemy_radians * (180 / PI) + 90;
+            Rectangle source = (Rectangle){0,0, ENEMY_SIZE, ENEMY_SIZE};
+            Rectangle dest = { object->position.x, object->position.y, object->size * 3, object->size * 3};
+            Vector2 pivot = {object->size , object->size };
+            DrawTexturePro(enemy_scout, source, dest, pivot, enemy_rotation, WHITE);
+            
         }
     }
     

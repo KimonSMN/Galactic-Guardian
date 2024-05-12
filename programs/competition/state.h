@@ -27,7 +27,10 @@
 #define ENEMY_SPEED 2
 #define ENEMY_MIN_DIST 700
 #define ENEMY_MAX_DIST 900
-#define ENEMY_SIZE 40
+
+#define ENEMY_SIZE 32
+
+
 
 #define SPACESHIP_HEALTH 4
 #define HEART_SIZE 64
@@ -58,6 +61,7 @@ typedef struct object {
 	double size;				// Μέγεθος (pixels)
 	Vector2 orientation;		// Κατεύθυνση (μόνο για διαστημόπλοιο)
 	int health;					// Ζωη (μόνο για διαστημόπλοιο)
+	bool remove;
 }* Object;
 
 // Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
