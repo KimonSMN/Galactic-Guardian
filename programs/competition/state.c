@@ -148,8 +148,8 @@ static void add_enemies(State state, int num) {
 			position,
 			speed,
 			(Vector2){0, 0},								// δεν χρησιμοποιείται για αστεροειδείς
-			randf(ASTEROID_MIN_SIZE, ASTEROID_MAX_SIZE),		// τυχαίο μέγεθος
-			0
+			ENEMY_SIZE,		// τυχαίο μέγεθος
+			6
 		);
 		set_insert(state->objects, enemy);
 	}
@@ -169,6 +169,12 @@ static void spaceship_pickup_collision(State state);
 static void asteroid_bullet_collision(State state);
 
 static void spaceship_asteroid_collision(State state);
+
+static void spaceship_enemy_collision(State state);
+
+// static void enemy_bullet_collision(State state);
+
+// Fix enemy_bullet_collision, maybe add one collision for everything
 
 // Δημιουργεί και επιστρέφει την αρχική κατάσταση του παιχνιδιού
 
@@ -354,6 +360,10 @@ void state_update(State state, KeyState keys) {
 
 	spaceship_asteroid_collision(state);
 
+	// enemy_bullet_collision(state);
+
+	spaceship_enemy_collision(state);
+
 }
 
 // INCLUDE THE SPEED FACTOR!!!!!!!!!!!  ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
@@ -399,6 +409,7 @@ static void spaceship_asteroid_collision(State state){
 		)) {
 			set_remove(state->objects,asteroid);
 			free(asteroid);
+			state->info.spaceship->health --;
 			if(state->info.score > 0)
 				state->info.score = state->info.score / 2;
 			break;
@@ -662,4 +673,97 @@ static void enemy_creation(State state){
 		add_enemies(state, remaining);
 		printf("Created %d new enemies\n", remaining);
 	}
+}
+
+// static void enemy_bullet_collision(State state){
+
+// 	// Συγκρούσεις Αστεροειδή και Σφαίρας
+	
+// 	List enemy_list = list_create(NULL);
+// 	List bullets_list = list_create(NULL);
+
+// 	for (SetNode node = set_first(state->objects);
+// 		node != SET_EOF;
+// 		node = set_next(state->objects, node)) {
+
+// 		Object obj = set_node_value(state->objects, node);
+// 		if (obj->type == ENEMY) {
+// 			list_insert_next(enemy_list, LIST_BOF, obj);
+// 		} else if (obj->type == BULLET) {
+// 			list_insert_next(bullets_list, LIST_BOF, obj);
+// 		}
+// 	}
+
+// 	// Συγκρουσεις Αστεροιδη και Σφαιρας
+// 	for (ListNode enemy_node = list_first(enemy_list);
+// 		enemy_node != LIST_EOF;
+// 		enemy_node = list_next(enemy_list, enemy_node)) {
+
+// 		Object enemy = list_node_value(enemy_list, enemy_node);
+
+// 		for (ListNode bullet_node = list_first(bullets_list);
+// 			bullet_node != LIST_EOF;
+// 			bullet_node = list_next(bullets_list, bullet_node)) {
+
+// 			Object bullet = list_node_value(bullets_list, bullet_node);
+
+// 			if (CheckCollisionCircles(
+// 					bullet->position,
+// 					bullet->size,
+// 					enemy->position,
+// 					enemy->size)) {
+
+// 					enemy->health--;
+// 					if(enemy->health <= 0){
+// 						set_remove(state->objects, enemy);
+// 						free(enemy);
+// 					}
+// 				}
+
+// 				set_remove(state->objects, bullet);
+// 				free(bullet);
+
+// 		}
+// 	}
+
+// 	list_destroy(enemy_list);
+// 	list_destroy(bullets_list);
+// }
+
+static void spaceship_enemy_collision(State state){
+	Object spaceship = state->info.spaceship;
+
+	float search_radius = 2 * ENEMY_MAX_DIST;
+
+	List enemies_in_range = state_objects(state,
+											(Vector2){spaceship->position.x - search_radius,spaceship->position.y + search_radius}, 
+											(Vector2){spaceship->position.x + search_radius,spaceship->position.y - search_radius}
+											);
+
+	for(ListNode node = list_first(enemies_in_range); 
+		node != LIST_EOF; 						
+		node = list_next(enemies_in_range, node)){
+
+		Object enemy = list_node_value(enemies_in_range, node);
+		if (enemy == NULL || enemy->type != ENEMY) 
+			continue;
+
+		if (spaceship == NULL || spaceship->type != SPACESHIP) 
+			continue; 
+
+		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
+		if (CheckCollisionCircles(
+			spaceship->position,
+			spaceship->size,
+			enemy->position,
+			enemy->size
+		)) {
+			set_remove(state->objects,enemy);
+			free(enemy);
+			printf("COLLIEDED WITH ENEMY");
+			state->info.spaceship->health--;
+			break;
+		}
+	}
+	state->pickupTimer--;
 }
