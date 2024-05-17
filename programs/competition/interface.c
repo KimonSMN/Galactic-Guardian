@@ -13,6 +13,10 @@ Texture2D pickup;
 Texture2D heart;
 Texture2D explosion;
 Texture2D enemy_scout;
+Texture2D game_name; 
+Texture2D start_button;
+Texture2D info_button;
+Texture2D exit_button;
 //Texture background_img;
 
 int pickupIndex = 0;
@@ -20,6 +24,9 @@ float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
 int testIndex = 0;
+
+// Start menu background color
+Color menu_color = {1,0,20,0};
 
 // Αρχικοποιεί το interface του παιχνιδιού
 
@@ -30,6 +37,11 @@ void interface_init(){
     InitAudioDevice();
 	
 	// Load images
+
+    game_name = LoadTextureFromImage(LoadImage("assets/game_name.png"));
+    start_button = LoadTextureFromImage(LoadImage("assets/start_button.png"));
+    info_button = LoadTextureFromImage(LoadImage("assets/info_button.png"));
+    exit_button = LoadTextureFromImage(LoadImage("assets/exit_button.png"));
 
     enemy_scout = LoadTextureFromImage(LoadImage("assets/enemy_scout.png"));
     pickup = LoadTextureFromImage(LoadImage("assets/rocket_pickup.png"));
@@ -47,6 +59,24 @@ void interface_init(){
 void interface_close(){
 	CloseAudioDevice();
 	CloseWindow();
+}
+void interface_draw_menu() {
+    Vector2 gameNamePos = { SCREEN_WIDTH / 2 - game_name.width / 2, 20 };
+    Vector2 startButtonPos = { SCREEN_WIDTH / 2 - start_button.width / 2, 350 };
+    Vector2 infoButtonPos = { SCREEN_WIDTH / 2 - info_button.width / 2, 450 };
+    Vector2 exitButtonPos = { SCREEN_WIDTH / 2 - exit_button.width / 2, 550 };
+
+    BeginDrawing();
+    ClearBackground(menu_color);
+    
+    DrawTexture(game_name, gameNamePos.x, gameNamePos.y, WHITE);
+
+    DrawTexture(start_button, startButtonPos.x, startButtonPos.y, WHITE);
+    DrawTexture(info_button, infoButtonPos.x, infoButtonPos.y, WHITE);
+    DrawTexture(exit_button, exitButtonPos.x, exitButtonPos.y, WHITE);
+
+
+    EndDrawing();
 }
 
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
@@ -75,7 +105,7 @@ void interface_draw_frame(State state) {
 
     BeginDrawing();
 	BeginMode2D(camera); 
-    ClearBackground(BLACK);
+    ClearBackground(menu_color);
 
     float radians = atan2(
 						state_info(state)->spaceship->orientation.x,

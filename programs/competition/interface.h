@@ -5,6 +5,9 @@
 // Αρχικοποιεί το interface του παιχνιδιού
 void interface_init();
 
+// Αρχικοποιεί το start menu του παιχνιδιού
+void interface_draw_menu();
+
 // Κλείνει το interface του παιχνιδιού
 void interface_close();
 

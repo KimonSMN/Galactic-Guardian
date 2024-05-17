@@ -50,6 +50,18 @@ typedef enum {
 	IDLE, JUMPING, FALLING, MOVING_UP, MOVING_DOWN
 } VerticalMovement;
 
+typedef enum {
+    START_MENU,
+    GAMEPLAY,
+    GAME_OVER
+} GameState;
+
+typedef enum {
+    START_BUTTON,
+    INFO_BUTTON,
+    EXIT_BUTTON
+} MenuButton;
+
 // Πληροφορίες για κάθε αντικείμενο
 typedef struct object {
 	ObjectType type;			// Τύπος (Διαστημόπλοιο, Αστεροειδής, Σφαίρα)

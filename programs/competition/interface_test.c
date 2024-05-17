@@ -6,7 +6,6 @@
 
 #define PICKUP_SIZE 32
 #define PICKUP_COUNT 15
-#define PICKUP_TIME 4.0
 
 #define EXPLOSION_SIZE 96
 #define EXPLOSION_COUNT 4
@@ -22,6 +21,13 @@ Texture2D atlas;
 int explosionIndex = 0;
 float explosionTimer = PICKUP_TIME;
 // Αρχικοποιεί το interface του παιχνιδιού
+
+void interface_draw_menu() {
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+    DrawText("Press ENTER to Start", SCREEN_WIDTH / 2 - MeasureText("Press ENTER to Start", 20) / 2, SCREEN_HEIGHT / 2 - 10, 20, DARKGRAY);
+    EndDrawing();
+}
 
 void interface_init(){
     // Initialize the window

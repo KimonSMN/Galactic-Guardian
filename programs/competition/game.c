@@ -6,44 +6,50 @@
 #include "state.h"
 
 State state;
+GameState gameState = START_MENU;
+
+void UpdateMenu() {
+    if (IsKeyPressed(KEY_ENTER)) {
+        gameState = GAMEPLAY;
+    }
+}
 
 int main() {
-	interface_init();
+    interface_init();
     state = state_create(); 
 
-	struct key_state keys = { false, false, false, false, false, false, false };
-	
-	state_info(state)->spaceship->position.x = (SCREEN_WIDTH - 120) / 2;
-	state_info(state)->spaceship->position.y = (SCREEN_HEIGHT - 120) / 2;
+    struct key_state keys = { false, false, false, false, false, false, false };
 
-	while (!WindowShouldClose()) {
-			// Update key states
-			keys.up = IsKeyDown(KEY_UP);
-			keys.left = IsKeyDown(KEY_LEFT);
-			keys.right = IsKeyDown(KEY_RIGHT);
-			keys.space = IsKeyDown(KEY_SPACE);
-			keys.p = IsKeyDown(KEY_P);
-			keys.n = IsKeyDown(KEY_N);
+    while (!WindowShouldClose()) {
+        if (gameState == START_MENU) {
+            UpdateMenu();
+            interface_draw_menu();
+			
+        } else if (gameState == GAMEPLAY) {
+            // Update key states
+            keys.up = IsKeyDown(KEY_UP);
+            keys.left = IsKeyDown(KEY_LEFT);
+            keys.right = IsKeyDown(KEY_RIGHT);
+            keys.space = IsKeyDown(KEY_SPACE);
+            keys.p = IsKeyDown(KEY_P);
+            keys.n = IsKeyDown(KEY_N);
 
-			state_update(state, &keys);
-			interface_draw_frame(state);
+            state_update(state, &keys);
+            interface_draw_frame(state);
 
-			// if hearts <= 0
-			if(state_info(state)->lost)
-				break;
-
-			// Debug output for key states
-			// printf("Keys pressed: Up(%d) Left(%d) Right(%d) Space(%d) P(%d) N(%d)\n",
-			// 	keys.up, keys.left, keys.right, keys.space, keys.p, keys.n);
-
-			// printf("Location of spaceship: %f,%f\n"
-			// 	, state_info(state)->spaceship->position.x
-			// 	, state_info(state)->spaceship->position.y);
-
+            // if hearts <= 0
+            if (state_info(state)->lost) 
+                gameState = GAME_OVER;
+				
+        } else if (gameState == GAME_OVER) {
+			break;
+		}
     }
 
     state_destroy(state); 
     interface_close();
+    CloseWindow(); // Close the window
     return 0;
 }
+
 
