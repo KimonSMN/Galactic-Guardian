@@ -5,7 +5,6 @@
 #include "interface.h"
 
 
-
 // Assets
 Texture2D spaceship_img;
 Texture2D asteroid_img;
@@ -21,15 +20,6 @@ float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
 int testIndex = 0;
-
-// bool explosionActive = false;
-// int explosionFrame = 0;
-// int explosionFrameCount = 4;
-// int explosionFrameDuration = 10; // Duration of each frame in game ticks
-// int explosionFrameTimer = 0; // Timer to change frames
-// Vector2 explosionPosition; // Position of the explosion
-
-
 
 // Αρχικοποιεί το interface του παιχνιδιού
 
@@ -71,14 +61,6 @@ void interface_draw_frame(State state) {
             pickupIndex = 0;
         }
     }
-
-
-    if(IsKeyPressed(KEY_R)){
-        testIndex++;
-        if(testIndex >= 4)
-            testIndex = 0;
-    }
-
 
 	Camera2D camera; // Αρχικοποιηση camera
 
@@ -153,7 +135,11 @@ void interface_draw_frame(State state) {
             };
             float enemy_radians = atan2(directionToSpaceship.y, directionToSpaceship.x);
             float enemy_rotation = enemy_radians * (180 / PI) + 90;
-            Rectangle source = (Rectangle){0,0, ENEMY_SIZE, ENEMY_SIZE};
+
+            int enemy_health = object_health(object);
+
+            int enemyHealthIndex = 3 - enemy_health; 
+            Rectangle source = (Rectangle){enemyHealthIndex * ENEMY_SIZE,0, ENEMY_SIZE, ENEMY_SIZE};
             Rectangle dest = { object->position.x, object->position.y, object->size * 3, object->size * 3};
             Vector2 pivot = {object->size , object->size };
             DrawTexturePro(enemy_scout, source, dest, pivot, enemy_rotation, WHITE);
@@ -162,7 +148,6 @@ void interface_draw_frame(State state) {
     }
     
     EndMode2D();
-
 
     heartIndex = state_info(state)->spaceship->health;
 

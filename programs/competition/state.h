@@ -19,11 +19,8 @@
 #define SPACESHIP_ACCELERATION 0.1
 #define SPACESHIP_SLOWDOWN 0.98
 
+
 #define ENEMY_NUM 1
-// #define ASTEROID_MIN_SIZE 10
-// #define ASTEROID_MAX_SIZE 80
-// #define ASTEROID_MIN_SPEED 1
-// #define ASTEROID_MAX_SPEED 1.5
 #define ENEMY_SPEED 2
 #define ENEMY_MIN_DIST 700
 #define ENEMY_MAX_DIST 900
@@ -39,7 +36,7 @@
 #define PICKUP_SIZE 32
 #define PICKUP_NUM 2
 #define PICKUP_COUNT 15
-#define PICKUP_TIME 4.0
+#define PICKUP_TIME 4
 
 
 #define SCREEN_WIDTH 900	// Πλάτος της οθόνης
@@ -93,6 +90,8 @@ State state_create();
 // Επιστρέφει τις βασικές πληροφορίες του παιχνιδιού στην κατάσταση state
 
 StateInfo state_info(State state);
+
+int object_health(Object object);
 
 // Επιστρέφει μια λίστα με όλα τα αντικείμενα του παιχνιδιού στην κατάσταση state,
 // των οποίων η θέση position βρίσκεται εντός του παραλληλογράμμου με πάνω αριστερή

@@ -227,6 +227,10 @@ StateInfo state_info(State state) {
 	return &(state->info);
 }
 
+int object_health(Object object) {
+    return object->health;
+}
+
 // Επιστρέφει μια λίστα με όλα τα αντικείμενα του παιχνιδιού στην κατάσταση state,
 // των οποίων η θέση position βρίσκεται εντός του παραλληλογράμμου με πάνω αριστερή
 // γωνία top_left και κάτω δεξιά bottom_right.
