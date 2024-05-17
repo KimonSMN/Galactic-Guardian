@@ -23,10 +23,10 @@ int main() {
     while (!WindowShouldClose()) {
         if (gameState == START_MENU) {
             UpdateMenu();
+			interface_fade_in();
             interface_draw_menu();
-			
         } else if (gameState == GAMEPLAY) {
-            // Update key states
+
             keys.up = IsKeyDown(KEY_UP);
             keys.left = IsKeyDown(KEY_LEFT);
             keys.right = IsKeyDown(KEY_RIGHT);
@@ -48,7 +48,7 @@ int main() {
 
     state_destroy(state); 
     interface_close();
-    CloseWindow(); // Close the window
+    CloseWindow(); 
     return 0;
 }
 

@@ -8,6 +8,8 @@ void interface_init();
 // Αρχικοποιεί το start menu του παιχνιδιού
 void interface_draw_menu();
 
+void interface_fade_in();
+
 // Κλείνει το interface του παιχνιδιού
 void interface_close();
 

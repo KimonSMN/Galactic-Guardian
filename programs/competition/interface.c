@@ -60,6 +60,21 @@ void interface_close(){
 	CloseAudioDevice();
 	CloseWindow();
 }
+
+float fadeInOpacity = 1;
+bool fadingIn = true;
+
+void interface_fade_in() {
+    if (fadingIn) {
+        fadeInOpacity -= 0.015;
+        if (fadeInOpacity <= 0) {
+            fadeInOpacity = 0;
+            fadingIn = false;
+        }
+    }
+}
+
+// Αρχικοποιεί το start menu του παιχνιδιού
 void interface_draw_menu() {
     Vector2 gameNamePos = { SCREEN_WIDTH / 2 - game_name.width / 2, 20 };
     Vector2 startButtonPos = { SCREEN_WIDTH / 2 - start_button.width / 2, 350 };
@@ -75,6 +90,9 @@ void interface_draw_menu() {
     DrawTexture(info_button, infoButtonPos.x, infoButtonPos.y, WHITE);
     DrawTexture(exit_button, exitButtonPos.x, exitButtonPos.y, WHITE);
 
+    if (fadingIn) {
+        DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, fadeInOpacity));
+    }
 
     EndDrawing();
 }

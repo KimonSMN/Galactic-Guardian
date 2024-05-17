@@ -53,7 +53,9 @@ typedef enum {
 typedef enum {
     START_MENU,
     GAMEPLAY,
-    GAME_OVER
+    GAME_OVER,
+	FADE_OUT,
+    FADE_IN
 } GameState;
 
 typedef enum {
