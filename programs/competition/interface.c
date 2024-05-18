@@ -24,7 +24,11 @@ int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
+
+
+int buttonCounter = 3;
 float buttonTimer = 30;
+
 int startButtonIndex = 0;
 int infoButtonIndex = 0;
 int exitButtonIndex = 0;
@@ -90,14 +94,51 @@ void interface_fade_in() {
 void interface_draw_menu() {
 
     buttonTimer --;
-    if (buttonTimer < 0){
+    if (buttonTimer < 0 && buttonCounter == 3){
         buttonTimer = 30;
         startButtonIndex++;
-        if(startButtonIndex >= 15){
+        if(startButtonIndex >= 2){
             startButtonIndex = 0;
         }
     }
-    
+    else if (buttonTimer < 0 && buttonCounter == 2){
+        buttonTimer = 30;
+        infoButtonIndex++;
+        if(infoButtonIndex >= 2){
+            infoButtonIndex = 0;
+        }
+    }
+    else if (buttonTimer < 0 && buttonCounter == 1){
+        buttonTimer = 30;
+        exitButtonIndex++;
+        if(exitButtonIndex >= 2){
+            exitButtonIndex = 0;
+        }
+    }
+
+    if(IsKeyPressed(KEY_UP)){
+        startButtonIndex = 0;
+        infoButtonIndex = 0;
+        exitButtonIndex = 0;
+        buttonCounter ++;
+        if(buttonCounter <= 0)
+            buttonCounter = 0;
+        else if(buttonCounter >= 3)
+            buttonCounter = 3;
+    }
+    else if (IsKeyPressed(KEY_DOWN)){
+        startButtonIndex = 0;
+        infoButtonIndex = 0;
+        exitButtonIndex = 0;
+        buttonCounter --;
+        if(buttonCounter <= 1)
+            buttonCounter = 1;
+        else if(buttonCounter >= 3)
+            buttonCounter = 3;
+    }
+
+
+
     Vector2 gameNamePos = { SCREEN_WIDTH / 2 - game_name.width / 2, 20 };
     Vector2 startButtonPos = { SCREEN_WIDTH / 2 - start_button.width / 2, 350 };
     Vector2 infoButtonPos = { SCREEN_WIDTH / 2 - info_button.width / 2, 450 };
@@ -123,8 +164,7 @@ void interface_draw_menu() {
     if (fadingIn) {
         DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, fadeInOpacity));
     }
-    if (IsKeyPressed(KEY_UP))
-        startButtonIndex++;
+
     EndDrawing();
 }
 
