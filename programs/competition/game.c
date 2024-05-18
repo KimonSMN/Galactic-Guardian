@@ -16,11 +16,12 @@ void UpdateMenu() {
 
 int main() {
     interface_init();
+    InitAudioDevice(); 
     state = state_create(); 
 
     struct key_state keys = { false, false, false, false, false, false, false };
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose()) {    
         if (gameState == START_MENU) {
             UpdateMenu();
 			interface_fade_in();
@@ -48,7 +49,6 @@ int main() {
 
     state_destroy(state); 
     interface_close();
-    CloseWindow(); 
     return 0;
 }
 

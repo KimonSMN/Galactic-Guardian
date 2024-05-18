@@ -431,102 +431,101 @@ static void spaceship_asteroid_collision(State state){
 	}
 }
 
-static void asteroid_bullet_collision(State state){
+static void asteroid_bullet_collision(State state) {
+    // Συγκρούσεις Αστεροειδή και Σφαίρας
+    List asteroid_list = list_create(NULL);
+    List bullets_list = list_create(NULL);
 
-	// Συγκρούσεις Αστεροειδή και Σφαίρας
-	
-	List asteroid_list = list_create(NULL);
-	List bullets_list = list_create(NULL);
+    for (SetNode node = set_first(state->objects);
+        node != SET_EOF;
+        node = set_next(state->objects, node)) {
 
-	for (SetNode node = set_first(state->objects);
-		node != SET_EOF;
-		node = set_next(state->objects, node)) {
+        Object obj = set_node_value(state->objects, node);
+        if (obj->type == ASTEROID) {
+            list_insert_next(asteroid_list, LIST_BOF, obj);
+        } else if (obj->type == BULLET) {
+            list_insert_next(bullets_list, LIST_BOF, obj);
+        }
+    }
 
-		Object obj = set_node_value(state->objects, node);
-		if (obj->type == ASTEROID) {
-			list_insert_next(asteroid_list, LIST_BOF, obj);
-		} else if (obj->type == BULLET) {
-			list_insert_next(bullets_list, LIST_BOF, obj);
-		}
-	}
+    // Συγκρουσεις Αστεροιδη και Σφαιρας
+    for (ListNode asteroid_node = list_first(asteroid_list);
+        asteroid_node != LIST_EOF;
+        asteroid_node = list_next(asteroid_list, asteroid_node)) {
 
-	// Συγκρουσεις Αστεροιδη και Σφαιρας
-	for (ListNode asteroid_node = list_first(asteroid_list);
-		asteroid_node != LIST_EOF;
-		asteroid_node = list_next(asteroid_list, asteroid_node)) {
+        Object asteroid = list_node_value(asteroid_list, asteroid_node);
+        bool asteroid_removed = false;
 
-		Object asteroid = list_node_value(asteroid_list, asteroid_node);
+        for (ListNode bullet_node = list_first(bullets_list);
+            bullet_node != LIST_EOF;
+            bullet_node = list_next(bullets_list, bullet_node)) {
 
-		for (ListNode bullet_node = list_first(bullets_list);
-			bullet_node != LIST_EOF;
-			bullet_node = list_next(bullets_list, bullet_node)) {
+            Object bullet = list_node_value(bullets_list, bullet_node);
+            if (bullet == NULL)
+				continue;
 
-			Object bullet = list_node_value(bullets_list, bullet_node);
+            if (CheckCollisionCircles(
+                    bullet->position,
+                    bullet->size,
+                    asteroid->position,
+                    asteroid->size)) {
 
-			if (CheckCollisionCircles(
-					bullet->position,
-					bullet->size,
-					asteroid->position,
-					asteroid->size)) {
+                if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) {
+                    for (int k = 0; k < 2; k++) {
+                        double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
+                        Vector2 asteroid_speed = vec2_from_polar(
+                            length * state->speed_factor,
+                            randf(0, 2 * PI) // Τυχαιο angle
+                        );
 
-				if (asteroid->size / 2 >= ASTEROID_MIN_SIZE) {
-					for (int k = 0; k < 2; k++) {
-						// Υπολογισμός Length
-						double length = sqrt(asteroid->speed.x * asteroid->speed.x + asteroid->speed.y * asteroid->speed.y);
-						Vector2 asteroid_speed = vec2_from_polar(
-							length * state->speed_factor,
-							randf(0, 2 * PI) // Τυχαιο angle
-						);
+                        Object new_asteroid = create_object(
+                            ASTEROID,
+                            asteroid->position,
+                            asteroid_speed,
+                            (Vector2){0, 0},
+                            asteroid->size / 2, // Μισό μέγεθος από τον αρχικό αστεροειδή
+                            0
+                        );
 
-						Object new_asteroid = create_object(
-							ASTEROID,
-							asteroid->position,
-							asteroid_speed,
-							(Vector2){0, 0},
-							asteroid->size / 2, // Μισό μέγεθος από τον αρχικό αστεροειδη
-							0
-						);
+                        set_insert(state->objects, new_asteroid);
+                    }
+                }
 
-						// Προστίθενται δύο νέοι αστεροειδείς
-						set_insert(state->objects, new_asteroid);
+                const int pickup_probability_percent = 20;
+                int random_value = rand() % 100 + 1;
+                if (random_value <= pickup_probability_percent) {
+                    Object new_pickup = create_object(
+                        PICKUP,
+                        asteroid->position,
+                        (Vector2){0, 0},
+                        (Vector2){0, 0},
+                        PICKUP_SIZE,
+                        0
+                    );
+                    set_insert(state->objects, new_pickup);
+                    printf("PICKUP CREATED LEGOOO\n");
+                }
 
-					}
+                set_remove(state->objects, asteroid);
+                asteroid_removed = true;
+                free(asteroid);
 
-				}
+                set_remove(state->objects, bullet);
+                free(bullet);
 
-				const int pickup_probability_percent = 20;
+                if (state->info.score > 0)
+                    state->info.score -= 10;
 
-				int random_value = rand() % 100 + 1;
-				if(random_value <= pickup_probability_percent){
-					// Creating a new PICKUP object where the asteroid was broken
-					Object new_pickup = create_object(
-						PICKUP,              // Object type
-						asteroid->position,  // Position at the location of the broken asteroid
-						(Vector2){0, 0},     // Zero velocity for the pickup object
-						(Vector2){0, 0},     // Zero acceleration
-						PICKUP_SIZE,    // Set size of pickup, adjust based on game design
-						0
-					);
-					set_insert(state->objects, new_pickup); // Add the pickup to the game state
-					printf("PICKUP CREATED LEGOOO\n");
-				}
+                break;
+            }
+        }
 
+        if (asteroid_removed)
+            break;
+    }
 
-				set_remove(state->objects, asteroid);
-				free(asteroid);
-
-				set_remove(state->objects, bullet);
-				free(bullet);
-
-				if (state->info.score > 0) 
-					state->info.score -= 10;
-				break;
-			}
-		}
-	}
-
-	list_destroy(asteroid_list);
-	list_destroy(bullets_list);
+    list_destroy(asteroid_list);
+    list_destroy(bullets_list);
 }
 
 static void spaceship_pickup_collision(State state){

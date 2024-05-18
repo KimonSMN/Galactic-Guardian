@@ -18,12 +18,16 @@ Texture2D start_button;
 Texture2D info_button;
 Texture2D exit_button;
 //Texture background_img;
+// Sound damage_sound;
 
 int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
-int testIndex = 0;
+float buttonTimer = 30;
+int startButtonIndex = 0;
+int infoButtonIndex = 0;
+int exitButtonIndex = 0;
 
 // Start menu background color
 Color menu_color = {1,0,20,0};
@@ -52,7 +56,15 @@ void interface_init(){
     explosion = LoadTextureFromImage(LoadImage("assets/explosion.png"));
     spaceship_img.height = spaceship_img.height * 3;
     spaceship_img.width = spaceship_img.width * 3;
-
+	start_button.height = start_button.height *1.2;
+    start_button.width = start_button.width *1.2;
+	info_button.height = info_button.height *1.2;
+    info_button.width = info_button.width *1.2;
+    exit_button.height = exit_button.height *1.2;
+    exit_button.width = exit_button.width *1.2;
+    // Load sounds
+    // Sound bullet_sound = LoadSound("assets/sound.wav");
+    // damage_sound = LoadSound("assets/hurt.wav");
 }
 
 // Κλείνει το interface του παιχνιδιού
@@ -76,6 +88,16 @@ void interface_fade_in() {
 
 // Αρχικοποιεί το start menu του παιχνιδιού
 void interface_draw_menu() {
+
+    buttonTimer --;
+    if (buttonTimer < 0){
+        buttonTimer = 30;
+        startButtonIndex++;
+        if(startButtonIndex >= 15){
+            startButtonIndex = 0;
+        }
+    }
+    
     Vector2 gameNamePos = { SCREEN_WIDTH / 2 - game_name.width / 2, 20 };
     Vector2 startButtonPos = { SCREEN_WIDTH / 2 - start_button.width / 2, 350 };
     Vector2 infoButtonPos = { SCREEN_WIDTH / 2 - info_button.width / 2, 450 };
@@ -86,14 +108,23 @@ void interface_draw_menu() {
     
     DrawTexture(game_name, gameNamePos.x, gameNamePos.y, WHITE);
 
-    DrawTexture(start_button, startButtonPos.x, startButtonPos.y, WHITE);
-    DrawTexture(info_button, infoButtonPos.x, infoButtonPos.y, WHITE);
-    DrawTexture(exit_button, exitButtonPos.x, exitButtonPos.y, WHITE);
+    Rectangle start_source = (Rectangle){192 * startButtonIndex ,0,192,48};
+    Rectangle start_dest = (Rectangle){startButtonPos.x, startButtonPos.y, start_source.width,start_source.height};
+    DrawTexturePro(start_button, start_source, start_dest, (Vector2){-95,0}, 0, WHITE);
+
+    Rectangle info_source = (Rectangle){192 * infoButtonIndex ,0,192,48};
+    Rectangle info_dest = (Rectangle){infoButtonPos.x, infoButtonPos.y, info_source.width,info_source.height};
+    DrawTexturePro(info_button, info_source, info_dest, (Vector2){-95,0}, 0, WHITE);
+
+    Rectangle exit_source = (Rectangle){192 * exitButtonIndex ,0,192,48};
+    Rectangle exit_dest = (Rectangle){exitButtonPos.x, exitButtonPos.y, exit_source.width,exit_source.height};
+    DrawTexturePro(exit_button, exit_source, exit_dest, (Vector2){-95,0}, 0, WHITE);
 
     if (fadingIn) {
         DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, fadeInOpacity));
     }
-
+    if (IsKeyPressed(KEY_UP))
+        startButtonIndex++;
     EndDrawing();
 }
 

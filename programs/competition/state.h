@@ -61,7 +61,8 @@ typedef enum {
 typedef enum {
     START_BUTTON,
     INFO_BUTTON,
-    EXIT_BUTTON
+    EXIT_BUTTON,
+    BUTTON_COUNT
 } MenuButton;
 
 // Πληροφορίες για κάθε αντικείμενο
