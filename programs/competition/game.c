@@ -27,7 +27,7 @@ void UpdateMenu() {
         if (button.start) {
             gameState = GAMEPLAY;
         } else if (button.info) {
-            // empty for now
+            gameState = INFO_MENU;
         } else if (button.exit) {
             gameState = GAME_OVER; 
         }
@@ -62,6 +62,8 @@ int main() {
             if (state_info(state)->lost) 
                 gameState = GAME_OVER;
 				
+        } else if (gameState == INFO_MENU){
+            interface_draw_info(state);
         } else if (gameState == GAME_OVER) {
 			break;
 		}

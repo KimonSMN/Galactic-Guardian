@@ -168,6 +168,16 @@ void interface_draw_menu() {
     EndDrawing();
 }
 
+void interface_draw_info(State state){
+
+    BeginDrawing();
+    ClearBackground(menu_color);
+    
+
+    EndDrawing();
+
+};
+
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
 void interface_draw_frame(State state) {
     int scale_factor = 5;

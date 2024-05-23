@@ -51,6 +51,7 @@ typedef enum {
 typedef enum {
     START_MENU,
     GAMEPLAY,
+	INFO_MENU,
     GAME_OVER
 } GameState;
 
