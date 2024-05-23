@@ -165,6 +165,7 @@ static void add_enemies(State state, int num) {
 	}
 }
 
+
 // Forward function declarations  
 static void spaceship_pickup_collision(State state);
 
@@ -556,7 +557,7 @@ static void spaceship_pickup_collision(State state){
 			pickup->position,
 			pickup->size
 		)) {
-			state->pickupTimer = 250;  
+			state->pickupTimer = 400;  
 			set_remove(state->objects,pickup);
 			free(pickup);
 			printf("PICKUP ACTUIALLY PICKED UP OLOLOLOL");
@@ -729,8 +730,11 @@ static void enemy_bullet_collision(State state){
 	
 				enemy->health--;
 				printf(" ENEMY HIT \n");
+				
 				set_remove(state->objects, bullet);
 				free(bullet);
+
+                state->info.score += 5;
 
 				if(enemy->health <= 0){
 					set_remove(state->objects, enemy);
@@ -775,6 +779,8 @@ static void spaceship_enemy_collision(State state){
 			set_remove(state->objects,enemy);
 			free(enemy);
 			printf("COLLIEDED WITH ENEMY");
+			if (state->info.score > 0)
+				state->info.score -= 20;
 			state->info.spaceship->health--;
 			break;
 		}

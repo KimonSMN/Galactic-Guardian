@@ -20,14 +20,12 @@
 #define SPACESHIP_SLOWDOWN 0.98
 
 
-#define ENEMY_NUM 1
+#define ENEMY_NUM 4
 #define ENEMY_SPEED 2
 #define ENEMY_MIN_DIST 700
 #define ENEMY_MAX_DIST 900
 
 #define ENEMY_SIZE 32
-
-
 
 #define SPACESHIP_HEALTH 4
 #define HEART_SIZE 64
@@ -53,17 +51,8 @@ typedef enum {
 typedef enum {
     START_MENU,
     GAMEPLAY,
-    GAME_OVER,
-	FADE_OUT,
-    FADE_IN
+    GAME_OVER
 } GameState;
-
-typedef enum {
-    START_BUTTON,
-    INFO_BUTTON,
-    EXIT_BUTTON,
-    BUTTON_COUNT
-} MenuButton;
 
 // Πληροφορίες για κάθε αντικείμενο
 typedef struct object {
@@ -94,6 +83,13 @@ typedef struct key_state {
 	bool n;
 	bool p;
 }* KeyState;
+
+typedef struct menu_button{
+	bool start;
+	bool info;
+	bool exit;
+	int counter;
+} MenuButton;
 
 // Η κατάσταση του παιχνιδιού (handle)
 typedef struct state* State;

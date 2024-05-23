@@ -7,10 +7,30 @@
 
 State state;
 GameState gameState = START_MENU;
+MenuButton button = {true, false, false, 1};
+
 
 void UpdateMenu() {
+    if (IsKeyPressed(KEY_DOWN)) {
+        button.counter++;
+        if (button.counter > 3) button.counter = 1;
+    } else if (IsKeyPressed(KEY_UP)) {
+        button.counter--;
+        if (button.counter < 1) button.counter = 3;
+    }
+
+    button.start = (button.counter == 1); // assigns either true or false
+    button.info = (button.counter == 2);
+    button.exit = (button.counter == 3);
+    
     if (IsKeyPressed(KEY_ENTER)) {
-        gameState = GAMEPLAY;
+        if (button.start) {
+            gameState = GAMEPLAY;
+        } else if (button.info) {
+            // empty for now
+        } else if (button.exit) {
+            gameState = GAME_OVER; 
+        }
     }
 }
 
@@ -20,7 +40,7 @@ int main() {
     state = state_create(); 
 
     struct key_state keys = { false, false, false, false, false, false, false };
-
+    
     while (!WindowShouldClose()) {    
         if (gameState == START_MENU) {
             UpdateMenu();
