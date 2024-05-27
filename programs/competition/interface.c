@@ -173,6 +173,10 @@ void interface_draw_info(State state){
     BeginDrawing();
     ClearBackground(menu_color);
     
+    // Game Controls: Provide a list of all the controls used in the game
+    // Gameplay Instructions: Explain the mechanics of the game
+    // Scoring System: Describe how the scoring works.
+    // Power-Ups and Items: Explain their effects.
 
     EndDrawing();
 
@@ -182,34 +186,34 @@ void interface_draw_info(State state){
 void interface_draw_frame(State state) {
     int scale_factor = 5;
 
-    pickupTimer --;
-    if (pickupTimer < 0){
+    pickupTimer--;
+    if (pickupTimer < 0) {
         pickupTimer = PICKUP_TIME;
         pickupIndex++;
-        if(pickupIndex >= PICKUP_COUNT){
+        if (pickupIndex >= PICKUP_COUNT) {
             pickupIndex = 0;
         }
     }
 
-	Camera2D camera; // Αρχικοποιηση camera
+    Camera2D camera; // Αρχικοποιηση camera
 
-	camera.offset = (Vector2){SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}; // window origin
-	camera.target = (Vector2){0, 0}; 
-	camera.rotation = 0;
-	camera.zoom = 1;
-	
-	// Καμερα ακολουθει διαστημοπλοιο 
+    camera.offset = (Vector2){SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}; // window origin
+    camera.target = (Vector2){0, 0}; 
+    camera.rotation = 0;
+    camera.zoom = 1;
+    
+    // Καμερα ακολουθει διαστημοπλοιο 
     camera.target.x = state_info(state)->spaceship->position.x;
     camera.target.y = state_info(state)->spaceship->position.y;
 
     BeginDrawing();
-	BeginMode2D(camera); 
+    BeginMode2D(camera); 
     ClearBackground(menu_color);
 
     float radians = atan2(
-						state_info(state)->spaceship->orientation.x,
-						state_info(state)->spaceship->orientation.y
-						);
+                        state_info(state)->spaceship->orientation.x,
+                        state_info(state)->spaceship->orientation.y
+                        );
 
     float rotation = radians * (-180 / PI);
     
@@ -223,56 +227,56 @@ void interface_draw_frame(State state) {
                     spaceship_source.height
                     };
                     
-    DrawTexturePro(spaceship_img, spaceship_source, spaceship_dest, (Vector2){spaceship_dest.width/2, spaceship_dest.height/2}, rotation, WHITE);
+    DrawTexturePro(spaceship_img, spaceship_source, spaceship_dest, (Vector2){spaceship_dest.width / 2, spaceship_dest.height / 2}, rotation, WHITE);
 
-	Vector2 top_left = {
-		state_info(state)->spaceship->position.x - ASTEROID_MAX_DIST, 
-		state_info(state)->spaceship->position.y + ASTEROID_MAX_DIST
-	}; // Set top_left
-	Vector2 bottom_right = {
-		state_info(state)->spaceship->position.x  + ASTEROID_MAX_DIST, 
-		state_info(state)->spaceship->position.y - ASTEROID_MAX_DIST
-	};	// Set bottom_right
+    Vector2 top_left = {
+        state_info(state)->spaceship->position.x - ASTEROID_MAX_DIST, 
+        state_info(state)->spaceship->position.y + ASTEROID_MAX_DIST
+    }; // Set top_left
+    Vector2 bottom_right = {
+        state_info(state)->spaceship->position.x + ASTEROID_MAX_DIST, 
+        state_info(state)->spaceship->position.y - ASTEROID_MAX_DIST
+    };  // Set bottom_right
 
-    List objects_in_range = state_objects(state,top_left,bottom_right);
+    List objects_in_range = state_objects(state, top_left, bottom_right);
     
-    for(ListNode node = list_first(objects_in_range); 
+    for (ListNode node = list_first(objects_in_range); 
         node != LIST_EOF;
-		node = list_next(objects_in_range, node)){
+        node = list_next(objects_in_range, node)) {
 
         Object object = list_node_value(objects_in_range, node);
         if (object->type == ASTEROID) {
-            Rectangle source = { 0, 0, asteroid_img.width, asteroid_img.height };
-            Rectangle dest = { object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor };
-            Vector2 origin = { object->size * scale_factor / 2, object->size * scale_factor / 2 };
+            Rectangle source = {0, 0, asteroid_img.width, asteroid_img.height};
+            Rectangle dest = {object->position.x, object->position.y, object->size * scale_factor, object->size * scale_factor};
+            Vector2 origin = {object->size * scale_factor / 2, object->size * scale_factor / 2};
             DrawTexturePro(asteroid_img, source, dest, origin, 0, WHITE);
-        }else if(object->type == BULLET){
+        } else if (object->type == BULLET) {
             float radians = atan2(object->orientation.y, object->orientation.x);
             float rotation = radians * (180 / PI);
-            Rectangle source = { 0, 0, bullet_img.width, bullet_img.height };
-            Rectangle dest = { object->position.x, object->position.y, object->size * 30, object->size * 30 };
-            Vector2 origin = { object->size * 30 / 2, object->size * 30 / 2 };
+            Rectangle source = {0, 0, bullet_img.width, bullet_img.height};
+            Rectangle dest = {object->position.x, object->position.y, object->size * 30, object->size * 30};
+            Vector2 origin = {object->size * 30 / 2, object->size * 30 / 2};
             DrawTexturePro(bullet_img, source, dest, origin, rotation, WHITE);
-        }else if(object->type == PICKUP){
-            Rectangle source = (Rectangle){PICKUP_SIZE * pickupIndex,0,PICKUP_SIZE,PICKUP_SIZE};
-            Rectangle dest = (Rectangle){object->position.x, object->position.y, source.width,source.height};
+        } else if (object->type == PICKUP) {
+            Rectangle source = (Rectangle){PICKUP_SIZE * pickupIndex, 0, PICKUP_SIZE, PICKUP_SIZE};
+            Rectangle dest = (Rectangle){object->position.x, object->position.y, source.width, source.height};
             DrawTexturePro(pickup, source, dest, (Vector2){0, 0}, 0, WHITE);
-        }else if (object->type == ENEMY){
+        } else if (object->type == ENEMY) {
             Vector2 directionToSpaceship = {
-            state_info(state)->spaceship->position.x - object->position.x,
-            state_info(state)->spaceship->position.y - object->position.y
+                state_info(state)->spaceship->position.x - object->position.x,
+                state_info(state)->spaceship->position.y - object->position.y
             };
             float enemy_radians = atan2(directionToSpaceship.y, directionToSpaceship.x);
             float enemy_rotation = enemy_radians * (180 / PI) + 90;
 
             int enemy_health = object_health(object);
 
-            int enemyHealthIndex = 3 - enemy_health; 
-            Rectangle source = (Rectangle){enemyHealthIndex * ENEMY_SIZE,0, ENEMY_SIZE, ENEMY_SIZE};
-            Rectangle dest = { object->position.x, object->position.y, object->size * 3, object->size * 3};
-            Vector2 pivot = {object->size , object->size };
-            DrawTexturePro(enemy_scout, source, dest, pivot, enemy_rotation, WHITE);
-            
+            int enemyHealthIndex = 3 - enemy_health;
+            Rectangle source = (Rectangle){enemyHealthIndex * ENEMY_SIZE, 0, ENEMY_SIZE, ENEMY_SIZE};
+            Rectangle dest = {object->position.x, object->position.y, object->size * 3, object->size * 3};
+            Vector2 origin = {dest.width / 2, dest.height / 2};
+
+            DrawTexturePro(enemy_scout, source, dest, origin, enemy_rotation, WHITE);
         }
     }
     
@@ -280,9 +284,9 @@ void interface_draw_frame(State state) {
 
     heartIndex = state_info(state)->spaceship->health;
 
-    Rectangle heart_source = (Rectangle){0,0,HEART_SIZE * heartIndex,HEART_SIZE};
-    Rectangle heart_dest = (Rectangle){0,10,heart_source.width,heart_source.height};
-    DrawTexturePro(heart, heart_source, heart_dest, (Vector2){0,0}, 0, WHITE);
+    Rectangle heart_source = (Rectangle){0, 0, HEART_SIZE * heartIndex, HEART_SIZE};
+    Rectangle heart_dest = (Rectangle){0, 10, heart_source.width, heart_source.height};
+    DrawTexturePro(heart, heart_source, heart_dest, (Vector2){0, 0}, 0, WHITE);
 
     // Draw the score and the FPS counter
     DrawText(TextFormat("%04i", state_info(state)->score), 780, 20, 40, WHITE);
@@ -290,3 +294,4 @@ void interface_draw_frame(State state) {
 
     EndDrawing();
 }
+

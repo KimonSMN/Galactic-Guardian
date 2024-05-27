@@ -64,6 +64,7 @@ int main() {
 				
         } else if (gameState == INFO_MENU){
             interface_draw_info(state);
+            
         } else if (gameState == GAME_OVER) {
 			break;
 		}

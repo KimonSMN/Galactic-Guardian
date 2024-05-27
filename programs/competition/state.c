@@ -20,6 +20,7 @@ struct state {
 	int next_bullet;		// Αριθμός frames μέχρι να επιτραπεί ξανά σφαίρα
 	float speed_factor;		// Πολλαπλασιαστής ταχύτητς (1 = κανονική ταχύτητα, 2 = διπλάσια, κλπ)
 	int pickupTimer;
+	int pauseTimer; 
 	};
 
 
@@ -82,14 +83,14 @@ static Pointer set_find_eq_or_greater(Set set, Pointer value){
 }
 
 
-static Rectangle enemyToRectangle(Object obj) {
-    Rectangle rect;
-    rect.x = obj->position.x - (obj->size / 2); // Offset by half the width
-    rect.y = obj->position.y - (obj->size / 2); // Offset by half the height
-    rect.width = obj->size * 1.5;
-    rect.height = obj->size * 1.5;
-    return rect;
-}
+// static Rectangle enemyToRectangle(Object obj) {
+//     Rectangle rect;
+//     rect.x = obj->position.x - (obj->size / 2); // Offset by half the width
+//     rect.y = obj->position.y - (obj->size / 2); // Offset by half the height
+//     rect.width = obj->size * 1.5;
+//     rect.height = obj->size * 1.5;
+//     return rect;
+// }
 
 
 // Προσθέτει num αστεροειδείς στην πίστα (η οποία μπορεί να περιέχει ήδη αντικείμενα).
@@ -200,6 +201,7 @@ State state_create() {
 	state->info.score = 0;					// Αρχικό σκορ 0
 	state->pickupTimer = 0;
 	state->info.lost = false;
+	state->pauseTimer = 0; 
 
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = set_create(compare_objects, NULL);
@@ -276,7 +278,7 @@ Vector2 vec2_normalize(Vector2 v) {
     if (length != 0) {
         return (Vector2){v.x / length, v.y / length};
     }
-    return (Vector2){0, 0};  // Return zero vector if input has zero length
+    return (Vector2){0, 0};
 }
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
@@ -287,6 +289,22 @@ void state_update(State state, KeyState keys) {
 
 	Vector2 top_left = {spaceship->position.x - 2 * SCREEN_HEIGHT, spaceship->position.y + 2 * SCREEN_HEIGHT};
 	Vector2 bottom_right = {spaceship->position.x + 2 * SCREEN_HEIGHT, spaceship->position.y - 2 * SCREEN_HEIGHT};
+
+	// Pause 
+
+    if (state->pauseTimer > 0) {
+        state->pauseTimer--;
+    }
+
+    if (keys->p && state->pauseTimer == 0) {
+        state->info.paused = !state->info.paused;
+        state->pauseTimer = 20; 
+        printf("Game paused: %d\n", state->info.paused);
+    }
+
+    if (state->info.paused) {
+        return;
+    }
 
 	// Κινηση Αντικειμένων
 
@@ -309,9 +327,9 @@ void state_update(State state, KeyState keys) {
         Vector2 velocity = vec2_scale(direction, ENEMY_SPEED);
 
         set_remove(state->objects, obj);
-        obj->position = vec2_add(obj->position, velocity);
+        obj->position = vec2_add(obj->position,vec2_scale(velocity, state->speed_factor));  
         set_insert(state->objects, obj);
-    }
+   		}
 	}
 
 	// Health handle
@@ -319,14 +337,6 @@ void state_update(State state, KeyState keys) {
 		state->info.lost = true;
 		printf("YOU HAVE LOST THE GAME TRY AGAIN FOO\n");
 		return;
-	}
-
-	// Παύση και διακοπή
-	if(state->info.paused && !keys->n)
-		return;
-
-	if (keys->p) {
-        state->info.paused = true;
 	}
 
 	// Περιστροφή διαστημοπλοίου
@@ -689,64 +699,63 @@ static void enemy_creation(State state){
 	}
 }
 
-static void enemy_bullet_collision(State state){
+static void enemy_bullet_collision(State state) {
 
-	// Συγκρούσεις Αστεροειδή και Σφαίρας
-	
-	List enemy_list = list_create(NULL);
-	List bullets_list = list_create(NULL);
+    List enemy_list = list_create(NULL);
+    List bullets_list = list_create(NULL);
 
-	for (SetNode node = set_first(state->objects);
-		node != SET_EOF;
-		node = set_next(state->objects, node)) {
+    for (SetNode node = set_first(state->objects);
+         node != SET_EOF;
+         node = set_next(state->objects, node)) {
 
-		Object obj = set_node_value(state->objects, node);
-		if (obj->type == ENEMY) {
-			list_insert_next(enemy_list, LIST_BOF, obj);
-		} else if (obj->type == BULLET) {
-			list_insert_next(bullets_list, LIST_BOF, obj);
-		}
-	}
+        Object obj = set_node_value(state->objects, node);
+        if (obj->type == ENEMY) {
+            list_insert_next(enemy_list, LIST_BOF, obj);
+        } else if (obj->type == BULLET) {
+            list_insert_next(bullets_list, LIST_BOF, obj);
+        }
+    }
 
-	// Συγκρουσεις Εχθρου και Σφαιρας
-	for (ListNode enemy_node = list_first(enemy_list);
-		enemy_node != LIST_EOF;
-		enemy_node = list_next(enemy_list, enemy_node)) {
+    for (ListNode enemy_node = list_first(enemy_list);
+         enemy_node != LIST_EOF;
+         enemy_node = list_next(enemy_list, enemy_node)) {
 
-		Object enemy = list_node_value(enemy_list, enemy_node);
+        Object enemy = list_node_value(enemy_list, enemy_node);
 
-		for (ListNode bullet_node = list_first(bullets_list);
-			bullet_node != LIST_EOF;
-			bullet_node = list_next(bullets_list, bullet_node)) {
+        for (ListNode bullet_node = list_first(bullets_list);
+             bullet_node != LIST_EOF;
+             bullet_node = list_next(bullets_list, bullet_node)) {
 
-			Object bullet = list_node_value(bullets_list, bullet_node);
+            Object bullet = list_node_value(bullets_list, bullet_node);
 
-			Rectangle enemyRect = enemyToRectangle(enemy);
+            Rectangle enemy_box = {
+                enemy->position.x - (ENEMY_SIZE * 3 / 2),
+                enemy->position.y - (ENEMY_SIZE * 3 / 2),
+                ENEMY_SIZE * 3,
+                ENEMY_SIZE * 3 
+            };
 
-			if (CheckCollisionCircleRec(
-					bullet->position,
-					bullet->size,
-					enemyRect)) {
-	
-				enemy->health--;
-				printf(" ENEMY HIT \n");
-				
-				set_remove(state->objects, bullet);
-				free(bullet);
+            if (CheckCollisionCircleRec(bullet->position, bullet->size, enemy_box)) {
+                enemy->health--;
+                printf(" ENEMY HIT \n");
+
+                set_remove(state->objects, bullet);
+                free(bullet);
 
                 state->info.score += 5;
 
-				if(enemy->health <= 0){
-					set_remove(state->objects, enemy);
-					free(enemy);
-				}
-			}
-		}
-	}
+                if (enemy->health <= 0) {
+                    set_remove(state->objects, enemy);
+                    free(enemy);
+                }
+            }
+        }
+    }
 
-	list_destroy(enemy_list);
-	list_destroy(bullets_list);
+    list_destroy(enemy_list);
+    list_destroy(bullets_list);
 }
+
 
 static void spaceship_enemy_collision(State state){
 	Object spaceship = state->info.spaceship;

@@ -52,7 +52,8 @@ typedef enum {
     START_MENU,
     GAMEPLAY,
 	INFO_MENU,
-    GAME_OVER
+    GAME_OVER,
+	PAUSED
 } GameState;
 
 // Πληροφορίες για κάθε αντικείμενο
