@@ -48,13 +48,14 @@ typedef enum {
 	IDLE, JUMPING, FALLING, MOVING_UP, MOVING_DOWN
 } VerticalMovement;
 
-typedef enum {
-    START_MENU,
-    GAMEPLAY,
-	INFO_MENU,
-    GAME_OVER,
-	PAUSED
+typedef struct game_state {
+    bool start_menu;
+    bool gameplay;
+    bool introduction;
+    bool info_menu;
+    bool game_over;
 } GameState;
+
 
 // Πληροφορίες για κάθε αντικείμενο
 typedef struct object {
@@ -66,6 +67,13 @@ typedef struct object {
 	int health;					// Ζωη (μόνο για διαστημόπλοιο)
 	bool remove;
 }* Object;
+
+typedef struct text_info {
+    int index;
+    int textIndex;
+    float timer;
+    float delay;
+}* TextInfo;
 
 // Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
 typedef struct state_info {
@@ -103,6 +111,8 @@ State state_create();
 // Επιστρέφει τις βασικές πληροφορίες του παιχνιδιού στην κατάσταση state
 
 StateInfo state_info(State state);
+
+TextInfo state_text(State state);
 
 int object_health(Object object);
 

@@ -11,6 +11,8 @@ void interface_draw_menu();
 // Αρχικοποιεί το info menu του παιχνιδιού
 void interface_draw_info();
 
+void interface_draw_intro();
+
 void interface_fade_in();
 
 // Κλείνει το interface του παιχνιδιού

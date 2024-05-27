@@ -48,6 +48,7 @@
 		"initializer_list": "c",
 		"adtvector.h": "c",
 		"adtlist.h": "c",
-		"set": "c"
+		"set": "c",
+		"string.h": "c"
 	},
 }

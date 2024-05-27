@@ -3,7 +3,8 @@
 
 #include "state.h"
 #include "interface.h"
-
+#include <string.h>
+#include <stdio.h>
 
 // Assets
 Texture2D spaceship_img;
@@ -25,7 +26,6 @@ float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
 
-
 int buttonCounter = 1;
 float buttonTimer = 30;
 
@@ -35,6 +35,8 @@ int exitButtonIndex = 0;
 
 // Start menu background color
 Color menu_color = {1,0,20,0};
+
+
 
 // Αρχικοποιεί το interface του παιχνιδιού
 
@@ -100,15 +102,13 @@ void interface_draw_menu() {
         if(startButtonIndex > 1){
             startButtonIndex = 0;
         }
-    }
-    else if (buttonTimer < 0 && buttonCounter == 2){
+    } else if (buttonTimer < 0 && buttonCounter == 2){
         buttonTimer = 30;
         infoButtonIndex++;
         if(infoButtonIndex > 1){
             infoButtonIndex = 0;
         }
-    }
-    else if (buttonTimer < 0 && buttonCounter == 3){
+    } else if (buttonTimer < 0 && buttonCounter == 3){
         buttonTimer = 30;
         exitButtonIndex++;
         if(exitButtonIndex > 1){
@@ -125,8 +125,7 @@ void interface_draw_menu() {
             buttonCounter = 3;
         else if(buttonCounter > 3)
             buttonCounter = 1;
-    }
-    else if (IsKeyPressed(KEY_DOWN)){
+    } else if (IsKeyPressed(KEY_DOWN)){
         startButtonIndex = 0;
         infoButtonIndex = 0;
         exitButtonIndex = 0;
@@ -136,8 +135,6 @@ void interface_draw_menu() {
         else if(buttonCounter > 3)
             buttonCounter = 1;
     }
-
-
 
     Vector2 gameNamePos = { SCREEN_WIDTH / 2 - game_name.width / 2, 40 };
     Vector2 startButtonPos = { SCREEN_WIDTH / 2 - start_button.width / 2, 350 };
@@ -168,6 +165,7 @@ void interface_draw_menu() {
     EndDrawing();
 }
 
+
 void interface_draw_info(State state){
 
     BeginDrawing();
@@ -181,6 +179,56 @@ void interface_draw_info(State state){
     EndDrawing();
 
 };
+
+const char *introTexts[] = {
+    "TEST TEST TEST",
+    "NOT A TEST NOT A TEST NOT\n A TEST YES A TEST",
+    "I AM WATCHING YOU \nI AM NOT LOLOL",
+    "28/5/1923"
+};
+const int numTexts = sizeof(introTexts) / sizeof(introTexts[0]);
+
+void interface_draw_intro(State state, GameState *gameState) {
+    
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    // Draw spaceman (rectangle for now)
+    DrawRectangle(SCREEN_WIDTH / 2 - 75, 150, 150, 300, RED);
+
+    // Draw text box
+    DrawRectangle(0, 480, SCREEN_WIDTH, 200, LIGHTGRAY);
+
+    if (state_text(state)->textIndex >= 0 && state_text(state)->textIndex < numTexts) {
+        const char *currentText = introTexts[state_text(state)->textIndex];
+        int length = strlen(currentText);
+
+        // Draw text letter by letter
+        for (int i = 0; i < state_text(state)->index; i++) {
+            DrawText(TextSubtext(currentText, 0, i + 1), 20, 515, 40, BLACK);
+        }
+
+        state_text(state)->timer += 1;
+        if (state_text(state)->timer >= state_text(state)->delay && state_text(state)->index < length) {
+            state_text(state)->index++;
+            state_text(state)->timer = 0;
+        }
+
+        if (state_text(state)->index >= length && IsKeyPressed(KEY_ENTER)) {
+            state_text(state)->textIndex++;
+            if (state_text(state)->textIndex < numTexts) {
+                state_text(state)->index = 0; 
+            } else {
+                gameState->introduction = false;
+                gameState->gameplay = true;
+            }
+        }
+    }else{
+        printf("DADAD");
+    }
+
+    EndDrawing();
+}
 
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
 void interface_draw_frame(State state) {

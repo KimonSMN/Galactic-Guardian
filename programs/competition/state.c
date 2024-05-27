@@ -21,6 +21,7 @@ struct state {
 	float speed_factor;		// Πολλαπλασιαστής ταχύτητς (1 = κανονική ταχύτητα, 2 = διπλάσια, κλπ)
 	int pickupTimer;
 	int pauseTimer; 
+	struct text_info text;
 	};
 
 
@@ -81,16 +82,6 @@ static Pointer set_find_eq_or_greater(Set set, Pointer value){
     set_remove(set, value);                     // Τέλος το αφαιρείτε
     return result;
 }
-
-
-// static Rectangle enemyToRectangle(Object obj) {
-//     Rectangle rect;
-//     rect.x = obj->position.x - (obj->size / 2); // Offset by half the width
-//     rect.y = obj->position.y - (obj->size / 2); // Offset by half the height
-//     rect.width = obj->size * 1.5;
-//     rect.height = obj->size * 1.5;
-//     return rect;
-// }
 
 
 // Προσθέτει num αστεροειδείς στην πίστα (η οποία μπορεί να περιέχει ήδη αντικείμενα).
@@ -202,7 +193,10 @@ State state_create() {
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
-
+	state->text.textIndex = 0;
+	state->text.delay = 0;
+	state->text.index = 0;
+	state->text.timer = 0;
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = set_create(compare_objects, NULL);
 
@@ -229,6 +223,11 @@ StateInfo state_info(State state) {
 	// Προς υλοποίηση checked
 	return &(state->info);
 }
+
+TextInfo state_text(State state) {
+	return &(state->text);
+}
+
 
 int object_health(Object object) {
     return object->health;

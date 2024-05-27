@@ -1,22 +1,22 @@
 
 #include <stdio.h>
 #include "raylib.h"
-
 #include "interface.h"
 #include "state.h"
 
 State state;
-GameState gameState = START_MENU;
+GameState gameState = {true, false, false, false, false};
 MenuButton button = {true, false, false, 1};
-
 
 void UpdateMenu() {
     if (IsKeyPressed(KEY_DOWN)) {
         button.counter++;
-        if (button.counter > 3) button.counter = 1;
+        if (button.counter > 3) 
+            button.counter = 1;
     } else if (IsKeyPressed(KEY_UP)) {
         button.counter--;
-        if (button.counter < 1) button.counter = 3;
+        if (button.counter < 1) 
+            button.counter = 3;
     }
 
     button.start = (button.counter == 1); // assigns either true or false
@@ -25,11 +25,14 @@ void UpdateMenu() {
     
     if (IsKeyPressed(KEY_ENTER)) {
         if (button.start) {
-            gameState = GAMEPLAY;
+            gameState.start_menu = false;
+            gameState.introduction = true;
         } else if (button.info) {
-            gameState = INFO_MENU;
+            gameState.start_menu = false;
+            gameState.info_menu = true;
         } else if (button.exit) {
-            gameState = GAME_OVER; 
+            gameState.start_menu = false;
+            gameState.game_over = true;
         }
     }
 }
@@ -42,11 +45,11 @@ int main() {
     struct key_state keys = { false, false, false, false, false, false, false };
     
     while (!WindowShouldClose()) {    
-        if (gameState == START_MENU) {
+        if (gameState.start_menu) {
             UpdateMenu();
 			interface_fade_in();
             interface_draw_menu();
-        } else if (gameState == GAMEPLAY) {
+        } else if (gameState.gameplay) {
 
             keys.up = IsKeyDown(KEY_UP);
             keys.left = IsKeyDown(KEY_LEFT);
@@ -60,14 +63,17 @@ int main() {
 
             // if hearts <= 0
             if (state_info(state)->lost) 
-                gameState = GAME_OVER;
+                gameState.game_over = true;
 				
-        } else if (gameState == INFO_MENU){
+        } else if (gameState.info_menu){
             interface_draw_info(state);
             
-        } else if (gameState == GAME_OVER) {
+        } else if (gameState.game_over) {
 			break;
-		}
+
+		} else if (gameState.introduction){
+            interface_draw_intro(state, &gameState);
+        }
     }
 
     state_destroy(state); 
