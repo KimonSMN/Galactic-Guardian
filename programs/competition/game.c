@@ -63,7 +63,7 @@ int main() {
 
             // if hearts <= 0
             if (state_info(state)->lost) 
-                gameState.game_over = true;
+                break;
 				
         } else if (gameState.info_menu){
             interface_draw_info(state);

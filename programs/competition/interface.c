@@ -18,6 +18,10 @@ Texture2D game_name;
 Texture2D start_button;
 Texture2D info_button;
 Texture2D exit_button;
+Texture2D astronaut;
+Texture2D skip_text_button;
+Texture2D space_background;
+// Sound bullet_sound;
 //Texture background_img;
 // Sound damage_sound;
 
@@ -25,6 +29,11 @@ int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
+
+
+int skipTextIndex = 0;
+float skipTextTimer = 8;
+
 
 int buttonCounter = 1;
 float buttonTimer = 30;
@@ -36,8 +45,6 @@ int exitButtonIndex = 0;
 // Start menu background color
 Color menu_color = {1,0,20,0};
 
-
-
 // Αρχικοποιεί το interface του παιχνιδιού
 
 void interface_init(){
@@ -48,11 +55,20 @@ void interface_init(){
 	
 	// Load images
 
-    game_name = LoadTextureFromImage(LoadImage("assets/game_name.png"));
+    game_name = LoadTextureFromImage(LoadImage("assets/game_name_v2.png"));
+
     start_button = LoadTextureFromImage(LoadImage("assets/start_button.png"));
     info_button = LoadTextureFromImage(LoadImage("assets/info_button.png"));
     exit_button = LoadTextureFromImage(LoadImage("assets/exit_button.png"));
 
+    skip_text_button = LoadTextureFromImage(LoadImage("assets/skip_text_button.png"));
+
+    space_background = LoadTextureFromImage(LoadImage("assets/space.png"));
+
+
+    astronaut = LoadTextureFromImage(LoadImage("assets/astronaut.png"));
+    astronaut.height = astronaut.height * 10;
+    astronaut.width = astronaut.width * 10;
     enemy_scout = LoadTextureFromImage(LoadImage("assets/enemy_scout.png"));
     pickup = LoadTextureFromImage(LoadImage("assets/rocket_pickup.png"));
     heart = LoadTextureFromImage(LoadImage("assets/hearts.png"));
@@ -69,7 +85,8 @@ void interface_init(){
     exit_button.height = exit_button.height *1.2;
     exit_button.width = exit_button.width *1.2;
     // Load sounds
-    // Sound bullet_sound = LoadSound("assets/sound.wav");
+    // bullet_sound = LoadSound("assets/sound.wav");
+    
     // damage_sound = LoadSound("assets/hurt.wav");
 }
 
@@ -94,7 +111,9 @@ void interface_fade_in() {
 
 // Αρχικοποιεί το start menu του παιχνιδιού
 void interface_draw_menu() {
+        // if (IsKeyPressed(KEY_SPACE)) PlaySound(bullet_sound);      // Play WAV sound
 
+    
     buttonTimer --;
     if (buttonTimer < 0 && buttonCounter == 1){
         buttonTimer = 30;
@@ -136,14 +155,15 @@ void interface_draw_menu() {
             buttonCounter = 1;
     }
 
-    Vector2 gameNamePos = { SCREEN_WIDTH / 2 - game_name.width / 2, 40 };
+    Vector2 gameNamePos = { SCREEN_WIDTH / 2 - game_name.width / 2, 60 };
     Vector2 startButtonPos = { SCREEN_WIDTH / 2 - start_button.width / 2, 350 };
     Vector2 infoButtonPos = { SCREEN_WIDTH / 2 - info_button.width / 2, 450 };
     Vector2 exitButtonPos = { SCREEN_WIDTH / 2 - exit_button.width / 2, 550 };
 
     BeginDrawing();
     ClearBackground(menu_color);
-    
+    DrawTexture(space_background, 0, 0, WHITE);
+
     DrawTexture(game_name, gameNamePos.x, gameNamePos.y, WHITE);
 
     Rectangle start_source = (Rectangle){192 * startButtonIndex ,0,192,48};
@@ -181,23 +201,24 @@ void interface_draw_info(State state){
 };
 
 const char *introTexts[] = {
-    "TEST TEST TEST",
-    "NOT A TEST NOT A TEST NOT\n A TEST YES A TEST",
-    "I AM WATCHING YOU \nI AM NOT LOLOL",
-    "28/5/1923"
+    "Hello traveler!\nI am BRUNO.",
+    "You have to help me.\nMy galaxy is under attack!",
+    "You must find my spacecraft's parts\nthat are scattered across space.",
+    "Only then will I be able to escape."
 };
 const int numTexts = sizeof(introTexts) / sizeof(introTexts[0]);
 
 void interface_draw_intro(State state, GameState *gameState) {
     
     BeginDrawing();
-    ClearBackground(BLACK);
+    ClearBackground(menu_color);
 
     // Draw spaceman (rectangle for now)
-    DrawRectangle(SCREEN_WIDTH / 2 - 75, 150, 150, 300, RED);
+    // DrawRectangle(SCREEN_WIDTH / 2 - 75, 150, 150, 300, RED);
+    DrawTexture(astronaut,SCREEN_WIDTH / 2 - astronaut.width /2 ,150,WHITE);
 
     // Draw text box
-    DrawRectangle(0, 480, SCREEN_WIDTH, 200, LIGHTGRAY);
+    DrawRectangle(0, 480, SCREEN_WIDTH, 150, LIGHTGRAY);
 
     if (state_text(state)->textIndex >= 0 && state_text(state)->textIndex < numTexts) {
         const char *currentText = introTexts[state_text(state)->textIndex];
@@ -205,7 +226,7 @@ void interface_draw_intro(State state, GameState *gameState) {
 
         // Draw text letter by letter
         for (int i = 0; i < state_text(state)->index; i++) {
-            DrawText(TextSubtext(currentText, 0, i + 1), 20, 515, 40, BLACK);
+            DrawText(TextSubtext(currentText, 0, i + 1), 20, 500, 40, BLACK);
         }
 
         state_text(state)->timer += 1;
@@ -213,18 +234,28 @@ void interface_draw_intro(State state, GameState *gameState) {
             state_text(state)->index++;
             state_text(state)->timer = 0;
         }
+        
+        if (state_text(state)->index >= length) {
+            skipTextTimer++;
+            if (skipTextTimer >= 7) { 
+                skipTextIndex++;
+                if (skipTextIndex >= 8) 
+                    skipTextIndex = 0;
+                skipTextTimer = 0;
+            }
 
-        if (state_text(state)->index >= length && IsKeyPressed(KEY_ENTER)) {
-            state_text(state)->textIndex++;
-            if (state_text(state)->textIndex < numTexts) {
-                state_text(state)->index = 0; 
-            } else {
-                gameState->introduction = false;
-                gameState->gameplay = true;
+            Rectangle skipTextSource = { 45 * skipTextIndex, 0, 45, 38 };
+            DrawTextureRec(skip_text_button, skipTextSource, (Vector2){SCREEN_WIDTH - 70, 560}, WHITE);
+            if (IsKeyPressed(KEY_ENTER)) {
+                state_text(state)->textIndex++;
+                if (state_text(state)->textIndex < numTexts) {
+                    state_text(state)->index = 0; 
+                } else {
+                    gameState->introduction = false;
+                    gameState->gameplay = true;
+                }
             }
         }
-    }else{
-        printf("DADAD");
     }
 
     EndDrawing();
