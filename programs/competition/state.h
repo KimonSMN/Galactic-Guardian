@@ -79,9 +79,16 @@ typedef struct text_info {
 typedef struct state_info {
 	Object spaceship;				// πληροφορίες για τη το διαστημόπλοιο
 	bool paused;					// true αν το παιχνίδι είναι paused
-	int score;						// το τρέχον σκορ
+	int coins;						// το τρέχον σκορ
 	bool lost;						// true αν οι καρδιες ειναι 0
 }* StateInfo;
+
+typedef struct wave_info {
+	int current_wave;
+    int time_until_next_wave;
+    int wave_delay;  
+    int enemies_per_wave;
+}* WaveInfo;
 
 // Πληροφορίες για το ποια πλήκτρα είναι πατημένα
 typedef struct key_state {
@@ -113,6 +120,8 @@ State state_create();
 StateInfo state_info(State state);
 
 TextInfo state_text(State state);
+
+WaveInfo state_wave(State state);
 
 int object_health(Object object);
 

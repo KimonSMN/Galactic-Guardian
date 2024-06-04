@@ -21,6 +21,7 @@ Texture2D exit_button;
 Texture2D astronaut;
 Texture2D skip_text_button;
 Texture2D space_background;
+Texture2D wave;
 // Sound bullet_sound;
 //Texture background_img;
 // Sound damage_sound;
@@ -30,6 +31,7 @@ float pickupTimer = PICKUP_TIME;
 
 int heartIndex = 0;
 
+int waveIndex = 0; 
 
 int skipTextIndex = 0;
 float skipTextTimer = 8;
@@ -51,7 +53,6 @@ void interface_init(){
     // Initialize the window
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "asteroids");
 	SetTargetFPS(60);
-    InitAudioDevice();
 	
 	// Load images
 
@@ -65,7 +66,9 @@ void interface_init(){
 
     space_background = LoadTextureFromImage(LoadImage("assets/space.png"));
 
-
+    wave = LoadTextureFromImage(LoadImage("assets/wave.png"));
+    wave.height = wave.height * 0.5;
+    wave.width = wave.width * 0.5;
     astronaut = LoadTextureFromImage(LoadImage("assets/astronaut.png"));
     astronaut.height = astronaut.height * 10;
     astronaut.width = astronaut.width * 10;
@@ -92,7 +95,6 @@ void interface_init(){
 
 // Κλείνει το interface του παιχνιδιού
 void interface_close(){
-	CloseAudioDevice();
 	CloseWindow();
 }
 
@@ -203,7 +205,7 @@ void interface_draw_info(State state){
 const char *introTexts[] = {
     "Hello traveler!\nI am BRUNO.",
     "You have to help me.\nMy galaxy is under attack!",
-    "You must find my spacecraft's parts\nthat are scattered across space.",
+    "You must defend yourself from\n 10 grueling waves of enemies\n.",
     "Only then will I be able to escape."
 };
 const int numTexts = sizeof(introTexts) / sizeof(introTexts[0]);
@@ -367,8 +369,15 @@ void interface_draw_frame(State state) {
     Rectangle heart_dest = (Rectangle){0, 10, heart_source.width, heart_source.height};
     DrawTexturePro(heart, heart_source, heart_dest, (Vector2){0, 0}, 0, WHITE);
 
-    // Draw the score and the FPS counter
-    DrawText(TextFormat("%04i", state_info(state)->score), 780, 20, 40, WHITE);
+    waveIndex = state_wave(state)->current_wave - 1;
+
+    Rectangle wave_source = (Rectangle){waveIndex * 500/2, 0, 500/2, 80/2};
+    Rectangle wave_dest = (Rectangle){0, 0, wave_source.width, wave_source.height};
+    DrawTexturePro(wave, wave_source, wave_dest, (Vector2){ - SCREEN_WIDTH /2 + 250/2, -20}, 0, WHITE);
+
+
+    // Draw the coins and the FPS counter
+    DrawText(TextFormat("%04d", state_info(state)->coins), 780, 20, 40, WHITE);
     DrawFPS(0, 0);
 
     EndDrawing();
