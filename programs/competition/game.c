@@ -57,6 +57,10 @@ int main() {
             keys.space = IsKeyDown(KEY_SPACE);
             keys.p = IsKeyDown(KEY_P);
             keys.n = IsKeyDown(KEY_N);
+            keys.s = IsKeyDown(KEY_S);
+            keys.num_one = IsKeyDown(KEY_Q);
+            keys.num_two = IsKeyDown(KEY_W);
+            keys.num_three = IsKeyDown(KEY_E);
 
             state_update(state, &keys);
             interface_draw_frame(state);

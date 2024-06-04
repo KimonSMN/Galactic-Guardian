@@ -8,6 +8,7 @@
 #include "ADTSet.h"
 #include "state.h"
 #include "vec2.h"
+#include <string.h>
 
 
 // Οι ολοκληρωμένες πληροφορίες της κατάστασης του παιχνιδιού.
@@ -21,8 +22,10 @@ struct state {
 	float speed_factor;		// Πολλαπλασιαστής ταχύτητς (1 = κανονική ταχύτητα, 2 = διπλάσια, κλπ)
 	int pickupTimer;
 	int pauseTimer; 
+    int purchaseTimer;
 	struct text_info text;
 	struct wave_info wave;
+    struct shop shop;
 	};
 
 
@@ -188,9 +191,10 @@ State state_create() {
 
 	// Γενικές πληροφορίες
 	state->info.paused = false;				// Το παιχνίδι ξεκινάει χωρίς να είναι paused.
-	state->speed_factor = 1;				// Κανονική ταχύτητα
+    state->info.shop_open = false;
+    state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
-	state->info.coins = 0;
+	state->info.coins = 20000;
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
@@ -205,6 +209,9 @@ State state_create() {
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 2000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
+
+    state->shop.more_bullets = 1;
+    state->shop.fill_health = 0;
 
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = set_create(compare_objects, NULL);
@@ -323,6 +330,13 @@ static void check_overlap(Object a, Object b, float distance) {
     }
 }
 
+// ShopItem create_shop_item(int stage, int cost) {
+//     ShopItem item = malloc(sizeof(*item));
+//     item->cost = cost;
+//     item->stage = stage;
+//     return item;
+// }
+
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 void state_update(State state, KeyState keys) {
@@ -338,6 +352,32 @@ void state_update(State state, KeyState keys) {
         state->info.paused = !state->info.paused;
         state->pauseTimer = 20;
         printf("Game paused: %d\n", state->info.paused);
+
+    }
+
+    if (keys->s && state->pauseTimer == 0) {
+        state->info.shop_open = !state->info.shop_open;
+        state->pauseTimer = 20;
+        printf("Shop opened: %d\n", state->info.shop_open);
+    }
+
+
+    if (state->purchaseTimer > 0) {
+        state->purchaseTimer--;
+    }
+    
+    if (state->info.shop_open) {
+        if (keys->num_one && state->shop.more_bullets <= 3 && state->purchaseTimer == 0) {
+            if (state->info.coins >= 1000) {
+                state->shop.more_bullets++;
+                state->info.coins -= 1000;
+                state->purchaseTimer = 40;
+                printf("BOUGHT ITEM\n");
+            } else {
+                printf("NOT ENOUGH COINS\n");
+            }
+        }
+        return;
     }
 
     if (state->info.paused) {
@@ -609,46 +649,32 @@ static void bullet_creation(State state, KeyState keys) {
         Vector2 perpendicular = {-spaceship->orientation.y, spaceship->orientation.x};
         Vector2 offset = vec2_scale(perpendicular, 20);
 
-        if (state->pickupTimer > 0) {
 
-            Object bullets[3];
-            Vector2 positions[3] = {
-                vec2_add(spaceship->position, offset),
-                spaceship->position,
-                vec2_subtract(spaceship->position, offset)
-            };
+        //if (state->pickupTimer > 0)
 
-            for (int i = 0; i < 3; i++) {
-                bullets[i] = create_object(
-                    BULLET,
-                    positions[i],
-            		vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED * state->speed_factor)),
-                    spaceship->orientation,
-                    BULLET_SIZE,
-                    0
-                );
-                if (bullets[i] == NULL) {
-                    printf("Failed to create bullet\n");
-                    continue;
-                }
-				set_insert(state->objects, bullets[i]);
-            }
-        } else {
-            // Create a single bullet
-            Object bullet = create_object(
+        Object bullets[3];
+        Vector2 positions[3] = {
+            spaceship->position,
+            vec2_add(spaceship->position, offset),
+            vec2_subtract(spaceship->position, offset)
+        };
+
+        for (int i = 0; i < state->shop.more_bullets; i++) {
+            bullets[i] = create_object(
                 BULLET,
-                spaceship->position,
-                vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED)),
+                positions[i],
+                vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, BULLET_SPEED * state->speed_factor)),
                 spaceship->orientation,
                 BULLET_SIZE,
                 0
             );
-            if (bullet == NULL) {
+            if (bullets[i] == NULL) {
                 printf("Failed to create bullet\n");
-                return;
+                continue;
             }
-			set_insert(state->objects, bullet);
+            set_insert(state->objects, bullets[i]);
         }
+        
 
         // Reset bullet firing delay
         state->next_bullet = BULLET_DELAY;

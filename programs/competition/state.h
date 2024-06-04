@@ -64,9 +64,20 @@ typedef struct object {
 	Vector2 speed;				// Ταχύτητα (pixels/frame)
 	double size;				// Μέγεθος (pixels)
 	Vector2 orientation;		// Κατεύθυνση (μόνο για διαστημόπλοιο)
-	int health;					// Ζωη (μόνο για διαστημόπλοιο)
-	bool remove;
+	int health;					// Ζωη
+
 }* Object;
+
+// typedef struct shop_item {
+// 	int cost;
+// 	int stage;
+// }* ShopItem;
+
+typedef struct shop {
+	int more_bullets;
+	int fill_health;
+	// empty for now
+}* Shop;
 
 typedef struct text_info {
     int index;
@@ -81,6 +92,8 @@ typedef struct state_info {
 	bool paused;					// true αν το παιχνίδι είναι paused
 	int coins;						// το τρέχον σκορ
 	bool lost;						// true αν οι καρδιες ειναι 0
+	bool shop_open; 
+
 }* StateInfo;
 
 typedef struct wave_info {
@@ -99,6 +112,10 @@ typedef struct key_state {
 	bool space;
 	bool n;
 	bool p;
+	bool s;
+	bool num_one;
+	bool num_two;
+	bool num_three;
 }* KeyState;
 
 typedef struct menu_button{
