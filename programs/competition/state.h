@@ -75,7 +75,6 @@ typedef struct object {
 
 typedef struct shop {
 	int more_bullets;
-	int fill_health;
 	// empty for now
 }* Shop;
 
@@ -113,9 +112,9 @@ typedef struct key_state {
 	bool n;
 	bool p;
 	bool s;
-	bool num_one;
-	bool num_two;
-	bool num_three;
+	bool q;
+	bool w;
+	bool e;
 }* KeyState;
 
 typedef struct menu_button{

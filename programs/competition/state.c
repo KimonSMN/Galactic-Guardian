@@ -211,7 +211,6 @@ State state_create() {
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
 
     state->shop.more_bullets = 1;
-    state->shop.fill_health = 0;
 
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = set_create(compare_objects, NULL);
@@ -365,12 +364,22 @@ void state_update(State state, KeyState keys) {
     if (state->purchaseTimer > 0) {
         state->purchaseTimer--;
     }
-    
+
     if (state->info.shop_open) {
-        if (keys->num_one && state->shop.more_bullets <= 3 && state->purchaseTimer == 0) {
+        if (keys->q && state->shop.more_bullets < 3 && state->purchaseTimer == 0) {
             if (state->info.coins >= 1000) {
                 state->shop.more_bullets++;
                 state->info.coins -= 1000;
+                state->purchaseTimer = 40;
+                printf("BOUGHT ITEM\n");
+            } else {
+                printf("NOT ENOUGH COINS\n");
+            }
+        }
+        else if (keys->w && state->purchaseTimer == 0 && state->info.spaceship->health < 4) {
+            if (state->info.coins >= 250) {
+                state->info.spaceship->health++;
+                state->info.coins -= 250;
                 state->purchaseTimer = 40;
                 printf("BOUGHT ITEM\n");
             } else {
