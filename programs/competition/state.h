@@ -91,9 +91,12 @@ typedef struct state_info {
 	int coins;						// το τρέχον σκορ
 	bool lost;						// true αν οι καρδιες ειναι 0
 	bool shop_open; 
+	bool purchase_complete;
+	bool not_enough_coins;
 	bool boss_spawned; 
 	bool boss_died;
 	int boss_health;
+
 }* StateInfo;
 
 typedef struct wave_info {

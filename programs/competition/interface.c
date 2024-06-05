@@ -47,8 +47,15 @@ Texture2D cost_250;
 
 Texture2D boss_healthbar;
 
+Texture2D coin;
+Texture2D purchase_complete;
+Texture2D not_enough_coins;
+
 int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
+
+int coinIndex = 0;
+float coinTimer = 4; // number of sprites
 
 int heartIndex = 0;
 
@@ -66,6 +73,7 @@ int startButtonIndex = 0;
 int infoButtonIndex = 0;
 int exitButtonIndex = 0;
 
+int purchase_popup_timer = 100;
 // Start menu background color
 Color menu_color = {1,0,20,0};
 
@@ -102,6 +110,10 @@ void interface_init(){
     cost_250 = LoadTextureFromImage(LoadImage("assets/cost_250.png"));
 
     boss_healthbar = LoadTextureFromImage(LoadImage("assets/boss_healthbar.png"));
+
+    coin = LoadTextureFromImage(LoadImage("assets/coin.png"));
+    purchase_complete = LoadTextureFromImage(LoadImage("assets/purchase_complete.png"));
+    not_enough_coins = LoadTextureFromImage(LoadImage("assets/not_enough_coins.png"));
 
     start_button = LoadTextureFromImage(LoadImage("assets/start_button.png"));
     info_button = LoadTextureFromImage(LoadImage("assets/info_button.png"));
@@ -278,6 +290,8 @@ static void interface_draw_shop(State state){
     int shop_ending_text_x = shop_frame_x + (shop_frame.width - shop_ending_text.width) / 2;
     int shop_ending_text_y = shop_frame_y + shop_frame.height - shop_ending_text.height - 20               ; 
 
+
+
     DrawTexture(shop_ending_text, shop_ending_text_x, shop_ending_text_y, WHITE);
     // HEAL-A-HOLIC
     int healaholic_title_x = item_frame_x + (shop_item_frame.width - healaholic_title.width) / 2;
@@ -357,6 +371,16 @@ static void interface_draw_shop(State state){
     int shop_cost_y = item_frame_y3 + shop_item_frame.height - cost_2000.height - 10;
 
     DrawTexture(cost_2000, shop_cost_x, shop_cost_y, WHITE);
+
+
+ 
+
+    if(state_info(state)->purchase_complete){
+        DrawTexture(purchase_complete, shop_ending_text_x - 10, shop_ending_text_y - 70, WHITE);
+    } if(state_info(state)->not_enough_coins){
+        DrawTexture(not_enough_coins, shop_ending_text_x + 55, shop_ending_text_y - 70, WHITE);
+    } 
+    
 }
 
 const char *introTexts[] = {
@@ -427,10 +451,20 @@ void interface_draw_frame(State state) {
     if (pickupTimer < 0) {
         pickupTimer = PICKUP_TIME;
         pickupIndex++;
-        if (pickupIndex >= PICKUP_COUNT) {
+        if (pickupIndex >= 9) {
             pickupIndex = 0;
         }
     }
+
+    // coinTimer--;
+    // if (coinTimer < 0) {
+    //     coinTimer = 5;
+    //     coinIndex++;
+    //     if (coinIndex >= 9) {
+    //         coinIndex = 0;
+    //     }
+    // }
+
 
     Camera2D camera; // Αρχικοποιηση camera
 
@@ -569,6 +603,10 @@ void interface_draw_frame(State state) {
 
     // Draw the coins and the FPS counter
     DrawText(TextFormat("%04d", state_info(state)->coins), 780, 20, 40, WHITE);
+    Rectangle source = (Rectangle){20 * coinIndex, 0, 20, 20};
+    Rectangle dest = (Rectangle){740, 21, source.width * 1.7, source.height * 1.7};
+    DrawTexturePro(coin, source, dest, (Vector2){0, 0}, 0, WHITE);
+
     DrawFPS(0, 0);
 
     if(state_info(state)->shop_open){ // make it open only when a wave has passed

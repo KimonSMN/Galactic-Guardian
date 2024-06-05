@@ -203,7 +203,7 @@ State state_create() {
     state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
     state->buddy_next_bullet = 0;
-	state->info.coins = 10000;
+	state->info.coins = 1000;
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
@@ -212,13 +212,16 @@ State state_create() {
 	state->text.index = 0;
 	state->text.timer = 0;
     
+    state->info.purchase_complete = false;
+    state->info.not_enough_coins = false;
+
     state->info.boss_spawned = false;
     state->info.boss_died = true;
     state->info.boss_health = 0;
 
     state->purchaseTimer = 0;
-    // Initialize wave variables
-    state->wave.current_wave = 3;
+
+    state->wave.current_wave = 4;
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 2000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
@@ -385,34 +388,45 @@ void state_update(State state, KeyState keys) {
         printf("Shop opened: %d\n", state->info.shop_open);
     }
 
-    if (state->purchaseTimer > 0) {
-        state->purchaseTimer--;
-    }
-
     if (state->info.shop_open) {
+        if (state->purchaseTimer > 0) {
+            state->purchaseTimer--;
+        } else {
+            state->info.purchase_complete = false;
+            state->info.not_enough_coins = false;
+        }
+
         if (keys->w && state->shop.more_bullets < 3 && state->purchaseTimer == 0) {
             if (state->info.coins >= 1000) {
                 state->shop.more_bullets++;
                 state->info.coins -= 1000;
-                state->purchaseTimer = 40;
+                state->purchaseTimer = 120;
                 printf("BOUGHT ITEM\n");
+                state->info.purchase_complete = true;
             } else {
                 printf("NOT ENOUGH COINS\n");
+                state->info.not_enough_coins = true;
+                state->purchaseTimer = 60;
             }
         } else if (keys->q && state->purchaseTimer == 0 && state->info.spaceship->health < 4) {
             if (state->info.coins >= 250) {
                 state->info.spaceship->health++;
                 state->info.coins -= 250;
-                state->purchaseTimer = 40;
+                state->purchaseTimer = 120;
+                state->info.purchase_complete = true;
                 printf("BOUGHT ITEM\n");
             } else {
                 printf("NOT ENOUGH COINS\n");
+                state->info.not_enough_coins = true;
+                state->purchaseTimer = 60;
+
             }
         } else if(keys->e && state->purchaseTimer == 0 && !state->shop.buddy){
             if (state->info.coins >= 2000) {
                 state->shop.buddy = true;
                 state->info.coins -= 2000;
-                state->purchaseTimer = 40;
+                state->purchaseTimer = 120;
+                state->info.purchase_complete = true;
                 printf("BOUGHT ITEM\n");
 
                state->info.buddy = create_object(
@@ -423,14 +437,16 @@ void state_update(State state, KeyState keys) {
                     SPACESHIP_SIZE / 2,
                     0
                 );
-
-
             } else {
                 printf("NOT ENOUGH COINS\n");
+                state->info.not_enough_coins = true;
+                state->purchaseTimer = 60;
+
             }
         }
         return; 
     }
+
 
 
     if (state->info.paused) {
