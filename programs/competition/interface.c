@@ -386,15 +386,15 @@ static void interface_draw_shop(State state){
 const char *introTexts[] = {
     "Hello traveler!\nI am BRUNO.",
     "You have to help me.\nMy galaxy is under attack!",
-    "You must defend yourself from\n 10 grueling waves of enemies\n.",
-    "Only then will I be able to escape."
+    "You must defend it from\n10 grueling waves of enemies\n.",
+    "But be careful, daunting bosses\nawait you at waves 5 and 10"
 };
 const int numTexts = sizeof(introTexts) / sizeof(introTexts[0]);
 
 void interface_draw_intro(State state, GameState *gameState) {
     
     BeginDrawing();
-    ClearBackground(menu_color);
+    DrawTexture(space_background, 0, 0, WHITE);
 
     // Draw astronaut
     DrawTexture(astronaut,SCREEN_WIDTH / 2 - astronaut.width /2 ,150,WHITE);
@@ -456,14 +456,14 @@ void interface_draw_frame(State state) {
         }
     }
 
-    // coinTimer--;
-    // if (coinTimer < 0) {
-    //     coinTimer = 5;
-    //     coinIndex++;
-    //     if (coinIndex >= 9) {
-    //         coinIndex = 0;
-    //     }
-    // }
+    coinTimer--;
+    if (coinTimer < 0) {
+        coinTimer = 5;
+        coinIndex++;
+        if (coinIndex >= 9) {
+            coinIndex = 0;
+        }
+    }
 
 
     Camera2D camera; // Αρχικοποιηση camera

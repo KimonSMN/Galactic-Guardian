@@ -203,7 +203,7 @@ State state_create() {
     state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
     state->buddy_next_bullet = 0;
-	state->info.coins = 1000;
+	state->info.coins = 2000;
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
@@ -221,7 +221,7 @@ State state_create() {
 
     state->purchaseTimer = 0;
 
-    state->wave.current_wave = 4;
+    state->wave.current_wave = 0;
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 1000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
@@ -248,9 +248,11 @@ State state_create() {
 }
 
 static void manage_waves(State state) {
+    
     if (state->wave.time_until_next_wave > 0) {
         state->wave.time_until_next_wave--;
     } else {
+        
         state->wave.current_wave += 1;
 
         // removes enemies from last wave
@@ -448,6 +450,11 @@ void state_update(State state, KeyState keys) {
     }
 
 
+    if (!state->info.shop_open) {
+        state->info.purchase_complete = false;
+        state->info.not_enough_coins = false;
+        state->purchaseTimer = 0;
+    }
 
     if (state->info.paused) {
         return;

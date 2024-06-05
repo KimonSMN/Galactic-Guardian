@@ -5,7 +5,7 @@
 #include "state.h"
 
 State state;
-GameState gameState = {false, true, false, false, false};
+GameState gameState = {true, false, false, false, false};
 MenuButton button = {true, false, false, 1};
 
 void UpdateMenu() {
