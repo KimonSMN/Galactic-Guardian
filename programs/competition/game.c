@@ -37,7 +37,7 @@ void UpdateMenu() {
     }
 }
 
-int main() {
+ int main() {
     interface_init();
     InitAudioDevice(); 
     state = state_create(); 

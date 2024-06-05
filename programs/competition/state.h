@@ -28,7 +28,7 @@
 #define ENEMY_SIZE 32
 
 #define BOSS_SIZE 128
-#define BOSS_HEALTH 20
+#define BOSS_HEALTH 1
 #define BOSS_SPEED 3
 
 #define SPACESHIP_HEALTH 4
@@ -92,6 +92,7 @@ typedef struct state_info {
 	bool lost;						// true αν οι καρδιες ειναι 0
 	bool shop_open; 
 	bool boss_spawned; 
+	bool boss_died;
 }* StateInfo;
 
 typedef struct wave_info {

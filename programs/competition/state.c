@@ -188,6 +188,9 @@ static void spaceship_boss_collision(State state);
 
 static void enemy_bullet_collision(State state);
 
+static void boss_bullet_collision(State state);
+
+
 // Δημιουργεί και επιστρέφει την αρχική κατάσταση του παιχνιδιού
 
 State state_create() {
@@ -208,8 +211,12 @@ State state_create() {
 	state->text.delay = 0;
 	state->text.index = 0;
 	state->text.timer = 0;
+    
     state->info.boss_spawned = false;
+    state->info.boss_died = true;
 
+
+    state->purchaseTimer = 0;
     // Initialize wave variables
     state->wave.current_wave = 4;
     state->wave.time_until_next_wave = 0;
@@ -266,9 +273,11 @@ static void manage_waves(State state) {
         spawn_boss(state);
         state->wave.time_until_next_wave = 2000000;
         state->info.boss_spawned = true;
+        state->info.boss_died = false;
+    } else if(state->wave.current_wave == 5 && state->info.boss_died){
+        state->wave.time_until_next_wave = 0;
     }
-
-  
+    
     enemy_creation(state, state->wave.enemies_per_wave);
   
     asteroid_creation(state); 
@@ -515,6 +524,7 @@ void state_update(State state, KeyState keys) {
     asteroid_bullet_collision(state);
     spaceship_asteroid_collision(state);
     enemy_bullet_collision(state);
+    boss_bullet_collision(state);
     spaceship_enemy_collision(state);
     spaceship_boss_collision(state);
 }
@@ -558,7 +568,7 @@ static void spaceship_asteroid_collision(State state){
 			asteroid->size
 		)) {
 			set_remove(state->objects,asteroid);
-			free(asteroid);
+			// free(asteroid);
 			state->info.spaceship->health --;
 			break;
 		}
@@ -641,7 +651,7 @@ static void asteroid_bullet_collision(State state) {
 
                 set_remove(state->objects, asteroid);
                 asteroid_removed = true;
-                free(asteroid);
+                // free(asteroid);
 
                 set_remove(state->objects, bullet);
                 // free(bullet);
@@ -689,7 +699,7 @@ static void spaceship_pickup_collision(State state){
 		)) {
 			state->pickupTimer = 300;  
 			set_remove(state->objects,pickup);
-			free(pickup);
+			// free(pickup);
 			break;
 		}
 	}
@@ -864,7 +874,7 @@ void spawn_boss(State state) {
 			speed,
 			(Vector2){0, 0},
 			BOSS_SIZE,
-			20
+			BOSS_HEALTH
 		);
     set_insert(state->objects, boss);
 }
@@ -912,7 +922,7 @@ static void enemy_bullet_collision(State state) {
 
                 if (enemy->health <= 0) {
                     set_remove(state->objects, enemy);
-                    free(enemy);
+                    // free(enemy);
 					state->info.coins += 40;
                 }
             }
@@ -922,7 +932,62 @@ static void enemy_bullet_collision(State state) {
     list_destroy(bullets_list);
 }
 
+static void boss_bullet_collision(State state) {
+    Object boss = NULL;
 
+    for (SetNode node = set_first(state->objects);
+         node != SET_EOF;
+         node = set_next(state->objects, node)) {
+
+        Object obj = set_node_value(state->objects, node);
+        if (obj->type == BOSS) {
+            boss = obj;
+            break;
+        }
+    }
+
+    if (boss == NULL) return;
+
+    List bullets_list = list_create(NULL);
+
+    for (SetNode node = set_first(state->objects);
+         node != SET_EOF;
+         node = set_next(state->objects, node)) {
+
+        Object obj = set_node_value(state->objects, node);
+        if (obj->type == BULLET) {
+            list_insert_next(bullets_list, LIST_BOF, obj);
+        }
+    }
+
+    for (ListNode bullet_node = list_first(bullets_list);
+         bullet_node != LIST_EOF;
+         bullet_node = list_next(bullets_list, bullet_node)) {
+
+        Object bullet = list_node_value(bullets_list, bullet_node);
+
+        Rectangle boss_box = {
+            boss->position.x - (BOSS_SIZE * 3 / 2),
+            boss->position.y - (BOSS_SIZE * 3 / 2),
+            BOSS_SIZE * 2 ,
+            BOSS_SIZE * 2
+        };  
+
+        if (CheckCollisionCircleRec(bullet->position, bullet->size, boss_box)) {
+            boss->health--;
+            set_remove(state->objects, bullet);
+            // free(bullet);
+
+            if (boss->health <= 0) {
+                set_remove(state->objects, boss);
+                // free(boss);
+                state->info.coins += 1000; 
+                state->info.boss_died = true;
+            }
+        }
+    }
+    list_destroy(bullets_list);
+}       
 static void spaceship_enemy_collision(State state){
 	Object spaceship = state->info.spaceship;
 
@@ -952,7 +1017,7 @@ static void spaceship_enemy_collision(State state){
 			enemy->size
 		)) {
 			set_remove(state->objects,enemy);
-			free(enemy);
+			// free(enemy);
 			printf("COLLIEDED WITH ENEMY");
 			state->info.spaceship->health--;
 			break;
@@ -989,7 +1054,7 @@ static void spaceship_boss_collision(State state){
 			boss->size
 		)) {
 			set_remove(state->objects,boss);
-			free(boss);
+			// free(boss);
 			printf("COLLIEDED WITH BOSS");
 			state->info.spaceship->health-= 4;
 			break;
