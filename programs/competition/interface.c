@@ -45,6 +45,8 @@ Texture2D healaholic_image; // not imported
 Texture2D healaholic_title;
 Texture2D cost_250;
 
+Texture2D boss_healthbar;
+
 int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
 
@@ -55,6 +57,7 @@ int waveIndex = 0;
 int skipTextIndex = 0;
 float skipTextTimer = 8;
 
+int bossHealthIndex = 0;
 
 int buttonCounter = 1;
 float buttonTimer = 30;
@@ -97,6 +100,8 @@ void interface_init(){
     healaholic_image = LoadTextureFromImage(LoadImage("assets/healaholic_image.png"));
     healaholic_title = LoadTextureFromImage(LoadImage("assets/healaholic_title.png"));
     cost_250 = LoadTextureFromImage(LoadImage("assets/cost_250.png"));
+
+    boss_healthbar = LoadTextureFromImage(LoadImage("assets/boss_healthbar.png"));
 
     start_button = LoadTextureFromImage(LoadImage("assets/start_button.png"));
     info_button = LoadTextureFromImage(LoadImage("assets/info_button.png"));
@@ -528,20 +533,29 @@ void interface_draw_frame(State state) {
                 state_info(state)->spaceship->position.x - object->position.x,
                 state_info(state)->spaceship->position.y - object->position.y
             };
-            float enemy_radians = atan2(directionToSpaceship.y, directionToSpaceship.x);
-            float enemy_rotation = enemy_radians * (180 / PI) + 90;
+            float boss_radians = atan2(directionToSpaceship.y, directionToSpaceship.x);
+            float boss_rotation = boss_radians * (180 / PI) + 90;
 
             Rectangle source = (Rectangle){0, 0, BOSS_SIZE, BOSS_SIZE};
             Rectangle dest = {object->position.x, object->position.y, object->size * 3, object->size * 3 };
             Vector2 origin = {dest.width / 2, dest.height / 2};
 
-            DrawTexturePro(boss, source, dest, origin, enemy_rotation, WHITE);
+            DrawTexturePro(boss, source, dest, origin, boss_rotation, WHITE);
+
         }
     }
     
     EndMode2D();
 
-    heartIndex = state_info(state)->spaceship->health;
+    if(!state_info(state)->boss_died){
+        bossHealthIndex = state_info(state)->boss_health ;
+
+        Rectangle health_source = {-bossHealthIndex * 500, 0, 500, boss_healthbar.height};
+        Rectangle health_dest = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70, 500, boss_healthbar.height};
+        DrawTexturePro(boss_healthbar, health_source, health_dest, (Vector2){health_dest.width/2,health_dest.height/2}, 0, WHITE);
+    }
+
+    heartIndex = state_info(state)->spaceship->health; 
 
     Rectangle heart_source = (Rectangle){0, 0, HEART_SIZE * heartIndex, HEART_SIZE};
     Rectangle heart_dest = (Rectangle){0, 10, heart_source.width, heart_source.height};
@@ -560,7 +574,7 @@ void interface_draw_frame(State state) {
     if(state_info(state)->shop_open){ // make it open only when a wave has passed
         interface_draw_shop(state);
     }
-
+   
     EndDrawing();
 }
 

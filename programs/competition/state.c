@@ -214,11 +214,11 @@ State state_create() {
     
     state->info.boss_spawned = false;
     state->info.boss_died = true;
-
+    state->info.boss_health = 0;
 
     state->purchaseTimer = 0;
     // Initialize wave variables
-    state->wave.current_wave = 4;
+    state->wave.current_wave = 3;
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 2000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
@@ -876,6 +876,7 @@ void spawn_boss(State state) {
 			BOSS_SIZE,
 			BOSS_HEALTH
 		);
+    state->info.boss_health = BOSS_HEALTH;
     set_insert(state->objects, boss);
 }
 
@@ -975,6 +976,7 @@ static void boss_bullet_collision(State state) {
 
         if (CheckCollisionCircleRec(bullet->position, bullet->size, boss_box)) {
             boss->health--;
+            state->info.boss_health--;
             set_remove(state->objects, bullet);
             // free(bullet);
 
