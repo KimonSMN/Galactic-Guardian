@@ -70,6 +70,11 @@ void UpdateMenu() {
 				
         } else if (gameState.info_menu){
             interface_draw_info(state);
+            if (IsKeyPressed(KEY_B)) {
+                gameState.info_menu = false;
+                gameState.start_menu = true;
+             }
+   
             
         } else if (gameState.game_over) {
 			break;

@@ -51,6 +51,8 @@ Texture2D coin;
 Texture2D purchase_complete;
 Texture2D not_enough_coins;
 
+Texture2D info_menu;
+
 int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
 
@@ -93,6 +95,8 @@ void interface_init(){
     shop_item_frame = LoadTextureFromImage(LoadImage("assets/shop_item_frame.png"));
     item_icon_frame = LoadTextureFromImage(LoadImage("assets/item_icon_frame.png"));
     shop_ending_text = LoadTextureFromImage(LoadImage("assets/shop_ending_text.png"));
+
+    info_menu = LoadTextureFromImage(LoadImage("assets/info_menu.png"));
 
     tiny_twin_desc = LoadTextureFromImage(LoadImage("assets/tiny_twin_desc.png"));
     tiny_twin_image = LoadTextureFromImage(LoadImage("assets/tiny_twin_image.png"));
@@ -248,8 +252,9 @@ void interface_draw_menu() {
 void interface_draw_info(State state){
 
     BeginDrawing();
-    ClearBackground(menu_color);
-    
+    DrawTexture(space_background, 0, 0, WHITE);
+
+    DrawTexture(info_menu,0,0,WHITE);    
     // Game Controls: Provide a list of all the controls used in the game
     // Gameplay Instructions: Explain the mechanics of the game
     // Scoring System: Describe how the scoring works.

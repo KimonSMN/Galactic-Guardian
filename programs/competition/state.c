@@ -203,7 +203,7 @@ State state_create() {
     state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
     state->buddy_next_bullet = 0;
-	state->info.coins = 2000;
+	state->info.coins = 0;
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
@@ -529,7 +529,8 @@ void state_update(State state, KeyState keys) {
     }
     if (keys->up) {
         spaceship->speed = vec2_add(spaceship->speed, vec2_scale(spaceship->orientation, SPACESHIP_ACCELERATION));
-    } else {
+    } 
+    else {
         spaceship->speed = vec2_scale(spaceship->speed, SPACESHIP_SLOWDOWN);
     }
 
