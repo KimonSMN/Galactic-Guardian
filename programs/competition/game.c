@@ -5,7 +5,7 @@
 #include "state.h"
 
 State state;
-GameState gameState = {true, false, false, false, false};
+GameState gameState = {false, true, false, false, false};
 MenuButton button = {true, false, false, 1};
 
 void UpdateMenu() {
@@ -64,7 +64,6 @@ int main() {
 
             state_update(state, &keys);
             interface_draw_frame(state);
-
             // if hearts <= 0
             if (state_info(state)->lost) 
                 break;

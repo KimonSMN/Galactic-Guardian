@@ -27,6 +27,10 @@
 
 #define ENEMY_SIZE 32
 
+#define BOSS_SIZE 128
+#define BOSS_HEALTH 20
+#define BOSS_SPEED 3
+
 #define SPACESHIP_HEALTH 4
 #define HEART_SIZE 64
 #define HEART_COUNT 4
@@ -41,7 +45,7 @@
 #define SCREEN_HEIGHT 700	// Υψος της οθόνης
 
 typedef enum {
-	SPACESHIP, ASTEROID, BULLET, PICKUP, ENEMY
+	SPACESHIP, ASTEROID, BULLET, PICKUP, ENEMY, BUDDY, BOSS
 } ObjectType;
 
 typedef enum {
@@ -56,7 +60,6 @@ typedef struct game_state {
     bool game_over;
 } GameState;
 
-
 // Πληροφορίες για κάθε αντικείμενο
 typedef struct object {
 	ObjectType type;			// Τύπος (Διαστημόπλοιο, Αστεροειδής, Σφαίρα)
@@ -65,16 +68,11 @@ typedef struct object {
 	double size;				// Μέγεθος (pixels)
 	Vector2 orientation;		// Κατεύθυνση (μόνο για διαστημόπλοιο)
 	int health;					// Ζωη
-
 }* Object;
-
-// typedef struct shop_item {
-// 	int cost;
-// 	int stage;
-// }* ShopItem;
 
 typedef struct shop {
 	int more_bullets;
+	bool buddy;
 	// empty for now
 }* Shop;
 
@@ -88,11 +86,12 @@ typedef struct text_info {
 // Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
 typedef struct state_info {
 	Object spaceship;				// πληροφορίες για τη το διαστημόπλοιο
+	Object buddy;
 	bool paused;					// true αν το παιχνίδι είναι paused
 	int coins;						// το τρέχον σκορ
 	bool lost;						// true αν οι καρδιες ειναι 0
 	bool shop_open; 
-
+	bool boss_spawned; 
 }* StateInfo;
 
 typedef struct wave_info {

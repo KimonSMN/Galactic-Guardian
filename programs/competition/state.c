@@ -19,6 +19,7 @@ struct state {
 	Set objects;			// περιέχει στοιχεία Object (αστεροειδείς, σφαίρες)
 	struct state_info info;	// Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
 	int next_bullet;		// Αριθμός frames μέχρι να επιτραπεί ξανά σφαίρα
+    int buddy_next_bullet;
 	float speed_factor;		// Πολλαπλασιαστής ταχύτητς (1 = κανονική ταχύτητα, 2 = διπλάσια, κλπ)
 	int pickupTimer;
 	int pauseTimer; 
@@ -169,7 +170,11 @@ static void asteroid_creation(State state);
 
 static void enemy_creation(State state, int enemy_num);
 
+static void spawn_boss(State state);
+
 static void bullet_creation(State state, KeyState keys);
+
+static void buddy_bullet_creation(State state);
 
 static void spaceship_pickup_collision(State state);
 
@@ -179,9 +184,9 @@ static void spaceship_asteroid_collision(State state);
 
 static void spaceship_enemy_collision(State state);
 
-static void enemy_bullet_collision(State state);
+static void spaceship_boss_collision(State state);
 
-// Fix enemy_bullet_collision, maybe add one collision for everything
+static void enemy_bullet_collision(State state);
 
 // Δημιουργεί και επιστρέφει την αρχική κατάσταση του παιχνιδιού
 
@@ -194,7 +199,8 @@ State state_create() {
     state->info.shop_open = false;
     state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
-	state->info.coins = 20000;
+    state->buddy_next_bullet = 0;
+	state->info.coins = 10000;
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
@@ -202,15 +208,18 @@ State state_create() {
 	state->text.delay = 0;
 	state->text.index = 0;
 	state->text.timer = 0;
-
+    state->info.boss_spawned = false;
 
     // Initialize wave variables
-    state->wave.current_wave = 0;
+    state->wave.current_wave = 4;
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 2000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
 
     state->shop.more_bullets = 1;
+    state->shop.buddy = false;
+
+    state->info.buddy = NULL;
 
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = set_create(compare_objects, NULL);
@@ -225,13 +234,8 @@ State state_create() {
 		SPACESHIP_HEALTH 
 	);
 
-	// // Προσθήκη αρχικών αστεροειδών
-	// add_asteroids(state, ASTEROID_NUM);
-
-	// add_enemies(state, ENEMY_NUM);
 	return state;
 }
-
 
 static void manage_waves(State state) {
     if (state->wave.time_until_next_wave > 0) {
@@ -239,14 +243,33 @@ static void manage_waves(State state) {
     } else {
         state->wave.current_wave += 1;
 
-		// remove the enemies from last wave
+        // removes enemies from last wave
+
+        SetNode node = set_first(state->objects);
+        while (node != SET_EOF) {
+            Object obj = set_node_value(state->objects, node);
+            if (obj->type == ENEMY) {
+                node = set_next(state->objects, node);
+                set_remove(state->objects, obj);
+                free(obj);
+            } else {
+                node = set_next(state->objects, node);
+            }
+        }
 
         printf("NEW WAVE CREATED: %d\n", state->wave.current_wave);
         state->wave.enemies_per_wave += state->wave.current_wave / 3 ;
         state->wave.time_until_next_wave = state->wave.wave_delay;
     }
 
-	enemy_creation(state, state->wave.enemies_per_wave);
+    if (state->wave.current_wave == 5 && !state->info.boss_spawned) {
+        spawn_boss(state);
+        state->wave.time_until_next_wave = 2000000;
+        state->info.boss_spawned = true;
+    }
+
+  
+    enemy_creation(state, state->wave.enemies_per_wave);
   
     asteroid_creation(state); 
 }
@@ -329,12 +352,6 @@ static void check_overlap(Object a, Object b, float distance) {
     }
 }
 
-// ShopItem create_shop_item(int stage, int cost) {
-//     ShopItem item = malloc(sizeof(*item));
-//     item->cost = cost;
-//     item->stage = stage;
-//     return item;
-// }
 
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
@@ -351,7 +368,6 @@ void state_update(State state, KeyState keys) {
         state->info.paused = !state->info.paused;
         state->pauseTimer = 20;
         printf("Game paused: %d\n", state->info.paused);
-
     }
 
     if (keys->s && state->pauseTimer == 0) {
@@ -360,13 +376,12 @@ void state_update(State state, KeyState keys) {
         printf("Shop opened: %d\n", state->info.shop_open);
     }
 
-
     if (state->purchaseTimer > 0) {
         state->purchaseTimer--;
     }
 
     if (state->info.shop_open) {
-        if (keys->q && state->shop.more_bullets < 3 && state->purchaseTimer == 0) {
+        if (keys->w && state->shop.more_bullets < 3 && state->purchaseTimer == 0) {
             if (state->info.coins >= 1000) {
                 state->shop.more_bullets++;
                 state->info.coins -= 1000;
@@ -375,8 +390,7 @@ void state_update(State state, KeyState keys) {
             } else {
                 printf("NOT ENOUGH COINS\n");
             }
-        }
-        else if (keys->w && state->purchaseTimer == 0 && state->info.spaceship->health < 4) {
+        } else if (keys->q && state->purchaseTimer == 0 && state->info.spaceship->health < 4) {
             if (state->info.coins >= 250) {
                 state->info.spaceship->health++;
                 state->info.coins -= 250;
@@ -385,9 +399,30 @@ void state_update(State state, KeyState keys) {
             } else {
                 printf("NOT ENOUGH COINS\n");
             }
+        } else if(keys->e && state->purchaseTimer == 0 && !state->shop.buddy){
+            if (state->info.coins >= 2000) {
+                state->shop.buddy = true;
+                state->info.coins -= 2000;
+                state->purchaseTimer = 40;
+                printf("BOUGHT ITEM\n");
+
+               state->info.buddy = create_object(
+                    BUDDY,
+                    (Vector2){spaceship->position.x - SPACESHIP_SIZE, spaceship->position.y - SPACESHIP_SIZE}, 
+                    (Vector2){0, 0},
+                    (Vector2){0, 1},
+                    SPACESHIP_SIZE / 2,
+                    0
+                );
+
+
+            } else {
+                printf("NOT ENOUGH COINS\n");
+            }
         }
-        return;
+        return; 
     }
+
 
     if (state->info.paused) {
         return;
@@ -402,7 +437,7 @@ void state_update(State state, KeyState keys) {
         node = list_next(objects_to_update, node)) {
 
         Object obj = list_node_value(objects_to_update, node);
-        if (obj->type == BULLET || obj->type == ASTEROID) {
+        if (obj->type == BULLET || obj->type == ASTEROID ) {
             set_remove(state->objects, obj);
             obj->position = vec2_add(obj->position, vec2_scale(obj->speed, state->speed_factor));
             set_insert(state->objects, obj);
@@ -413,10 +448,17 @@ void state_update(State state, KeyState keys) {
             set_remove(state->objects, obj);
             obj->position = vec2_add(obj->position, vec2_scale(velocity, state->speed_factor));
             set_insert(state->objects, obj);
+        } else if (obj->type == BOSS) {
+            Vector2 direction = vec2_from_to(obj->position, state->info.spaceship->position);
+            direction = vec2_normalize(direction);
+            Vector2 velocity = vec2_scale(direction, BOSS_SPEED);
+            set_remove(state->objects, obj);
+            obj->position = vec2_add(obj->position, vec2_scale(velocity, state->speed_factor));
+            set_insert(state->objects, obj);
         }
     }
 
-    // Now check for overlaps between ENEMY objects
+    // check for overlaps between enemies
     for (ListNode nodeA = list_first(objects_to_update);
         nodeA != LIST_EOF;
         nodeA = list_next(objects_to_update, nodeA)) {
@@ -441,6 +483,7 @@ void state_update(State state, KeyState keys) {
             }
         }
     }
+
     if (spaceship->health <= 0) {
         state->info.lost = true;
         printf("YOU HAVE LOST THE GAME TRY AGAIN FOO\n");
@@ -460,14 +503,20 @@ void state_update(State state, KeyState keys) {
 
     spaceship->position = vec2_add(spaceship->position, spaceship->speed);
 
+    if (state->info.buddy) {
+        state->info.buddy->position = (Vector2){spaceship->position.x - SPACESHIP_SIZE * 2, spaceship->position.y - SPACESHIP_SIZE * 2};
+    }
+
+
     asteroid_creation(state);
-    // enemy_creation(state);
     bullet_creation(state, keys);
+    buddy_bullet_creation(state);
     spaceship_pickup_collision(state);
     asteroid_bullet_collision(state);
     spaceship_asteroid_collision(state);
     enemy_bullet_collision(state);
     spaceship_enemy_collision(state);
+    spaceship_boss_collision(state);
 }
 
 
@@ -576,7 +625,7 @@ static void asteroid_bullet_collision(State state) {
                     }
                 }
 
-                const int pickup_probability_percent = 40;
+                const int pickup_probability_percent = 5;
                 int random_value = rand() % 100 + 1;
                 if (random_value <= pickup_probability_percent) {
                     Object new_pickup = create_object(
@@ -595,9 +644,9 @@ static void asteroid_bullet_collision(State state) {
                 free(asteroid);
 
                 set_remove(state->objects, bullet);
-                free(bullet);
+                // free(bullet);
 
-				state->info.coins += 1;
+				state->info.coins += 10;
                 break;
             }
         }
@@ -638,7 +687,7 @@ static void spaceship_pickup_collision(State state){
 			pickup->position,
 			pickup->size
 		)) {
-			state->pickupTimer = 400;  
+			state->pickupTimer = 300;  
 			set_remove(state->objects,pickup);
 			free(pickup);
 			break;
@@ -657,9 +706,6 @@ static void bullet_creation(State state, KeyState keys) {
         Object spaceship = state->info.spaceship;
         Vector2 perpendicular = {-spaceship->orientation.y, spaceship->orientation.x};
         Vector2 offset = vec2_scale(perpendicular, 20);
-
-
-        //if (state->pickupTimer > 0)
 
         Object bullets[3];
         Vector2 positions[3] = {
@@ -691,6 +737,54 @@ static void bullet_creation(State state, KeyState keys) {
     }
 }
 
+static void buddy_bullet_creation(State state) {
+
+
+    if (state->buddy_next_bullet > 0) {
+        state->buddy_next_bullet--;
+    }
+
+    if (state->buddy_next_bullet <= 0 && state->info.buddy) {
+        Object buddy = state->info.buddy;
+
+        Vector2 top_left = {
+            buddy->position.x - 400, 
+            buddy->position.y + 400
+        };
+        Vector2 bottom_right = {
+            buddy->position.x + 400, 
+            buddy->position.y - 400
+        };
+
+        List objects = state_objects(state, top_left, bottom_right);
+        for(ListNode node = list_first(objects);
+            node != LIST_EOF;
+            node = list_next(objects, node)){
+
+            Object obj = list_node_value(objects, node);
+            if(obj->type == ENEMY){
+                Vector2 direction_to_enemy = vec2_normalize(vec2_from_to(buddy->position, obj->position));
+
+                buddy->orientation = direction_to_enemy; // note that if i change this to . position i can create something like a bomb
+
+                Object bullet = create_object(
+                    BULLET,
+                    buddy->position,
+                    vec2_add(buddy->speed, vec2_scale(direction_to_enemy, BULLET_SPEED * state->speed_factor)),
+                    direction_to_enemy,
+                    BULLET_SIZE,
+                    0
+                );
+            
+                set_insert(state->objects, bullet);
+                
+                // Reset bullet firing delay
+                state->buddy_next_bullet = 200;
+                printf("Created bullets\n");
+            }
+        }
+    }
+}
 
 static void asteroid_creation(State state){
 	Object spaceship = state->info.spaceship;
@@ -750,6 +844,32 @@ static void enemy_creation(State state, int enemy_num){
 	}
 }
 
+void spawn_boss(State state) {
+    Vector2 position = vec2_add(
+			state->info.spaceship->position,
+			vec2_from_polar(
+				randf(ENEMY_MIN_DIST, ENEMY_MAX_DIST),	// απόσταση
+				randf(0, 2*PI)							// κατεύθυνση
+			)
+		);
+
+		Vector2 speed = vec2_from_polar(
+			BOSS_SPEED * state->speed_factor,
+			randf(0, 2*PI)
+		);
+
+		Object boss = create_object(
+			BOSS,
+			position,
+			speed,
+			(Vector2){0, 0},
+			BOSS_SIZE,
+			20
+		);
+    set_insert(state->objects, boss);
+}
+
+
 static void enemy_bullet_collision(State state) {
 
     List enemy_list = list_create(NULL);
@@ -788,12 +908,12 @@ static void enemy_bullet_collision(State state) {
             if (CheckCollisionCircleRec(bullet->position, bullet->size, enemy_box)) {
                 enemy->health--;
                 set_remove(state->objects, bullet);
-                free(bullet);
+                // free(bullet);
 
                 if (enemy->health <= 0) {
                     set_remove(state->objects, enemy);
                     free(enemy);
-					state->info.coins += 20;
+					state->info.coins += 40;
                 }
             }
         }
@@ -838,5 +958,41 @@ static void spaceship_enemy_collision(State state){
 			break;
 		}
 	}
-	state->pickupTimer--;
+}
+
+static void spaceship_boss_collision(State state){
+	Object spaceship = state->info.spaceship;
+
+	float search_radius = 2 * ENEMY_MAX_DIST;
+
+	List boss_in_range = state_objects(state,
+											(Vector2){spaceship->position.x - search_radius,spaceship->position.y + search_radius}, 
+											(Vector2){spaceship->position.x + search_radius,spaceship->position.y - search_radius}
+											);
+
+	for(ListNode node = list_first(boss_in_range); 
+		node != LIST_EOF; 						
+		node = list_next(boss_in_range, node)){
+
+		Object boss = list_node_value(boss_in_range, node);
+		if (boss == NULL || boss->type != BOSS) 
+			continue;
+
+		if (spaceship == NULL || spaceship->type != SPACESHIP) 
+			continue; 
+
+		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
+		if (CheckCollisionCircles(
+			spaceship->position,
+			spaceship->size,
+			boss->position,
+			boss->size
+		)) {
+			set_remove(state->objects,boss);
+			free(boss);
+			printf("COLLIEDED WITH BOSS");
+			state->info.spaceship->health-= 4;
+			break;
+		}
+	}
 }

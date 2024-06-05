@@ -10,7 +10,7 @@
 Texture2D spaceship_img;
 Texture2D asteroid_img;
 Texture2D bullet_img;
-Texture2D pickup;
+Texture2D shield_pickup;
 Texture2D heart;
 Texture2D explosion;
 Texture2D enemy_scout;
@@ -22,9 +22,28 @@ Texture2D astronaut;
 Texture2D skip_text_button;
 Texture2D space_background;
 Texture2D wave;
-// Sound bullet_sound;
-//Texture background_img;
-// Sound damage_sound;
+Texture2D boss;
+
+Texture2D shop_frame;
+Texture2D shop_text;
+Texture2D shop_item_frame;
+Texture2D item_icon_frame;
+Texture2D shop_ending_text;
+
+Texture2D tiny_twin_desc;
+Texture2D tiny_twin_image;
+Texture2D tiny_twin_title;
+Texture2D cost_2000;
+
+Texture2D pew_pew_plus_desc;
+Texture2D pew_pew_plus_image; // not imported
+Texture2D pew_pew_plus_title;
+Texture2D cost_1000;
+
+Texture2D healaholic_desc;
+Texture2D healaholic_image; // not imported
+Texture2D healaholic_title;
+Texture2D cost_250;
 
 int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
@@ -58,14 +77,32 @@ void interface_init(){
 
     game_name = LoadTextureFromImage(LoadImage("assets/game_name_v2.png"));
 
+    shop_frame = LoadTextureFromImage(LoadImage("assets/shop_frame.png"));
+    shop_text = LoadTextureFromImage(LoadImage("assets/shop_text.png"));
+    shop_item_frame = LoadTextureFromImage(LoadImage("assets/shop_item_frame.png"));
+    item_icon_frame = LoadTextureFromImage(LoadImage("assets/item_icon_frame.png"));
+    shop_ending_text = LoadTextureFromImage(LoadImage("assets/shop_ending_text.png"));
+
+    tiny_twin_desc = LoadTextureFromImage(LoadImage("assets/tiny_twin_desc.png"));
+    tiny_twin_image = LoadTextureFromImage(LoadImage("assets/tiny_twin_image.png"));
+    tiny_twin_title = LoadTextureFromImage(LoadImage("assets/tiny_twin_title.png"));
+    cost_2000 = LoadTextureFromImage(LoadImage("assets/cost_2000.png"));
+
+    pew_pew_plus_desc = LoadTextureFromImage(LoadImage("assets/pew_pew_plus_desc.png"));
+    pew_pew_plus_image = LoadTextureFromImage(LoadImage("assets/pew_pew_plus_image.png"));
+    pew_pew_plus_title = LoadTextureFromImage(LoadImage("assets/pew_pew_plus_title.png"));
+    cost_1000 = LoadTextureFromImage(LoadImage("assets/cost_1000.png"));
+
+    healaholic_desc = LoadTextureFromImage(LoadImage("assets/healaholic_desc.png"));
+    healaholic_image = LoadTextureFromImage(LoadImage("assets/healaholic_image.png"));
+    healaholic_title = LoadTextureFromImage(LoadImage("assets/healaholic_title.png"));
+    cost_250 = LoadTextureFromImage(LoadImage("assets/cost_250.png"));
+
     start_button = LoadTextureFromImage(LoadImage("assets/start_button.png"));
     info_button = LoadTextureFromImage(LoadImage("assets/info_button.png"));
     exit_button = LoadTextureFromImage(LoadImage("assets/exit_button.png"));
-
     skip_text_button = LoadTextureFromImage(LoadImage("assets/skip_text_button.png"));
-
     space_background = LoadTextureFromImage(LoadImage("assets/space.png"));
-
     wave = LoadTextureFromImage(LoadImage("assets/wave.png"));
     wave.height = wave.height * 0.5;
     wave.width = wave.width * 0.5;
@@ -73,7 +110,15 @@ void interface_init(){
     astronaut.height = astronaut.height * 10;
     astronaut.width = astronaut.width * 10;
     enemy_scout = LoadTextureFromImage(LoadImage("assets/enemy_scout.png"));
-    pickup = LoadTextureFromImage(LoadImage("assets/rocket_pickup.png"));
+
+    boss = LoadTextureFromImage(LoadImage("assets/boss.png"));
+
+
+    shield_pickup = LoadTextureFromImage(LoadImage("assets/shield_pickup.png"));
+    shield_pickup.height = shield_pickup.height * 1.5;
+    shield_pickup.width = shield_pickup.width * 1.5;
+
+
     heart = LoadTextureFromImage(LoadImage("assets/hearts.png"));
 	spaceship_img = LoadTextureFromImage(LoadImage("assets/spaceship.png"));
     asteroid_img = LoadTextureFromImage(LoadImage("assets/asteroid.png"));
@@ -87,10 +132,7 @@ void interface_init(){
     info_button.width = info_button.width *1.2;
     exit_button.height = exit_button.height *1.2;
     exit_button.width = exit_button.width *1.2;
-    // Load sounds
-    // bullet_sound = LoadSound("assets/sound.wav");
-    
-    // damage_sound = LoadSound("assets/hurt.wav");
+
 }
 
 // Κλείνει το interface του παιχνιδιού
@@ -113,9 +155,7 @@ void interface_fade_in() {
 
 // Αρχικοποιεί το start menu του παιχνιδιού
 void interface_draw_menu() {
-        // if (IsKeyPressed(KEY_SPACE)) PlaySound(bullet_sound);      // Play WAV sound
 
-    
     buttonTimer --;
     if (buttonTimer < 0 && buttonCounter == 1){
         buttonTimer = 30;
@@ -202,6 +242,118 @@ void interface_draw_info(State state){
 
 };
 
+static void interface_draw_shop(State state){
+    BeginDrawing();
+
+
+    int shop_frame_x = (SCREEN_WIDTH - shop_frame.width) / 2;
+    int shop_frame_y = (SCREEN_HEIGHT - shop_frame.height) / 2 + 20;
+
+    // Shop frame
+    DrawTexture(shop_frame, shop_frame_x, shop_frame_y, WHITE);
+
+    // Shop text "SHOP"
+    int shop_text_x = shop_frame_x + (shop_frame.width - shop_text.width) / 2; // Center of Shop frame
+    int shop_text_y = shop_frame_y + 25;
+
+    DrawTexture(shop_text, shop_text_x, shop_text_y, WHITE);
+
+    // Item frames in the shop frame
+    int item_frame_x = shop_frame_x + (shop_frame.width - shop_item_frame.width) / 2;
+
+    int item_frame_y1 = shop_text_y + shop_text.height + 25;
+    int item_frame_y2 = item_frame_y1 + shop_item_frame.height + 35;
+    int item_frame_y3 = item_frame_y2 + shop_item_frame.height + 35;
+
+    DrawTexture(shop_item_frame, item_frame_x, item_frame_y1, WHITE);
+    DrawTexture(shop_item_frame, item_frame_x, item_frame_y2, WHITE);
+    DrawTexture(shop_item_frame, item_frame_x, item_frame_y3, WHITE);
+
+    // complaint text 
+    int shop_ending_text_x = shop_frame_x + (shop_frame.width - shop_ending_text.width) / 2;
+    int shop_ending_text_y = shop_frame_y + shop_frame.height - shop_ending_text.height - 20               ; 
+
+    DrawTexture(shop_ending_text, shop_ending_text_x, shop_ending_text_y, WHITE);
+    // HEAL-A-HOLIC
+    int healaholic_title_x = item_frame_x + (shop_item_frame.width - healaholic_title.width) / 2;
+    int healaholic_title_y = item_frame_y1 + 15;
+
+    DrawTexture(healaholic_title, healaholic_title_x, healaholic_title_y, WHITE);
+
+    int healaholic_icon_frame_x = item_frame_x + 10;
+    int healaholic_icon_frame_y = healaholic_title_y + healaholic_title.height - 25;
+
+    DrawTexture(item_icon_frame, healaholic_icon_frame_x, healaholic_icon_frame_y, WHITE);
+
+    int healaholic_image_x = healaholic_icon_frame_x + (item_icon_frame.width - healaholic_image.width) / 2;
+    int healaholic_image_y = healaholic_icon_frame_y + (item_icon_frame.height - healaholic_image.height) / 2;
+
+    DrawTexture(healaholic_image, healaholic_image_x, healaholic_image_y, WHITE);
+
+    int healaholic_desc_x = healaholic_icon_frame_x;
+    int healaholic_desc_y = healaholic_icon_frame_y + item_icon_frame.height + 10;
+
+    DrawTexture(healaholic_desc, healaholic_desc_x, healaholic_desc_y, WHITE);
+
+    int cost_250_x = item_frame_x + shop_item_frame.width - cost_250.width - 10;
+    int cost_250_y = item_frame_y1 + shop_item_frame.height - cost_250.height - 10;
+
+    DrawTexture(cost_250, cost_250_x, cost_250_y, WHITE);
+
+    // PEW PEW PLUS
+    int pew_pew_plus_title_x = item_frame_x + (shop_item_frame.width - pew_pew_plus_title.width) / 2;
+    int pew_pew_plus_title_y = item_frame_y2 + 15;
+
+    DrawTexture(pew_pew_plus_title, pew_pew_plus_title_x, pew_pew_plus_title_y, WHITE);
+
+    int pew_pew_plus_icon_frame_x = item_frame_x + 10;
+    int pew_pew_plus_icon_frame_y = pew_pew_plus_title_y + pew_pew_plus_title.height - 25;
+
+    DrawTexture(item_icon_frame, pew_pew_plus_icon_frame_x, pew_pew_plus_icon_frame_y, WHITE);
+
+    int pew_pew_plus_image_x = pew_pew_plus_icon_frame_x + (item_icon_frame.width - pew_pew_plus_image.width) / 2;
+    int pew_pew_plus_image_y = pew_pew_plus_icon_frame_y + (item_icon_frame.height - pew_pew_plus_image.height) / 2;
+
+    DrawTexture(pew_pew_plus_image, pew_pew_plus_image_x, pew_pew_plus_image_y, WHITE);
+
+    int pew_pew_plus_desc_x = pew_pew_plus_icon_frame_x;
+    int pew_pew_plus_desc_y = pew_pew_plus_icon_frame_y + item_icon_frame.height + 10;
+
+    DrawTexture(pew_pew_plus_desc, pew_pew_plus_desc_x, pew_pew_plus_desc_y, WHITE);
+
+    int cost_1000_x = item_frame_x + shop_item_frame.width - cost_1000.width - 10;
+    int cost_1000_y = item_frame_y2 + shop_item_frame.height - cost_1000.height - 10;
+
+    DrawTexture(cost_1000, cost_1000_x, cost_1000_y, WHITE);
+
+    // TINY TWIN
+    int tiny_twin_title_x = item_frame_x + (shop_item_frame.width - tiny_twin_title.width) / 2;
+    int tiny_twin_title_y = item_frame_y3 + 15; // Adjust as needed for vertical centering
+
+    DrawTexture(tiny_twin_title, tiny_twin_title_x, tiny_twin_title_y, WHITE);
+
+    int tiny_twin_icon_frame_x = item_frame_x + 10; 
+    int tiny_twin_icon_frame_y = tiny_twin_title_y + tiny_twin_title.height - 25;
+    DrawTexture(item_icon_frame, tiny_twin_icon_frame_x, tiny_twin_icon_frame_y, WHITE);
+
+    int tiny_twin_image_x = tiny_twin_icon_frame_x + (item_icon_frame.width - tiny_twin_image.width) / 2;
+    int tiny_twin_image_y = tiny_twin_icon_frame_y + (item_icon_frame.height - tiny_twin_image.height) / 2;
+
+    DrawTexture(tiny_twin_image, tiny_twin_image_x, tiny_twin_image_y, WHITE);
+
+    // Position the description below the icon frame
+    int tiny_twin_desc_x = tiny_twin_icon_frame_x;
+    int tiny_twin_desc_y = tiny_twin_icon_frame_y + item_icon_frame.height + 10;
+
+    DrawTexture(tiny_twin_desc, tiny_twin_desc_x, tiny_twin_desc_y, WHITE);
+
+    // Position the cost at the bottom right of the item frame
+    int shop_cost_x = item_frame_x + shop_item_frame.width - cost_2000.width - 10;
+    int shop_cost_y = item_frame_y3 + shop_item_frame.height - cost_2000.height - 10;
+
+    DrawTexture(cost_2000, shop_cost_x, shop_cost_y, WHITE);
+}
+
 const char *introTexts[] = {
     "Hello traveler!\nI am BRUNO.",
     "You have to help me.\nMy galaxy is under attack!",
@@ -215,8 +367,7 @@ void interface_draw_intro(State state, GameState *gameState) {
     BeginDrawing();
     ClearBackground(menu_color);
 
-    // Draw spaceman (rectangle for now)
-    // DrawRectangle(SCREEN_WIDTH / 2 - 75, 150, 150, 300, RED);
+    // Draw astronaut
     DrawTexture(astronaut,SCREEN_WIDTH / 2 - astronaut.width /2 ,150,WHITE);
 
     // Draw text box
@@ -310,6 +461,20 @@ void interface_draw_frame(State state) {
                     
     DrawTexturePro(spaceship_img, spaceship_source, spaceship_dest, (Vector2){spaceship_dest.width / 2, spaceship_dest.height / 2}, rotation, WHITE);
 
+
+    if (state_info(state)->buddy) {
+        Rectangle buddy_source = {0, 0, tiny_twin_image.width, tiny_twin_image.height};
+        Rectangle buddy_dest = {
+            state_info(state)->buddy->position.x,
+            state_info(state)->buddy->position.y,
+            tiny_twin_image.width,
+            tiny_twin_image.height
+        };
+        Vector2 buddy_origin = {buddy_dest.width / 2, buddy_dest.height / 2};
+        DrawTexturePro(tiny_twin_image, buddy_source, buddy_dest, buddy_origin, rotation, WHITE);
+    }
+
+
     Vector2 top_left = {
         state_info(state)->spaceship->position.x - ASTEROID_MAX_DIST, 
         state_info(state)->spaceship->position.y + ASTEROID_MAX_DIST
@@ -339,9 +504,9 @@ void interface_draw_frame(State state) {
             Vector2 origin = {object->size * 30 / 2, object->size * 30 / 2};
             DrawTexturePro(bullet_img, source, dest, origin, rotation, WHITE);
         } else if (object->type == PICKUP) {
-            Rectangle source = (Rectangle){PICKUP_SIZE * pickupIndex, 0, PICKUP_SIZE, PICKUP_SIZE};
+            Rectangle source = (Rectangle){PICKUP_SIZE * 1.5 * pickupIndex, 0, PICKUP_SIZE* 1.5, PICKUP_SIZE* 1.5};
             Rectangle dest = (Rectangle){object->position.x, object->position.y, source.width, source.height};
-            DrawTexturePro(pickup, source, dest, (Vector2){0, 0}, 0, WHITE);
+            DrawTexturePro(shield_pickup, source, dest, (Vector2){0, 0}, 0, WHITE);
         } else if (object->type == ENEMY) {
             Vector2 directionToSpaceship = {
                 state_info(state)->spaceship->position.x - object->position.x,
@@ -358,6 +523,19 @@ void interface_draw_frame(State state) {
             Vector2 origin = {dest.width / 2, dest.height / 2};
 
             DrawTexturePro(enemy_scout, source, dest, origin, enemy_rotation, WHITE);
+        } else if (object->type == BOSS) {
+            Vector2 directionToSpaceship = {
+                state_info(state)->spaceship->position.x - object->position.x,
+                state_info(state)->spaceship->position.y - object->position.y
+            };
+            float enemy_radians = atan2(directionToSpaceship.y, directionToSpaceship.x);
+            float enemy_rotation = enemy_radians * (180 / PI) + 90;
+
+            Rectangle source = (Rectangle){0, 0, BOSS_SIZE, BOSS_SIZE};
+            Rectangle dest = {object->position.x, object->position.y, object->size * 3, object->size * 3 };
+            Vector2 origin = {dest.width / 2, dest.height / 2};
+
+            DrawTexturePro(boss, source, dest, origin, enemy_rotation, WHITE);
         }
     }
     
@@ -375,10 +553,13 @@ void interface_draw_frame(State state) {
     Rectangle wave_dest = (Rectangle){0, 0, wave_source.width, wave_source.height};
     DrawTexturePro(wave, wave_source, wave_dest, (Vector2){ - SCREEN_WIDTH /2 + 250/2, -20}, 0, WHITE);
 
-
     // Draw the coins and the FPS counter
     DrawText(TextFormat("%04d", state_info(state)->coins), 780, 20, 40, WHITE);
     DrawFPS(0, 0);
+
+    if(state_info(state)->shop_open){ // make it open only when a wave has passed
+        interface_draw_shop(state);
+    }
 
     EndDrawing();
 }
