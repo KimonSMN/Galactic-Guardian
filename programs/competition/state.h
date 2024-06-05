@@ -28,7 +28,7 @@
 #define ENEMY_SIZE 32
 
 #define BOSS_SIZE 128
-#define BOSS_HEALTH 11
+#define BOSS_HEALTH 44
 #define BOSS_SPEED 3
 
 #define SPACESHIP_HEALTH 4

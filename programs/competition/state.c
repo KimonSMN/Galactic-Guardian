@@ -223,7 +223,7 @@ State state_create() {
 
     state->wave.current_wave = 4;
     state->wave.time_until_next_wave = 0;
-    state->wave.wave_delay = 2000; // 2000 ~30 sec 
+    state->wave.wave_delay = 1000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
 
     state->shop.more_bullets = 1;
@@ -986,7 +986,7 @@ static void boss_bullet_collision(State state) {
         Rectangle boss_box = {
             boss->position.x - (BOSS_SIZE * 3 / 2),
             boss->position.y - (BOSS_SIZE * 3 / 2),
-            BOSS_SIZE * 2 ,
+            BOSS_SIZE * 2  ,
             BOSS_SIZE * 2
         };  
 

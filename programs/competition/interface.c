@@ -582,9 +582,9 @@ void interface_draw_frame(State state) {
     EndMode2D();
 
     if(!state_info(state)->boss_died){
-        bossHealthIndex = state_info(state)->boss_health ;
+        bossHealthIndex = (44 - state_info(state)->boss_health) /(44/11)  ;
 
-        Rectangle health_source = {-bossHealthIndex * 500, 0, 500, boss_healthbar.height};
+        Rectangle health_source = {bossHealthIndex * 500, 0, 500, boss_healthbar.height};
         Rectangle health_dest = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70, 500, boss_healthbar.height};
         DrawTexturePro(boss_healthbar, health_source, health_dest, (Vector2){health_dest.width/2,health_dest.height/2}, 0, WHITE);
     }
