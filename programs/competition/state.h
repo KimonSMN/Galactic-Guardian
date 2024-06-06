@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "ADTList.h"
 
-// Χαρακτηριστικά αντικειμένων
+// Χαρακτηριστικά αντικειμένων.
 #define ASTEROID_NUM 6
 #define ASTEROID_MIN_SIZE 10
 #define ASTEROID_MAX_SIZE 80
@@ -18,32 +18,28 @@
 #define SPACESHIP_ROTATION (PI/32)
 #define SPACESHIP_ACCELERATION 0.1
 #define SPACESHIP_SLOWDOWN 0.99
+#define SPACESHIP_HEALTH 4 // Ζωη παικτη
 
-
+// Χαρακτηριστικα Εχθρου.
 #define ENEMY_NUM 4
 #define ENEMY_SPEED 2
 #define ENEMY_MIN_DIST 700
 #define ENEMY_MAX_DIST 900
-
 #define ENEMY_SIZE 32
 
+// Χαρακτηριστικα Boss.
 #define BOSS_SIZE 128
 #define BOSS_HEALTH 44
 #define BOSS_SPEED 4
 
+// Χαρακτηριστικα τελικου Boss.
 #define FINAL_BOSS_SIZE 128
 #define FINAL_BOSS_HEALTH 88
 #define FINAL_BOSS_SPEED 3
 
-#define SPACESHIP_HEALTH 4
-#define HEART_SIZE 64
+
+#define HEART_SIZE 64	// Μεγεθος εικονας καρδιας
 #define HEART_COUNT 4
-
-#define PICKUP_SIZE 32
-#define PICKUP_NUM 2
-#define PICKUP_COUNT 15
-#define PICKUP_TIME 4
-
 
 #define SCREEN_WIDTH 900	// Πλάτος της οθόνης
 #define SCREEN_HEIGHT 700	// Υψος της οθόνης
@@ -57,15 +53,15 @@ typedef enum {
 } VerticalMovement;
 
 typedef struct game_state {
-    bool start_menu;
-    bool gameplay;
-    bool introduction;
-    bool info_menu;
-    bool game_over;
+    bool start_menu;			// Αρχικη οθονη
+    bool gameplay;				// Το παινχιδι εκει που πυροβολας
+    bool introduction;			// Εκει που μιλαει ο αστροναυτης
+    bool info_menu;				// Μενου πληροφοριων
+    bool game_over;				
 	bool game_won;
 } GameState;
 
-// Πληροφορίες για κάθε αντικείμενο
+// Πληροφορίες για κάθε αντικείμενο.
 typedef struct object {
 	ObjectType type;			// Τύπος (Διαστημόπλοιο, Αστεροειδής, Σφαίρα)
 	Vector2 position;			// Θέση
@@ -76,9 +72,8 @@ typedef struct object {
 }* Object;
 
 typedef struct shop {
-	int more_bullets;
-	bool buddy;
-	// empty for now
+	int more_bullets;			// Item στο shop
+	bool buddy;					// Item στο shop
 }* Shop;
 
 typedef struct text_info {
@@ -88,38 +83,41 @@ typedef struct text_info {
     float delay;
 }* TextInfo;
 
-// Γενικές πληροφορίες για την κατάσταση του παιχνιδιού
+// Γενικές πληροφορίες για την κατάσταση του παιχνιδιού.
 typedef struct state_info {
 	Object spaceship;				// πληροφορίες για τη το διαστημόπλοιο
-	Object buddy;
+	Object buddy;					// πληροφορίες για τη τον βοηθο του διαστημοπλοιου 
 	bool paused;					// true αν το παιχνίδι είναι paused
-	int coins;						// το τρέχον σκορ
+	
 	bool lost;						// true αν οι καρδιες ειναι 0
-	bool shop_open; 
-	bool purchase_complete;
-	bool not_enough_coins;
-	bool boss_spawned; 
-	bool boss_died;
-	int boss_health;
-	bool final_boss_spawned;
-	bool final_boss_died;
-	int final_boss_health;
-	bool final_boss_attacked;
-	int shockwave_timer;
+	bool game_won;					// true αν νικησε ο παικτης το τελικο boss στο wave 10
 
-	bool game_won;
+	bool shop_open; 				// true αν το κουμπι "s" πατηθηκε 
+	bool purchase_complete;			// true αν ο παικτης εχει αρκετα coins και καταφερε να αγορασει αντικειμενο στο shop
+	bool not_enough_coins;			// true αν ο παικτης ειναι αφραγκος 
+	int coins;						// τα coins
+
+	bool boss_spawned; 				// Flag για το αν εχει εμφανιστει το boss (wave 5)
+	bool boss_died;					// Flag για το αν ζει το boss
+	int boss_health;				// Η ζωη του boss 
+
+	bool final_boss_spawned; 		// Flag για το αν εχει εφανιστει το τελικο boss
+	bool final_boss_died; 			// Flag για το αν ζει το τελικο boss
+	int final_boss_health;			// Η ζωη του τελικου boss
+	bool final_boss_attacked;		// Flag για αν εχει επιτεθει το τελικο boss
+	int shockwave_timer;			// Timer που οριζει τον χρονο μεχρι την επομενη επιθεση του τελικου boss
 }* StateInfo;
 
 typedef struct wave_info {
-	int current_wave;
-    int time_until_next_wave;
-    int wave_delay;  
-    int enemies_per_wave;
+	int current_wave;				// Το τρεχων wave
+    int time_until_next_wave;		// Timer μεχρι το επομενο wave
+    int wave_delay;  				// Ο χρονος που περνει το καθε wave
+    int enemies_per_wave;			// Οι εχθροι που εχει το καθε wave
 }* WaveInfo;
 
-// Πληροφορίες για το ποια πλήκτρα είναι πατημένα
+// Πληροφορίες για το ποια πλήκτρα είναι πατημένα.
 typedef struct key_state {
-	bool up;						// true αν το αντίστοιχο πλήκτρο είναι πατημένο
+	bool up;						// true αν το αντίστοιχο πλήκτρο είναι πατημένο:
 	bool left;
 	bool right;
 	bool enter;
@@ -133,26 +131,32 @@ typedef struct key_state {
 }* KeyState;
 
 typedef struct menu_button{
-	bool start;
+	bool start;		// Κουμπια στην αρχικη οθονη:
 	bool info;
 	bool exit;
-	int counter;
+	int counter;	// Counter ωστε να ξερουμε πιο κουμπι ειναι επιλεγμενο
 } MenuButton;
 
 // Η κατάσταση του παιχνιδιού (handle)
 typedef struct state* State;
 
-// Δημιουργεί και επιστρέφει την αρχική κατάσταση του παιχνιδιού
+// Δημιουργεί και επιστρέφει την αρχική κατάσταση του παιχνιδιού.
 
 State state_create();
 
-// Επιστρέφει τις βασικές πληροφορίες του παιχνιδιού στην κατάσταση state
+// Επιστρέφει τις βασικές πληροφορίες του παιχνιδιού στην κατάσταση state.
 
 StateInfo state_info(State state);
 
+// Επιστρέφει πληοροφοριες για αυτα που λεει ο astronaut.
+
 TextInfo state_text(State state);
 
+// Επιστρέφει πληροφοριες για τα wave.
+
 WaveInfo state_wave(State state);
+
+// Επιστρεφει την ζωη του αντικειμενου Object.
 
 int object_health(Object object);
 

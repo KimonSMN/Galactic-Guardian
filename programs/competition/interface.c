@@ -10,7 +10,6 @@
 Texture2D spaceship_img;
 Texture2D asteroid_img;
 Texture2D bullet_img;
-Texture2D shield_pickup;
 Texture2D heart;
 Texture2D explosion;
 Texture2D enemy_scout;
@@ -79,8 +78,6 @@ Sound boss_roar;
 Music background_music;
 Music intro_music;
 
-int pickupIndex = 0;
-float pickupTimer = PICKUP_TIME;
 
 int coinIndex = 0;
 float coinTimer = 4; // number of sprites
@@ -181,11 +178,6 @@ void interface_init(){
     astronaut.height = astronaut.height * 10;
     astronaut.width = astronaut.width * 10;
     enemy_scout = LoadTextureFromImage(LoadImage("assets/images/enemy_scout.png"));
-
-
-    shield_pickup = LoadTextureFromImage(LoadImage("assets/images/shield_pickup.png"));
-    shield_pickup.height = shield_pickup.height * 1.5;
-    shield_pickup.width = shield_pickup.width * 1.5;
 
     game_over = LoadTextureFromImage(LoadImage("assets/images/game_over.png"));
     restart = LoadTextureFromImage(LoadImage("assets/images/restart.png"));
@@ -603,14 +595,7 @@ void interface_draw_frame(State state) {
 
     int scale_factor = 5;
 
-    pickupTimer--;
-    if (pickupTimer < 0) {
-        pickupTimer = PICKUP_TIME;
-        pickupIndex++;
-        if (pickupIndex >= 9) {
-            pickupIndex = 0;
-        }
-    }
+
 
     coinTimer--;
     if (coinTimer < 0) {
@@ -698,10 +683,6 @@ void interface_draw_frame(State state) {
             Vector2 origin = {object->size * 30 / 2, object->size * 30 / 2};
             DrawTexturePro(bullet_img, source, dest, origin, rotation, WHITE);
 
-        } else if (object->type == PICKUP) {
-            Rectangle source = (Rectangle){PICKUP_SIZE * 1.5 * pickupIndex, 0, PICKUP_SIZE* 1.5, PICKUP_SIZE* 1.5};
-            Rectangle dest = (Rectangle){object->position.x, object->position.y, source.width, source.height};
-            DrawTexturePro(shield_pickup, source, dest, (Vector2){0, 0}, 0, WHITE);
         } else if (object->type == ENEMY) {
             Vector2 directionToSpaceship = {
                 state_info(state)->spaceship->position.x - object->position.x,
@@ -800,4 +781,3 @@ void interface_draw_frame(State state) {
    
     EndDrawing();
 }
-
