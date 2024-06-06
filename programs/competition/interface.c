@@ -22,7 +22,6 @@ Texture2D astronaut;
 Texture2D skip_text_button;
 Texture2D space_background;
 Texture2D wave;
-Texture2D boss;
 
 Texture2D shop_frame;
 Texture2D shop_text;
@@ -45,6 +44,8 @@ Texture2D healaholic_image; // not imported
 Texture2D healaholic_title;
 Texture2D cost_250;
 
+Texture2D boss;
+Texture2D final_boss;
 Texture2D boss_healthbar;
 
 Texture2D coin;
@@ -52,6 +53,10 @@ Texture2D purchase_complete;
 Texture2D not_enough_coins;
 
 Texture2D info_menu;
+
+Texture2D game_over;
+Texture2D restart;
+Texture2D back;
 
 Sound bought_item; 
 Sound cant_buy; 
@@ -84,6 +89,7 @@ int skipTextIndex = 0;
 float skipTextTimer = 8;
 
 int bossHealthIndex = 0;
+int finalBossHealthIndex = 0;
 
 int buttonCounter = 1;
 float buttonTimer = 30;
@@ -152,6 +158,8 @@ void interface_init(){
     cost_250 = LoadTextureFromImage(LoadImage("assets/images/cost_250.png"));
 
     boss_healthbar = LoadTextureFromImage(LoadImage("assets/images/boss_healthbar.png"));
+    boss = LoadTextureFromImage(LoadImage("assets/images/boss.png"));
+    final_boss = LoadTextureFromImage(LoadImage("assets/images/final_boss.png"));
 
     coin = LoadTextureFromImage(LoadImage("assets/images/coin.png"));
     purchase_complete = LoadTextureFromImage(LoadImage("assets/images/purchase_complete.png"));
@@ -170,12 +178,14 @@ void interface_init(){
     astronaut.width = astronaut.width * 10;
     enemy_scout = LoadTextureFromImage(LoadImage("assets/images/enemy_scout.png"));
 
-    boss = LoadTextureFromImage(LoadImage("assets/images/boss.png"));
-
 
     shield_pickup = LoadTextureFromImage(LoadImage("assets/images/shield_pickup.png"));
     shield_pickup.height = shield_pickup.height * 1.5;
     shield_pickup.width = shield_pickup.width * 1.5;
+
+    game_over = LoadTextureFromImage(LoadImage("assets/images/game_over.png"));
+    restart = LoadTextureFromImage(LoadImage("assets/images/restart.png"));
+    back = LoadTextureFromImage(LoadImage("assets/images/back_to_menu.png"));
 
 
     heart = LoadTextureFromImage(LoadImage("assets/images/hearts.png"));
@@ -341,18 +351,33 @@ void interface_draw_info(State state){
     DrawTexture(space_background, 0, 0, WHITE);
 
     DrawTexture(info_menu,0,0,WHITE);    
-    // Game Controls: Provide a list of all the controls used in the game
-    // Gameplay Instructions: Explain the mechanics of the game
-    // Scoring System: Describe how the scoring works.
-    // Power-Ups and Items: Explain their effects.
 
     EndDrawing();
 
 };
 
+void interface_draw_lost(State state) {
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    int game_over_x = (SCREEN_WIDTH / 2) - (game_over.width / 2);
+    int game_over_y = (SCREEN_HEIGHT / 2) - (game_over.height / 2) - restart.height - 35; 
+    int restart_x = (SCREEN_WIDTH / 2) - (restart.width / 2);
+    int restart_y = (SCREEN_HEIGHT / 2) - (restart.height / 2);
+    int back_x = (SCREEN_WIDTH / 2) - (back.width / 2);
+    int back_y = (SCREEN_HEIGHT / 2) - (back.height / 2) + restart.height + 25;
+
+
+    DrawTexture(game_over, game_over_x, game_over_y, WHITE);
+    DrawTexture(restart, restart_x, restart_y, WHITE);
+    DrawTexture(back, back_x, back_y, WHITE);
+
+    EndDrawing();
+}
+
+
 static void interface_draw_shop(State state){
     BeginDrawing();
-
 
     int shop_frame_x = (SCREEN_WIDTH - shop_frame.width) / 2;
     int shop_frame_y = (SCREEN_HEIGHT - shop_frame.height) / 2 + 20;
@@ -491,8 +516,8 @@ static void interface_draw_shop(State state){
 const char *introTexts[] = {
     "Hello traveler!\nI am BRUNO.",
     "You have to help me.\nMy galaxy is under attack!",
-    "You must defend it from\n10 grueling waves of enemies\n.",
-    "But be careful, daunting bosses\nawait you at waves 5 and 10"
+    "You must defend it from\n10 grueling waves of enemies.",
+    "But be careful, daunting bosses\nawait you at waves 5 and 10!"
 };
 const int numTexts = sizeof(introTexts) / sizeof(introTexts[0]);
 
@@ -548,6 +573,7 @@ void interface_draw_intro(State state, GameState *gameState) {
 
     EndDrawing();
 }
+
 
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
 void interface_draw_frame(State state) {
@@ -683,6 +709,26 @@ void interface_draw_frame(State state) {
 
             DrawTexturePro(boss, source, dest, origin, boss_rotation, WHITE);
 
+        } else if (object->type == FINAL_BOSS) {
+            Vector2 directionToSpaceship = {
+                state_info(state)->spaceship->position.x - object->position.x,
+                state_info(state)->spaceship->position.y - object->position.y
+            };
+            float final_boss_radians = atan2(directionToSpaceship.y, directionToSpaceship.x);
+            float final_boss_rotation = final_boss_radians * (180 / PI) + 90;
+
+            Rectangle source = (Rectangle){0, 0, FINAL_BOSS_SIZE, FINAL_BOSS_SIZE};
+            Rectangle dest = {object->position.x, object->position.y, object->size * 3, object->size * 3 };
+            Vector2 origin = {dest.width / 2, dest.height / 2};
+
+            DrawTexturePro(final_boss, source, dest, origin, final_boss_rotation, WHITE);
+            // draw boss shockwave
+            if (state_info(state)->final_boss_attacked) {
+                Color shockwave_color = Fade(GREEN, 0.5);
+
+                // Draw the shockwave circle around the boss
+                DrawCircleV(object->position, 300, shockwave_color);
+            }
         }
     }
     
@@ -695,6 +741,15 @@ void interface_draw_frame(State state) {
         Rectangle health_dest = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70, 500, boss_healthbar.height};
         DrawTexturePro(boss_healthbar, health_source, health_dest, (Vector2){health_dest.width/2,health_dest.height/2}, 0, WHITE);
     }
+
+    if(!state_info(state)->final_boss_died){
+        bossHealthIndex = (88 - state_info(state)->boss_health) /(88/11)  ;
+
+        Rectangle health_source = {bossHealthIndex * 500, 0, 500, boss_healthbar.height};
+        Rectangle health_dest = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70, 500, boss_healthbar.height};
+        DrawTexturePro(boss_healthbar, health_source, health_dest, (Vector2){health_dest.width/2,health_dest.height/2}, 0, WHITE);
+    }
+
 
     heartIndex = state_info(state)->spaceship->health; 
 

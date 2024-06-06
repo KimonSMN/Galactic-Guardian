@@ -4,8 +4,51 @@
 #include "state.h"
 
 State state;
-GameState gameState = {true, false, false, false, false};
+GameState gameState = {true, false, false, false, false, false};
 MenuButton button = {true, false, false, 1};
+
+
+void ResetGame() {
+    state_destroy(state);     // Destroy the current state
+    state = state_create();   // Create a new state
+
+    // Reset button states
+    button.start = true;
+    button.info = false;
+    button.exit = false;
+    button.counter = 1;
+
+    // Reset game state variables
+    gameState.start_menu = false;
+    gameState.gameplay = true;
+    gameState.info_menu = false;
+    gameState.game_over = false;
+    gameState.introduction = false;
+
+    StopMusicStream(intro_music); // Restart intro music
+    PlayMusicStream(background_music); // Pause background music
+}
+
+void BackToMenu() {
+    state_destroy(state);     // Destroy the current state
+    state = state_create();   // Create a new state
+
+    // Reset button states
+    button.start = false;
+    button.info = false;
+    button.exit = false;
+    button.counter = 1;
+
+    // Reset game state variables
+    gameState.start_menu = true;
+    gameState.gameplay = false;
+    gameState.info_menu = false;
+    gameState.game_over = false;
+    gameState.introduction = false;
+
+    PlayMusicStream(intro_music); // Restart intro music
+    StopMusicStream(background_music); // Pause background music
+}
 
 void UpdateMenu() {
     if (IsKeyPressed(KEY_DOWN)) {
@@ -69,8 +112,14 @@ int main() {
             state_update(state, &keys);
             interface_draw_frame(state);
 
-            if (state_info(state)->lost) 
+            if (state_info(state)->lost) {
+                gameState.gameplay = false;
+                gameState.game_over = true;
+            }
+                
+            if(state_info(state)->game_won)
                 break;
+        
         } else if (gameState.info_menu){
             interface_draw_info(state);
             if (IsKeyPressed(KEY_B)) {
@@ -78,7 +127,15 @@ int main() {
                 gameState.start_menu = true;
             }
         } else if (gameState.game_over) {
-            break;
+            interface_draw_lost(state);
+            StopMusicStream(background_music);
+            StopMusicStream(intro_music);
+            if (IsKeyPressed(KEY_ENTER)){
+                ResetGame(); 
+            }
+            else if(IsKeyPressed(KEY_B)){
+                BackToMenu();
+            }
         } else if (gameState.introduction){
             interface_draw_intro(state, &gameState);
         }

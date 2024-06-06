@@ -21,6 +21,8 @@ void interface_draw_intro();
 
 void interface_fade_in();
 
+void interface_draw_lost();
+
 // Κλείνει το interface του παιχνιδιού
 void interface_close();
 

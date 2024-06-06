@@ -29,7 +29,11 @@
 
 #define BOSS_SIZE 128
 #define BOSS_HEALTH 44
-#define BOSS_SPEED 3
+#define BOSS_SPEED 4
+
+#define FINAL_BOSS_SIZE 128
+#define FINAL_BOSS_HEALTH 88
+#define FINAL_BOSS_SPEED 3
 
 #define SPACESHIP_HEALTH 4
 #define HEART_SIZE 64
@@ -45,7 +49,7 @@
 #define SCREEN_HEIGHT 700	// Υψος της οθόνης
 
 typedef enum {
-	SPACESHIP, ASTEROID, BULLET, PICKUP, ENEMY, BUDDY, BOSS
+	SPACESHIP, ASTEROID, BULLET, PICKUP, ENEMY, BUDDY, BOSS, FINAL_BOSS
 } ObjectType;
 
 typedef enum {
@@ -58,6 +62,7 @@ typedef struct game_state {
     bool introduction;
     bool info_menu;
     bool game_over;
+	bool game_won;
 } GameState;
 
 // Πληροφορίες για κάθε αντικείμενο
@@ -96,7 +101,13 @@ typedef struct state_info {
 	bool boss_spawned; 
 	bool boss_died;
 	int boss_health;
+	bool final_boss_spawned;
+	bool final_boss_died;
+	int final_boss_health;
+	bool final_boss_attacked;
+	int shockwave_timer;
 
+	bool game_won;
 }* StateInfo;
 
 typedef struct wave_info {

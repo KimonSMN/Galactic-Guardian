@@ -171,7 +171,7 @@ static void asteroid_creation(State state);
 
 static void enemy_creation(State state, int enemy_num);
 
-static void spawn_boss(State state);
+static void spawn_boss(State state, ObjectType type, int boss_health, int boss_speed, int boss_size);
 
 static void bullet_creation(State state, KeyState keys);
 
@@ -191,7 +191,9 @@ static void enemy_bullet_collision(State state);
 
 static void boss_bullet_collision(State state);
 
+static void final_boss_bullet_collision(State state);
 
+static void final_boss_shockwave(State state);
 // Δημιουργεί και επιστρέφει την αρχική κατάσταση του παιχνιδιού
 
 State state_create() {
@@ -204,7 +206,7 @@ State state_create() {
     state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
     state->buddy_next_bullet = 0;
-	state->info.coins = 3000;
+	state->info.coins = 2000;
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
@@ -220,9 +222,14 @@ State state_create() {
     state->info.boss_died = true;
     state->info.boss_health = 0;
 
+    state->info.final_boss_spawned= false;
+    state->info.final_boss_died = true;
+    state->info.final_boss_health = 0;
+    state->info.final_boss_attacked = false;
+
     state->purchaseTimer = 0;
 
-    state->wave.current_wave = 3;
+    state->wave.current_wave = 4;
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 1000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
@@ -231,7 +238,7 @@ State state_create() {
     state->shop.buddy = false;
 
     state->info.buddy = NULL;
-
+    state->info.game_won = false;
 	// Δημιουργούμε το vector των αντικειμένων, και προσθέτουμε αντικείμενα
 	state->objects = set_create(compare_objects, NULL);
 
@@ -276,11 +283,18 @@ static void manage_waves(State state) {
     }
 
     if (state->wave.current_wave == 5 && !state->info.boss_spawned) {
-        spawn_boss(state);
+        spawn_boss(state,BOSS,BOSS_HEALTH, BOSS_SPEED, BOSS_SIZE);
         state->wave.time_until_next_wave = 2000000;
         state->info.boss_spawned = true;
         state->info.boss_died = false;
     } else if(state->wave.current_wave == 5 && state->info.boss_died){
+        state->wave.time_until_next_wave = 0;
+    } else if(state->wave.current_wave == 10 && !state->info.final_boss_spawned){
+        spawn_boss(state,FINAL_BOSS ,FINAL_BOSS_HEALTH, FINAL_BOSS_SPEED, FINAL_BOSS_SIZE);
+        state->wave.time_until_next_wave = 2000000;
+        state->info.final_boss_spawned = true;
+        state->info.final_boss_died = false;
+    }else if(state->wave.current_wave == 10 && state->info.final_boss_died){
         state->wave.time_until_next_wave = 0;
     }
     
@@ -462,6 +476,21 @@ void state_update(State state, KeyState keys) {
         return;
     }
 
+    static int shockwave_timer = 0;
+    if (state->info.final_boss_spawned && !state->info.final_boss_died) {
+        shockwave_timer++;
+        if (shockwave_timer >= 300) {
+            final_boss_shockwave(state);
+            shockwave_timer = 0;
+        }
+    }
+
+    if (state->info.final_boss_attacked) {
+        state->info.shockwave_timer--;
+        if (state->info.shockwave_timer <= 0) {
+            state->info.final_boss_attacked = false;
+        }
+    }   
     manage_waves(state);
 
     List objects_to_update = state_objects(state, top_left, bottom_right);
@@ -486,6 +515,13 @@ void state_update(State state, KeyState keys) {
             Vector2 direction = vec2_from_to(obj->position, state->info.spaceship->position);
             direction = vec2_normalize(direction);
             Vector2 velocity = vec2_scale(direction, BOSS_SPEED);
+            set_remove(state->objects, obj);
+            obj->position = vec2_add(obj->position, vec2_scale(velocity, state->speed_factor));
+            set_insert(state->objects, obj);
+        } else if (obj->type == FINAL_BOSS) {
+            Vector2 direction = vec2_from_to(obj->position, state->info.spaceship->position);
+            direction = vec2_normalize(direction);
+            Vector2 velocity = vec2_scale(direction, FINAL_BOSS_SPEED);
             set_remove(state->objects, obj);
             obj->position = vec2_add(obj->position, vec2_scale(velocity, state->speed_factor));
             set_insert(state->objects, obj);
@@ -550,15 +586,16 @@ void state_update(State state, KeyState keys) {
     asteroid_bullet_collision(state);
     spaceship_asteroid_collision(state);
     enemy_bullet_collision(state);
-    boss_bullet_collision(state);
     spaceship_enemy_collision(state);
+    boss_bullet_collision(state);
     spaceship_boss_collision(state);
+    final_boss_bullet_collision(state);
 }
 
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
 void state_destroy(State state) {
-	// Προς υλοποίηση
+	free(state);
 }
 
 
@@ -786,12 +823,12 @@ static void buddy_bullet_creation(State state) {
         Object buddy = state->info.buddy;
 
         Vector2 top_left = {
-            buddy->position.x - 400, 
-            buddy->position.y + 400
+            buddy->position.x - 700, 
+            buddy->position.y + 700
         };
         Vector2 bottom_right = {
-            buddy->position.x + 400, 
-            buddy->position.y - 400
+            buddy->position.x + 700, 
+            buddy->position.y - 700
         };
 
         List objects = state_objects(state, top_left, bottom_right);
@@ -800,7 +837,7 @@ static void buddy_bullet_creation(State state) {
             node = list_next(objects, node)){
 
             Object obj = list_node_value(objects, node);
-            if(obj->type == ENEMY){
+            if(obj->type == ENEMY || obj->type == BOSS ||obj->type == FINAL_BOSS){
                 Vector2 direction_to_enemy = vec2_normalize(vec2_from_to(buddy->position, obj->position));
 
                 buddy->orientation = direction_to_enemy; // note that if i change this to . position i can create something like a bomb
@@ -884,7 +921,7 @@ static void enemy_creation(State state, int enemy_num){
 	}
 }
 
-void spawn_boss(State state) {
+void spawn_boss(State state, ObjectType type, int boss_health, int boss_speed, int boss_size) {
     Vector2 position = vec2_add(
 			state->info.spaceship->position,
 			vec2_from_polar(
@@ -894,19 +931,19 @@ void spawn_boss(State state) {
 		);
 
 		Vector2 speed = vec2_from_polar(
-			BOSS_SPEED * state->speed_factor,
+			boss_speed * state->speed_factor,
 			randf(0, 2*PI)
 		);
 
 		Object boss = create_object(
-			BOSS,
+			type,
 			position,
 			speed,
 			(Vector2){0, 0},
-			BOSS_SIZE,
-			BOSS_HEALTH
+			boss_size,
+			boss_health
 		);
-    state->info.boss_health = BOSS_HEALTH;
+    state->info.boss_health = boss_health;
     set_insert(state->objects, boss);
     play_sound(6); // boss roar
 }
@@ -957,7 +994,7 @@ static void enemy_bullet_collision(State state) {
                 if (enemy->health <= 0) {
                     set_remove(state->objects, enemy);
                     // free(enemy);
-					state->info.coins += 40;
+					state->info.coins += 20;
                 }
             }
         }
@@ -979,9 +1016,9 @@ static void boss_bullet_collision(State state) {
             break;
         }
     }
-
-    if (boss == NULL) return;
-
+    if (boss == NULL) 
+        return;
+    
     List bullets_list = list_create(NULL);
 
     for (SetNode node = set_first(state->objects);
@@ -1025,6 +1062,68 @@ static void boss_bullet_collision(State state) {
     }
     list_destroy(bullets_list);
 }       
+
+static void final_boss_bullet_collision(State state) {
+    Object boss = NULL;
+
+    for (SetNode node = set_first(state->objects);
+         node != SET_EOF;
+         node = set_next(state->objects, node)) {
+
+        Object obj = set_node_value(state->objects, node);
+        if (obj->type == FINAL_BOSS) {
+            boss = obj;
+            break;
+        }
+    }
+    if (boss == NULL) 
+        return;
+    List bullets_list = list_create(NULL);
+
+    for (SetNode node = set_first(state->objects);
+         node != SET_EOF;
+         node = set_next(state->objects, node)) {
+
+        Object obj = set_node_value(state->objects, node);
+        if (obj->type == BULLET) {
+            list_insert_next(bullets_list, LIST_BOF, obj);
+        }
+    }
+
+    for (ListNode bullet_node = list_first(bullets_list);
+         bullet_node != LIST_EOF;
+         bullet_node = list_next(bullets_list, bullet_node)) {
+
+        Object bullet = list_node_value(bullets_list, bullet_node);
+
+        Rectangle boss_box = {
+            boss->position.x - (FINAL_BOSS_SIZE * 2 / 2),
+            boss->position.y - (FINAL_BOSS_SIZE * 2 / 2),
+            FINAL_BOSS_SIZE * 2  ,
+            FINAL_BOSS_SIZE * 2
+        };  
+
+        if (CheckCollisionCircleRec(bullet->position, bullet->size, boss_box)) {
+            boss->health--;
+            state->info.boss_health--;
+            play_sound(4); // boss damaged sound
+            set_remove(state->objects, bullet);
+            // free(bullet);
+
+            if (boss->health <= 0) {
+                set_remove(state->objects, boss);
+                // free(boss);
+                play_sound(5); // boss died sound
+                state->info.coins += 1000; 
+                state->info.boss_died = true;
+                state->info.game_won = true;
+            }
+        }
+    }
+    list_destroy(bullets_list);
+}       
+
+
 static void spaceship_enemy_collision(State state){
 	Object spaceship = state->info.spaceship;
 
@@ -1065,39 +1164,65 @@ static void spaceship_enemy_collision(State state){
 }
 
 static void spaceship_boss_collision(State state){
-	Object spaceship = state->info.spaceship;
+    Object spaceship = state->info.spaceship;
 
-	float search_radius = 2 * ENEMY_MAX_DIST;
+    float search_radius = 2 * ENEMY_MAX_DIST;
 
-	List boss_in_range = state_objects(state,
-											(Vector2){spaceship->position.x - search_radius,spaceship->position.y + search_radius}, 
-											(Vector2){spaceship->position.x + search_radius,spaceship->position.y - search_radius}
-											);
+    List boss_in_range = state_objects(state,
+                                        (Vector2){spaceship->position.x - search_radius,spaceship->position.y + search_radius}, 
+                                        (Vector2){spaceship->position.x + search_radius,spaceship->position.y - search_radius}
+                                        );
 
-	for(ListNode node = list_first(boss_in_range); 
-		node != LIST_EOF; 						
-		node = list_next(boss_in_range, node)){
+    for(ListNode node = list_first(boss_in_range); 
+        node != LIST_EOF;                         
+        node = list_next(boss_in_range, node)){
 
-		Object boss = list_node_value(boss_in_range, node);
-		if (boss == NULL || boss->type != BOSS) 
-			continue;
+        Object boss = list_node_value(boss_in_range, node);
+        if (boss == NULL || (boss->type != BOSS && boss->type != FINAL_BOSS)) 
+            continue;
 
-		if (spaceship == NULL || spaceship->type != SPACESHIP) 
-			continue; 
+        if (spaceship == NULL || spaceship->type != SPACESHIP) 
+            continue; 
 
-		// Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
-		if (CheckCollisionCircles(
-			spaceship->position,
-			spaceship->size,
-			boss->position,
-			boss->size
-		)) {
-			set_remove(state->objects,boss);
-			// free(boss);
-			printf("COLLIEDED WITH BOSS");
-			state->info.spaceship->health-= 4;
+        // Ελεγχος συγκρουσης διαστημοπλοιο και αστεροειδης 
+        if (CheckCollisionCircles(
+            spaceship->position,
+            spaceship->size,
+            boss->position,
+            boss->size
+        )) {
+            if (boss->type == BOSS) {
+                state->info.spaceship->health -= 4;
+            } else if (boss->type == FINAL_BOSS) {
+                state->info.spaceship->health -= 1;
+            }
             play_sound(2); // player damaged sound
-			break;
-		}
-	}
+            printf("COLLIEDED WITH BOSS or FINAL_BOSS");
+            break;
+        }
+    }
+
+    list_destroy(boss_in_range);
+}
+
+
+static void final_boss_shockwave(State state) {
+    Object boss = NULL;
+    for (SetNode node = set_first(state->objects); node != SET_EOF; node = set_next(state->objects, node)) {
+        Object obj = set_node_value(state->objects, node);
+        if (obj->type == FINAL_BOSS) {
+            boss = obj;
+            break;
+        }
+    }
+
+    float shockwave_radius = 300; 
+    if (CheckCollisionCircles(boss->position, shockwave_radius, state->info.spaceship->position, state->info.spaceship->size)) {
+        state->info.spaceship->health -= 1; 
+        play_sound(2);
+        printf("SHOCKED!!!!");
+    }
+
+    state->info.final_boss_attacked = true;
+    state->info.shockwave_timer = 150;
 }
