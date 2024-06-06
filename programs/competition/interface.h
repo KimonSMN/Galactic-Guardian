@@ -2,8 +2,8 @@
 
 #include "state.h"
 
-Music background_music;
-Music intro_music;
+extern Music background_music;
+extern Music intro_music;
 
 
 // Αρχικοποιεί το interface του παιχνιδιού
