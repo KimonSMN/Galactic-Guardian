@@ -46,7 +46,7 @@ void BackToMenu() {
     gameState.game_over = false;
     gameState.introduction = false;
 
-    PlayMusicStream(intro_music); // Restart intro music
+    StopMusicStream(intro_music); // Restart intro music
     StopMusicStream(background_music); // Pause background music
 }
 
@@ -117,8 +117,10 @@ int main() {
                 gameState.game_over = true;
             }
                 
-            if(state_info(state)->game_won)
-                break;
+            if(state_info(state)->game_won){
+                gameState.gameplay = false;
+                gameState.game_won = true;
+            }
         
         } else if (gameState.info_menu){
             interface_draw_info(state);
@@ -138,6 +140,12 @@ int main() {
             }
         } else if (gameState.introduction){
             interface_draw_intro(state, &gameState);
+        } else if (gameState.game_won) {
+            interface_draw_win(state);
+
+            if(IsKeyPressed(KEY_B))
+                BackToMenu();
+            
         }
     }
 

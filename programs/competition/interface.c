@@ -58,8 +58,12 @@ Texture2D game_over;
 Texture2D restart;
 Texture2D back;
 
+Texture2D back_won;
+Texture2D congratulations;
+
 Sound bought_item; 
 Sound cant_buy; 
+
 int purchase_complete_sound_timer = 0;
 int not_enough_coins_sound_timer = 0;
 
@@ -187,6 +191,9 @@ void interface_init(){
     restart = LoadTextureFromImage(LoadImage("assets/images/restart.png"));
     back = LoadTextureFromImage(LoadImage("assets/images/back_to_menu.png"));
 
+    congratulations = LoadTextureFromImage(LoadImage("assets/images/congratulations.png"));
+    back_won = LoadTextureFromImage(LoadImage("assets/images/back_won.png"));
+ 
 
     heart = LoadTextureFromImage(LoadImage("assets/images/hearts.png"));
 	spaceship_img = LoadTextureFromImage(LoadImage("assets/images/spaceship.png"));
@@ -375,6 +382,22 @@ void interface_draw_lost(State state) {
     EndDrawing();
 }
 
+void interface_draw_win(State state) {
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    int congratulations_x = (SCREEN_WIDTH / 2) - (congratulations.width / 2);
+    int congratulations_y = (SCREEN_HEIGHT / 2) - (congratulations.height / 2) ; 
+    int back_x = (SCREEN_WIDTH / 2) - (back_won.width / 2);
+    int back_y = (SCREEN_HEIGHT / 2) - (back_won.height / 2) + back_won.height + 150;
+
+
+
+    DrawTexture(congratulations, congratulations_x, congratulations_y, WHITE);
+    DrawTexture(back_won, back_x, back_y, WHITE);
+
+    EndDrawing();
+}
 
 static void interface_draw_shop(State state){
     BeginDrawing();

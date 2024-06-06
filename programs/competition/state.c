@@ -206,7 +206,7 @@ State state_create() {
     state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
     state->buddy_next_bullet = 0;
-	state->info.coins = 2000;
+	state->info.coins = 4000;
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
@@ -229,7 +229,7 @@ State state_create() {
 
     state->purchaseTimer = 0;
 
-    state->wave.current_wave = 4;
+    state->wave.current_wave = 9;
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 1000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
