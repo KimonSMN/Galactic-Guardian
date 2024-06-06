@@ -53,6 +53,23 @@ Texture2D not_enough_coins;
 
 Texture2D info_menu;
 
+Sound bought_item; 
+Sound cant_buy; 
+int purchase_complete_sound_timer = 0;
+int not_enough_coins_sound_timer = 0;
+
+Sound test;
+Sound confirm;
+Sound player_damaged;
+Sound laser;
+Sound hit;
+Sound boss_damaged;
+Sound boss_died;
+Sound boss_roar;
+
+Music background_music;
+Music intro_music;
+
 int pickupIndex = 0;
 float pickupTimer = PICKUP_TIME;
 
@@ -81,70 +98,91 @@ Color menu_color = {1,0,20,0};
 
 // Αρχικοποιεί το interface του παιχνιδιού
 
+
+
 void interface_init(){
     // Initialize the window
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "asteroids");
+    InitAudioDevice();
+
 	SetTargetFPS(60);
-	
+    
+    // Load sounds
+    bought_item = LoadSound("assets/sounds/can_buy_2.wav"); 
+    cant_buy = LoadSound("assets/sounds/cant_buy.wav"); 
+    test = LoadSound("assets/sounds/test.wav"); 
+    confirm = LoadSound("assets/sounds/confirm.wav"); 
+    player_damaged= LoadSound("assets/sounds/player_damaged.wav");
+    laser = LoadSound("assets/sounds/laser.mp3");
+    hit = LoadSound("assets/sounds/hit.wav");
+    intro_music = LoadMusicStream("assets/sounds/intro_music.ogg");
+    background_music = LoadMusicStream("assets/sounds/background_music.ogg");
+    boss_damaged = LoadSound("assets/sounds/boss_damaged.wav");
+    boss_died = LoadSound("assets/sounds/boss_died.wav");
+    boss_roar = LoadSound("assets/sounds/boss_roar.wav");
+
+    SetSoundVolume(player_damaged,0.7);
+    SetMusicVolume(background_music,0.5);
+    SetMusicVolume(intro_music,0.5);
+
 	// Load images
+    game_name = LoadTextureFromImage(LoadImage("assets/images/game_name_v2.png"));
 
-    game_name = LoadTextureFromImage(LoadImage("assets/game_name_v2.png"));
+    shop_frame = LoadTextureFromImage(LoadImage("assets/images/shop_frame.png"));
+    shop_text = LoadTextureFromImage(LoadImage("assets/images/shop_text.png"));
+    shop_item_frame = LoadTextureFromImage(LoadImage("assets/images/shop_item_frame.png"));
+    item_icon_frame = LoadTextureFromImage(LoadImage("assets/images/item_icon_frame.png"));
+    shop_ending_text = LoadTextureFromImage(LoadImage("assets/images/shop_ending_text.png"));
 
-    shop_frame = LoadTextureFromImage(LoadImage("assets/shop_frame.png"));
-    shop_text = LoadTextureFromImage(LoadImage("assets/shop_text.png"));
-    shop_item_frame = LoadTextureFromImage(LoadImage("assets/shop_item_frame.png"));
-    item_icon_frame = LoadTextureFromImage(LoadImage("assets/item_icon_frame.png"));
-    shop_ending_text = LoadTextureFromImage(LoadImage("assets/shop_ending_text.png"));
+    info_menu = LoadTextureFromImage(LoadImage("assets/images/info_menu.png"));
 
-    info_menu = LoadTextureFromImage(LoadImage("assets/info_menu.png"));
+    tiny_twin_desc = LoadTextureFromImage(LoadImage("assets/images/tiny_twin_desc.png"));
+    tiny_twin_image = LoadTextureFromImage(LoadImage("assets/images/tiny_twin_image.png"));
+    tiny_twin_title = LoadTextureFromImage(LoadImage("assets/images/tiny_twin_title.png"));
+    cost_2000 = LoadTextureFromImage(LoadImage("assets/images/cost_2000.png"));
 
-    tiny_twin_desc = LoadTextureFromImage(LoadImage("assets/tiny_twin_desc.png"));
-    tiny_twin_image = LoadTextureFromImage(LoadImage("assets/tiny_twin_image.png"));
-    tiny_twin_title = LoadTextureFromImage(LoadImage("assets/tiny_twin_title.png"));
-    cost_2000 = LoadTextureFromImage(LoadImage("assets/cost_2000.png"));
+    pew_pew_plus_desc = LoadTextureFromImage(LoadImage("assets/images/pew_pew_plus_desc.png"));
+    pew_pew_plus_image = LoadTextureFromImage(LoadImage("assets/images/pew_pew_plus_image.png"));
+    pew_pew_plus_title = LoadTextureFromImage(LoadImage("assets/images/pew_pew_plus_title.png"));
+    cost_1000 = LoadTextureFromImage(LoadImage("assets/images/cost_1000.png"));
 
-    pew_pew_plus_desc = LoadTextureFromImage(LoadImage("assets/pew_pew_plus_desc.png"));
-    pew_pew_plus_image = LoadTextureFromImage(LoadImage("assets/pew_pew_plus_image.png"));
-    pew_pew_plus_title = LoadTextureFromImage(LoadImage("assets/pew_pew_plus_title.png"));
-    cost_1000 = LoadTextureFromImage(LoadImage("assets/cost_1000.png"));
+    healaholic_desc = LoadTextureFromImage(LoadImage("assets/images/healaholic_desc.png"));
+    healaholic_image = LoadTextureFromImage(LoadImage("assets/images/healaholic_image.png"));
+    healaholic_title = LoadTextureFromImage(LoadImage("assets/images/healaholic_title.png"));
+    cost_250 = LoadTextureFromImage(LoadImage("assets/images/cost_250.png"));
 
-    healaholic_desc = LoadTextureFromImage(LoadImage("assets/healaholic_desc.png"));
-    healaholic_image = LoadTextureFromImage(LoadImage("assets/healaholic_image.png"));
-    healaholic_title = LoadTextureFromImage(LoadImage("assets/healaholic_title.png"));
-    cost_250 = LoadTextureFromImage(LoadImage("assets/cost_250.png"));
+    boss_healthbar = LoadTextureFromImage(LoadImage("assets/images/boss_healthbar.png"));
 
-    boss_healthbar = LoadTextureFromImage(LoadImage("assets/boss_healthbar.png"));
+    coin = LoadTextureFromImage(LoadImage("assets/images/coin.png"));
+    purchase_complete = LoadTextureFromImage(LoadImage("assets/images/purchase_complete.png"));
+    not_enough_coins = LoadTextureFromImage(LoadImage("assets/images/not_enough_coins.png"));
 
-    coin = LoadTextureFromImage(LoadImage("assets/coin.png"));
-    purchase_complete = LoadTextureFromImage(LoadImage("assets/purchase_complete.png"));
-    not_enough_coins = LoadTextureFromImage(LoadImage("assets/not_enough_coins.png"));
-
-    start_button = LoadTextureFromImage(LoadImage("assets/start_button.png"));
-    info_button = LoadTextureFromImage(LoadImage("assets/info_button.png"));
-    exit_button = LoadTextureFromImage(LoadImage("assets/exit_button.png"));
-    skip_text_button = LoadTextureFromImage(LoadImage("assets/skip_text_button.png"));
-    space_background = LoadTextureFromImage(LoadImage("assets/space.png"));
-    wave = LoadTextureFromImage(LoadImage("assets/wave.png"));
+    start_button = LoadTextureFromImage(LoadImage("assets/images/start_button.png"));
+    info_button = LoadTextureFromImage(LoadImage("assets/images/info_button.png"));
+    exit_button = LoadTextureFromImage(LoadImage("assets/images/exit_button.png"));
+    skip_text_button = LoadTextureFromImage(LoadImage("assets/images/skip_text_button.png"));
+    space_background = LoadTextureFromImage(LoadImage("assets/images/space.png"));
+    wave = LoadTextureFromImage(LoadImage("assets/images/wave.png"));
     wave.height = wave.height * 0.5;
     wave.width = wave.width * 0.5;
-    astronaut = LoadTextureFromImage(LoadImage("assets/astronaut.png"));
+    astronaut = LoadTextureFromImage(LoadImage("assets/images/astronaut.png"));
     astronaut.height = astronaut.height * 10;
     astronaut.width = astronaut.width * 10;
-    enemy_scout = LoadTextureFromImage(LoadImage("assets/enemy_scout.png"));
+    enemy_scout = LoadTextureFromImage(LoadImage("assets/images/enemy_scout.png"));
 
-    boss = LoadTextureFromImage(LoadImage("assets/boss.png"));
+    boss = LoadTextureFromImage(LoadImage("assets/images/boss.png"));
 
 
-    shield_pickup = LoadTextureFromImage(LoadImage("assets/shield_pickup.png"));
+    shield_pickup = LoadTextureFromImage(LoadImage("assets/images/shield_pickup.png"));
     shield_pickup.height = shield_pickup.height * 1.5;
     shield_pickup.width = shield_pickup.width * 1.5;
 
 
-    heart = LoadTextureFromImage(LoadImage("assets/hearts.png"));
-	spaceship_img = LoadTextureFromImage(LoadImage("assets/spaceship.png"));
-    asteroid_img = LoadTextureFromImage(LoadImage("assets/asteroid.png"));
-    bullet_img = LoadTextureFromImage(LoadImage("assets/bullet.png"));
-    explosion = LoadTextureFromImage(LoadImage("assets/explosion.png"));
+    heart = LoadTextureFromImage(LoadImage("assets/images/hearts.png"));
+	spaceship_img = LoadTextureFromImage(LoadImage("assets/images/spaceship.png"));
+    asteroid_img = LoadTextureFromImage(LoadImage("assets/images/asteroid.png"));
+    bullet_img = LoadTextureFromImage(LoadImage("assets/images/bullet.png"));
+    explosion = LoadTextureFromImage(LoadImage("assets/images/explosion.png"));
     spaceship_img.height = spaceship_img.height * 3;
     spaceship_img.width = spaceship_img.width * 3;
 	start_button.height = start_button.height *1.2;
@@ -153,12 +191,48 @@ void interface_init(){
     info_button.width = info_button.width *1.2;
     exit_button.height = exit_button.height *1.2;
     exit_button.width = exit_button.width *1.2;
+}
 
+void play_sound(int num) {
+    switch(num) {
+        case 1:
+            PlaySound(laser);
+            break;
+        case 2:
+            PlaySound(player_damaged);
+            break;
+        case 3:
+            PlaySound(hit);
+            break;
+        case 4:
+            PlaySound(boss_damaged);
+            break;
+        case 5:
+            PlaySound(boss_died);
+            break;
+        case 6:
+            PlaySound(boss_roar);
+            break;
+        default:
+            break;
+    }
 }
 
 // Κλείνει το interface του παιχνιδιού
 void interface_close(){
-	CloseWindow();
+    UnloadSound(bought_item);
+    UnloadSound(cant_buy);
+    UnloadSound(test);
+    UnloadSound(confirm);
+    UnloadSound(player_damaged);
+    UnloadSound(laser);
+    UnloadSound(hit);
+
+    UnloadMusicStream(intro_music);
+    UnloadMusicStream(background_music);
+
+    CloseAudioDevice();
+    CloseWindow();
 }
 
 float fadeInOpacity = 1;
@@ -208,6 +282,7 @@ void interface_draw_menu() {
         else if(buttonCounter > 3)
             buttonCounter = 1;
     } else if (IsKeyPressed(KEY_DOWN)){
+       
         startButtonIndex = 0;
         infoButtonIndex = 0;
         exitButtonIndex = 0;
@@ -216,7 +291,18 @@ void interface_draw_menu() {
             buttonCounter = 3;
         else if(buttonCounter > 3)
             buttonCounter = 1;
+    } 
+    if (IsKeyPressed(KEY_ENTER)){
+        PlaySound(confirm);
+
+    } // might not work?
+    else if(IsKeyPressed(KEY_UP)){
+        PlaySound(test);
     }
+    else if(IsKeyPressed(KEY_DOWN)){
+        PlaySound(test);
+    }
+    
 
     Vector2 gameNamePos = { SCREEN_WIDTH / 2 - game_name.width / 2, 60 };
     Vector2 startButtonPos = { SCREEN_WIDTH / 2 - start_button.width / 2, 350 };
@@ -377,15 +463,29 @@ static void interface_draw_shop(State state){
 
     DrawTexture(cost_2000, shop_cost_x, shop_cost_y, WHITE);
 
-
- 
-
-    if(state_info(state)->purchase_complete){
+    if (state_info(state)->purchase_complete) {
         DrawTexture(purchase_complete, shop_ending_text_x - 10, shop_ending_text_y - 70, WHITE);
-    } if(state_info(state)->not_enough_coins){
+        if (purchase_complete_sound_timer == 0) {
+            PlaySound(bought_item);
+            purchase_complete_sound_timer = 125; 
+        }
+    }
+
+    if (state_info(state)->not_enough_coins) {
         DrawTexture(not_enough_coins, shop_ending_text_x + 55, shop_ending_text_y - 70, WHITE);
+        if (not_enough_coins_sound_timer == 0) {
+            PlaySound(cant_buy);
+            not_enough_coins_sound_timer = 65;
+        }
     } 
-    
+
+    if (purchase_complete_sound_timer > 0) {
+        purchase_complete_sound_timer--;
+    }
+    if (not_enough_coins_sound_timer > 0) {
+        not_enough_coins_sound_timer--;
+    }
+
 }
 
 const char *introTexts[] = {
@@ -434,6 +534,7 @@ void interface_draw_intro(State state, GameState *gameState) {
             Rectangle skipTextSource = { 45 * skipTextIndex, 0, 45, 38 };
             DrawTextureRec(skip_text_button, skipTextSource, (Vector2){SCREEN_WIDTH - 70, 560}, WHITE);
             if (IsKeyPressed(KEY_ENTER)) {
+                PlaySound(confirm);
                 state_text(state)->textIndex++;
                 if (state_text(state)->textIndex < numTexts) {
                     state_text(state)->index = 0; 
@@ -450,6 +551,7 @@ void interface_draw_intro(State state, GameState *gameState) {
 
 // Σχεδιάζει ένα frame με την τωρινή κατάσταση του παιχνδιού
 void interface_draw_frame(State state) {
+
     int scale_factor = 5;
 
     pickupTimer--;
@@ -469,7 +571,6 @@ void interface_draw_frame(State state) {
             coinIndex = 0;
         }
     }
-
 
     Camera2D camera; // Αρχικοποιηση camera
 
@@ -547,6 +648,7 @@ void interface_draw_frame(State state) {
             Rectangle dest = {object->position.x, object->position.y, object->size * 30, object->size * 30};
             Vector2 origin = {object->size * 30 / 2, object->size * 30 / 2};
             DrawTexturePro(bullet_img, source, dest, origin, rotation, WHITE);
+
         } else if (object->type == PICKUP) {
             Rectangle source = (Rectangle){PICKUP_SIZE * 1.5 * pickupIndex, 0, PICKUP_SIZE* 1.5, PICKUP_SIZE* 1.5};
             Rectangle dest = (Rectangle){object->position.x, object->position.y, source.width, source.height};

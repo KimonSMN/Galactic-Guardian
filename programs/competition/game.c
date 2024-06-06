@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "raylib.h"
 #include "interface.h"
@@ -27,6 +26,8 @@ void UpdateMenu() {
         if (button.start) {
             gameState.start_menu = false;
             gameState.introduction = true;
+            StopMusicStream(intro_music);
+            PlayMusicStream(background_music);
         } else if (button.info) {
             gameState.start_menu = false;
             gameState.info_menu = true;
@@ -37,20 +38,23 @@ void UpdateMenu() {
     }
 }
 
- int main() {
+int main() {
     interface_init();
-    InitAudioDevice(); 
     state = state_create(); 
 
     struct key_state keys = { false, false, false, false, false, false, false };
-    
-    while (!WindowShouldClose()) {    
+
+    PlayMusicStream(intro_music); // Start playing intro music
+
+    while (!WindowShouldClose()) {   
+        UpdateMusicStream(intro_music);
+        UpdateMusicStream(background_music);
+
         if (gameState.start_menu) {
             UpdateMenu();
-			interface_fade_in();
+            interface_fade_in();
             interface_draw_menu();
         } else if (gameState.gameplay) {
-
             keys.up = IsKeyDown(KEY_UP);
             keys.left = IsKeyDown(KEY_LEFT);
             keys.right = IsKeyDown(KEY_RIGHT);
@@ -64,22 +68,18 @@ void UpdateMenu() {
 
             state_update(state, &keys);
             interface_draw_frame(state);
-            // if hearts <= 0
+
             if (state_info(state)->lost) 
                 break;
-				
         } else if (gameState.info_menu){
             interface_draw_info(state);
             if (IsKeyPressed(KEY_B)) {
                 gameState.info_menu = false;
                 gameState.start_menu = true;
-             }
-   
-            
+            }
         } else if (gameState.game_over) {
-			break;
-
-		} else if (gameState.introduction){
+            break;
+        } else if (gameState.introduction){
             interface_draw_intro(state, &gameState);
         }
     }
@@ -88,5 +88,3 @@ void UpdateMenu() {
     interface_close();
     return 0;
 }
-
-

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "interface.h"
 
 #include "ADTVector.h"
 #include "ADTList.h"
@@ -203,7 +204,7 @@ State state_create() {
     state->speed_factor = 1;				// Κανονική ταχύτητα
 	state->next_bullet = 0;					// Σφαίρα επιτρέπεται αμέσως
     state->buddy_next_bullet = 0;
-	state->info.coins = 0;
+	state->info.coins = 3000;
 	state->pickupTimer = 0;
 	state->info.lost = false;
 	state->pauseTimer = 0; 
@@ -211,7 +212,7 @@ State state_create() {
 	state->text.delay = 0;
 	state->text.index = 0;
 	state->text.timer = 0;
-    
+
     state->info.purchase_complete = false;
     state->info.not_enough_coins = false;
 
@@ -221,7 +222,7 @@ State state_create() {
 
     state->purchaseTimer = 0;
 
-    state->wave.current_wave = 0;
+    state->wave.current_wave = 3;
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 1000; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10;   // Initial number of enemies per wave
@@ -370,6 +371,7 @@ static void check_overlap(Object a, Object b, float distance) {
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 void state_update(State state, KeyState keys) {
+
     Object spaceship = state->info.spaceship;
     Vector2 top_left = {spaceship->position.x - 2 * SCREEN_HEIGHT, spaceship->position.y + 2 * SCREEN_HEIGHT};
     Vector2 bottom_right = {spaceship->position.x + 2 * SCREEN_HEIGHT, spaceship->position.y - 2 * SCREEN_HEIGHT};
@@ -594,6 +596,7 @@ static void spaceship_asteroid_collision(State state){
 			set_remove(state->objects,asteroid);
 			// free(asteroid);
 			state->info.spaceship->health --;
+            play_sound(2); // player damaged sound
 			break;
 		}
 	}
@@ -764,6 +767,7 @@ static void bullet_creation(State state, KeyState keys) {
             set_insert(state->objects, bullets[i]);
         }
         
+        play_sound(1); // laser sound
 
         // Reset bullet firing delay
         state->next_bullet = BULLET_DELAY;
@@ -811,7 +815,9 @@ static void buddy_bullet_creation(State state) {
                 );
             
                 set_insert(state->objects, bullet);
-                
+
+                play_sound(1); // laser sound
+
                 // Reset bullet firing delay
                 state->buddy_next_bullet = 200;
                 printf("Created bullets\n");
@@ -902,6 +908,7 @@ void spawn_boss(State state) {
 		);
     state->info.boss_health = BOSS_HEALTH;
     set_insert(state->objects, boss);
+    play_sound(6); // boss roar
 }
 
 
@@ -944,6 +951,8 @@ static void enemy_bullet_collision(State state) {
                 enemy->health--;
                 set_remove(state->objects, bullet);
                 // free(bullet);
+
+                 play_sound(3); // enemy damaged sound
 
                 if (enemy->health <= 0) {
                     set_remove(state->objects, enemy);
@@ -1001,12 +1010,14 @@ static void boss_bullet_collision(State state) {
         if (CheckCollisionCircleRec(bullet->position, bullet->size, boss_box)) {
             boss->health--;
             state->info.boss_health--;
+            play_sound(4); // boss damaged sound
             set_remove(state->objects, bullet);
             // free(bullet);
 
             if (boss->health <= 0) {
                 set_remove(state->objects, boss);
                 // free(boss);
+                play_sound(5); // boss died sound
                 state->info.coins += 1000; 
                 state->info.boss_died = true;
             }
@@ -1046,6 +1057,8 @@ static void spaceship_enemy_collision(State state){
 			// free(enemy);
 			printf("COLLIEDED WITH ENEMY");
 			state->info.spaceship->health--;
+            play_sound(2); // player damaged sound
+
 			break;
 		}
 	}
@@ -1083,6 +1096,7 @@ static void spaceship_boss_collision(State state){
 			// free(boss);
 			printf("COLLIEDED WITH BOSS");
 			state->info.spaceship->health-= 4;
+            play_sound(2); // player damaged sound
 			break;
 		}
 	}
