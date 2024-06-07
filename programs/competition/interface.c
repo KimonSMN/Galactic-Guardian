@@ -78,7 +78,6 @@ Sound boss_roar;
 Music background_music;
 Music intro_music;
 
-
 int coinIndex = 0;
 float coinTimer = 4; // number of sprites
 
@@ -104,8 +103,6 @@ int purchase_popup_timer = 100;
 Color menu_color = {1,0,20,0};
 
 // Αρχικοποιεί το interface του παιχνιδιού
-
-
 
 void interface_init(){
     // Initialize the window
@@ -747,7 +744,7 @@ void interface_draw_frame(State state) {
     }
 
     if(!state_info(state)->final_boss_died){
-        bossHealthIndex = (88 - state_info(state)->boss_health) /(88/11)  ;
+        bossHealthIndex = (132 - state_info(state)->boss_health) /(132/11)  ;
 
         Rectangle health_source = {bossHealthIndex * 500, 0, 500, boss_healthbar.height};
         Rectangle health_dest = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70, 500, boss_healthbar.height};

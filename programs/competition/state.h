@@ -34,8 +34,8 @@
 
 // Χαρακτηριστικα τελικου Boss.
 #define FINAL_BOSS_SIZE 128
-#define FINAL_BOSS_HEALTH 88
-#define FINAL_BOSS_SPEED 3
+#define FINAL_BOSS_HEALTH 132
+#define FINAL_BOSS_SPEED 4
 
 
 #define HEART_SIZE 64	// Μεγεθος εικονας καρδιας
@@ -59,6 +59,7 @@ typedef struct game_state {
     bool info_menu;				// Μενου πληροφοριων
     bool game_over;				
 	bool game_won;
+	bool quit;
 } GameState;
 
 // Πληροφορίες για κάθε αντικείμενο.

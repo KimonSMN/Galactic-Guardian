@@ -4,7 +4,7 @@
 #include "state.h"
 
 State state;
-GameState gameState = {true, false, false, false, false, false};
+GameState gameState = {true, false, false, false, false, false, false};
 MenuButton button = {true, false, false, 1};
 
 
@@ -24,6 +24,7 @@ void ResetGame() {
     gameState.info_menu = false;
     gameState.game_over = false;
     gameState.introduction = false;
+    gameState.quit = false;
 
     StopMusicStream(intro_music); // Restart intro music
     PlayMusicStream(background_music); // Pause background music
@@ -76,7 +77,7 @@ void UpdateMenu() {
             gameState.info_menu = true;
         } else if (button.exit) {
             gameState.start_menu = false;
-            gameState.game_over = true;
+            gameState.quit = true;
         }
     }
 }
@@ -146,6 +147,8 @@ int main() {
             if(IsKeyPressed(KEY_B))
                 BackToMenu();
             
+        } else if(gameState.quit){
+            break;
         }
     }
 

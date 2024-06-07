@@ -253,7 +253,7 @@ State state_create() {
     state->info.final_boss_attacked = false;
 
     // Πληροφοριες για το καθε wave 
-    state->wave.current_wave = 9;
+    state->wave.current_wave = 0;
     state->wave.time_until_next_wave = 0;
     state->wave.wave_delay = 1500; // 2000 ~30 sec 
     state->wave.enemies_per_wave = 10; 
