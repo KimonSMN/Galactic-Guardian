@@ -591,9 +591,7 @@ void interface_draw_intro(State state, GameState *gameState) {
 void interface_draw_frame(State state) {
 
     int scale_factor = 5;
-
-
-
+    
     coinTimer--;
     if (coinTimer < 0) {
         coinTimer = 5;
@@ -608,7 +606,7 @@ void interface_draw_frame(State state) {
     camera.offset = (Vector2){SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}; // window origin
     camera.target = (Vector2){0, 0}; 
     camera.rotation = 0;
-    camera.zoom = 1;
+    camera.zoom = 0.9;
     
     // Καμερα ακολουθει διαστημοπλοιο 
     camera.target.x = state_info(state)->spaceship->position.x;

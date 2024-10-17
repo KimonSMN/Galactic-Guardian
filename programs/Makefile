@@ -1,7 +1,7 @@
 # paths
-LIB = ../../lib
-INCLUDE = ../../include
-
+LIB = ../lib
+INCLUDE = ../include
+MODULES = ../modules
 # compiler
 CC = gcc
 
@@ -10,10 +10,10 @@ CFLAGS = -Wall -Werror -g -I$(INCLUDE)
 LDFLAGS = -lm
 
 # Αρχεία .o
-OBJS = game_example.o state.o interface.o $(LIB)/k08.a $(LIB)/libraylib.a
+OBJS = game.o state.o interface.o vec2.o $(LIB)/k08.a $(LIB)/libraylib.a
 
 # Το εκτελέσιμο πρόγραμμα
-EXEC = game_example
+EXEC = game
 
 # Παράμετροι για δοκιμαστική εκτέλεση
 ARGS =

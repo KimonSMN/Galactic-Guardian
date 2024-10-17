@@ -1,34 +1,47 @@
-![run-tests](../../workflows/run-tests/badge.svg)
+# Galactic Guardian
 
-## 2024 Project 1
+Galactic Guardian is a retro-inspired space-shooter game where players must defend the galaxy from waves of enemies. Battle against various enemy waves, and survive challenging boss fights to become the ultimate guardian of the galaxy!
 
-Εκφώνηση: https://k08.chatzi.org/projects/project1/
+## Screenshots
 
-### Προσωπικά στοιχεία
+![Main Menu](images/main_menu.png)
 
-__Όνομα__: Κίμωνας Σμυρλιάνος
+## Features
 
-__Α.Μ.__: sdi2200165
+- **Challenging Waves of Enemies**: Face increasing levels of difficulty as you progress through waves of enemies.
+- **Boss Battles**: Engage in epic boss battles to test your skills.
+- **Companion Character**: Meet BRUNO, a mysterious companion who will guide you on your journey.
+- **Collect Coins**: Earn coins to buy cool stuff from the item shop!
 
-### Ασκήσεις που παραδίδονται
+## Installation
 
-Συμπληρώστε εδώ τις ασκήσεις (και τυχόν bonus) που παραδίδετε. Αν κάποια άσκηση
-βρίσκεται σε μη αναμενόμενα αρχεία αναφέρετε και τα αρχεία αυτά.
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/KimonSMN/galactic-guardian.git
+   ```
+2. Navigate to the project directory:
+   ```sh
+   cd galactic-guardian
+   ```
+3. Run the game:
 
-- Ασκηση 1
-- Ασκηση 2
-- Ασκηση 3
-- Ασκηση 4
-- Ασκηση 5
-- Ασκηση 6
-- Design Competition
+   ```sh
+   cd /programs
+   make run
+   ```
 
-### Documentation
+## Gameplay
 
-Συμπληρώστε εδώ __όσο documentation χρειάζεται__ ώστε οι βαθμολογητές να
-κατανοήσουν πλήρως τις λύσεις σας και να τις βαθμολογήσουν ανάλογα. Αυτό θα
-πρέπει να γίνει ανεξάρτητα με το αν ο κώδικάς σας είναι καλά σχολιασμένος,
-πράγμα που συνιστάται.
+![Wave 5 Gameplay](images/fight_1.png)
 
+## How to Play
 
+1. **Start the Game**: Move the arrow keys to the "Start" button in the main menu to begin your adventure.
+2. **Move Your Ship**: Use the arrow keys to control your spaceship.
+3. **Shoot Enemies**: Press the spacebar to shoot at enemies and asteroids.
+4. **Survive Waves**: Defeat enemies and survive each wave to progress to the next level.
+5. **Defeat Bosses**: Face challenging bosses at the end of certain waves.
 
+## Contact
+
+For any questions or feedback, connect with me on [LinkedIn](https://www.linkedin.com/in/kimon-smirlianos/).
