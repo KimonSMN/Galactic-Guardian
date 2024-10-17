@@ -2,8 +2,6 @@
 
 Galactic Guardian is a retro-inspired space-shooter game where players must defend the galaxy from waves of enemies. Battle against various enemy waves, and survive challenging boss fights to become the ultimate guardian of the galaxy!
 
-## Screenshots
-
 ![Main Menu](/programs/assets/screenshots/main_menu.png)
 
 ## Features
