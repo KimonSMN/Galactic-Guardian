@@ -24,7 +24,6 @@ Galactic Guardian is a retro-inspired space-shooter game where players must defe
 3. Run the game:
 
    ```sh
-   cd /programs
    make run
    ```
 
