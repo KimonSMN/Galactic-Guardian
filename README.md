@@ -4,7 +4,7 @@ Galactic Guardian is a retro-inspired space-shooter game where players must defe
 
 ## Screenshots
 
-![Main Menu](images/main_menu.png)
+![Main Menu](/programs/assets/screenshots/main_menu.png)
 
 ## Features
 
@@ -32,7 +32,7 @@ Galactic Guardian is a retro-inspired space-shooter game where players must defe
 
 ## Gameplay
 
-![Wave 5 Gameplay](images/fight_1.png)
+![Main Menu](/programs/assets/screenshots/fight_1.png)
 
 ## How to Play
 
