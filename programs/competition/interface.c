@@ -112,18 +112,18 @@ void interface_init(){
 	SetTargetFPS(60);
     
     // Load sounds
-    bought_item = LoadSound("assets/sounds/can_buy_2.wav"); 
-    cant_buy = LoadSound("assets/sounds/cant_buy.wav"); 
-    test = LoadSound("assets/sounds/test.wav"); 
-    confirm = LoadSound("assets/sounds/confirm.wav"); 
-    player_damaged= LoadSound("assets/sounds/player_damaged.wav");
+    bought_item = LoadSound("assets/sounds/can_buy_2.mp3"); 
+    cant_buy = LoadSound("assets/sounds/cant_buy.mp3"); 
+    test = LoadSound("assets/sounds/test.mp3"); 
+    confirm = LoadSound("assets/sounds/confirm.mp3"); 
+    player_damaged= LoadSound("assets/sounds/player_damaged.mp3");
     laser = LoadSound("assets/sounds/laser.mp3");
-    hit = LoadSound("assets/sounds/hit.wav");
-    intro_music = LoadMusicStream("assets/sounds/intro_music.ogg");
-    background_music = LoadMusicStream("assets/sounds/background_music.ogg");
-    boss_damaged = LoadSound("assets/sounds/boss_damaged.wav");
-    boss_died = LoadSound("assets/sounds/boss_died.wav");
-    boss_roar = LoadSound("assets/sounds/boss_roar.wav");
+    hit = LoadSound("assets/sounds/hit.mp3");
+    intro_music = LoadMusicStream("assets/sounds/intro_music.mp3");
+    background_music = LoadMusicStream("assets/sounds/background_music.mp3");
+    boss_damaged = LoadSound("assets/sounds/boss_damaged.mp3");
+    boss_died = LoadSound("assets/sounds/boss_died.mp3");
+    boss_roar = LoadSound("assets/sounds/boss_roar.mp3");
 
     SetSoundVolume(player_damaged,0.7);
     SetMusicVolume(background_music,0.5);
