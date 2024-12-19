@@ -1,6 +1,6 @@
 # Galactic Guardian
 
-🏆 Winner of Kostas Chatzikokolakis Game Design Competition!  
+🏆 **Winner of Kostas Chatzikokolakis Game Design Competition!** 
 Galactic Guardian is a retro-inspired space-shooter game that won **1st** place in the Design Competition of [Kostas Chatzikokolakis Data Structures class in 2024](https://k08.chatzi.org/projects/competition/).  
 
 ![Main Menu](/programs/assets/screenshots/main_menu.png)
