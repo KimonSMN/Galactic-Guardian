@@ -1,6 +1,7 @@
 # Galactic Guardian
 
-Galactic Guardian is a retro-inspired space-shooter game where players must defend the galaxy from waves of enemies. Battle against various enemy waves, and survive challenging boss fights to become the ultimate guardian of the galaxy!
+🏆 Winner of Kostas Chatzikokolakis Game Design Competition!  
+Galactic Guardian is a retro-inspired space-shooter game that won **1st** place in the Design Competition of [Kostas Chatzikokolakis Data Structures class in 2024](https://k08.chatzi.org/projects/competition/).  
 
 ![Main Menu](/programs/assets/screenshots/main_menu.png)
 
